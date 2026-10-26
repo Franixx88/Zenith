@@ -42,9 +42,10 @@ jobs:
           python-version: '3.12'
       - name: Rust toolchain
         run: |
-          rustup update stable --no-self-update
-          rustup default stable
-          rustup component add rustfmt clippy
+          toolchain=$(python -c 'import tomllib; print(tomllib.load(open("rust-toolchain.toml", "rb"))["toolchain"]["channel"])')
+          rustup toolchain install "$toolchain" --profile minimal --component rustfmt --component clippy
+          rustc --version
+          cargo --version
       - name: Rust checks and tests
         run: |
           cargo fmt --check
