@@ -169,7 +169,9 @@ class PipelineTests(unittest.TestCase):
                   "--epochs", 2, "--batch-size", 32, "--block-rows", 128,
                   "--val-rows", 64, "--val-chunk", 32, "--threads", 1, "--warmup-steps", 0]
         command([*common, "--out", full])
-        command([*common, "--out", split, "--stop-after-epochs", 1])
+        stopped = command([*common, "--out", split, "--max-train-seconds", "0.000001"])
+        self.assertIn("time budget reached", stopped.stdout)
+        self.assertEqual(json.loads((split / "latest.json").read_text())["epoch"], 1)
         command([*common, "--out", split, "--resume", split / "last.pt"])
         self.assertEqual((full / "last.znnue").read_bytes(), (split / "last.znnue").read_bytes())
         a = torch.load(full / "last.pt", weights_only=True)

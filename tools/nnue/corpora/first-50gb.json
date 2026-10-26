@@ -1,0 +1,25 @@
+{
+  "format": "zenith-binpack-corpus-v1",
+  "source": "official-stockfish/master-binpacks",
+  "revision": "1e095a758c630bc58d0b6dac4da44fcd38ac89c2",
+  "license": "ODbL",
+  "attribution": "Stockfish training binpack collection; original dataset names and source revision preserved",
+  "source_url": "https://huggingface.co/datasets/official-stockfish/master-binpacks",
+  "files": [
+    {
+      "name": "test80-2022-08-aug-16tb7p.v6-dd.min.binpack",
+      "bytes": 10809713086,
+      "sha256": "0d22957b8d4f0f8e6f2913be7b744b2dab5178c3563e0f916312d0d94c28b92b"
+    },
+    {
+      "name": "T60T70wIsRightFarseer.binpack",
+      "bytes": 32981564118,
+      "sha256": "8c329b988c02bdf4ccc13b3cc627f69531b8b6bb1719f17f775f49476d045c70"
+    },
+    {
+      "name": "farseerT76.binpack",
+      "bytes": 6141321549,
+      "sha256": "255956f2d28d78e5eb050aa542d768b0d8e0667ea09bb250effc83706f26da54"
+    }
+  ]
+}

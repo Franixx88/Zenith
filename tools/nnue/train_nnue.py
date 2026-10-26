@@ -262,6 +262,8 @@ def main():
     ap.add_argument("--val-chunk", type=int, default=4096)
     ap.add_argument("--stop-after-epochs", type=int, help="stop at this epoch boundary; keep the full --epochs schedule")
     ap.add_argument("--log-every", type=int, default=200)
+    ap.add_argument("--max-train-seconds", type=float,
+                    help="per invocation time budget; finish and checkpoint the current epoch before stopping")
     args = ap.parse_args()
 
     for name in ["epochs", "batch_size", "val_rows", "val_chunk", "threads", "log_every"]:
@@ -280,6 +282,8 @@ def main():
     if any(not math.isfinite(v) or v <= 0 for v in [args.lr, args.lr_final, args.sigmoid_scale]) or not math.isfinite(args.weight_decay) or args.weight_decay < 0:
         ap.error("learning rates/scale must be finite and positive; weight-decay nonnegative")
 
+    if args.max_train_seconds is not None and (not math.isfinite(args.max_train_seconds) or args.max_train_seconds <= 0):
+        ap.error("max-train-seconds must be finite and positive")
     if args.threads:
         torch.set_num_threads(args.threads)
     torch.manual_seed(args.seed)
@@ -352,6 +356,7 @@ def main():
         t = (s - args.warmup_steps) / max(1, total_steps - args.warmup_steps)
         return args.lr_final + 0.5 * (args.lr - args.lr_final) * (1 + math.cos(math.pi * min(t, 1)))
 
+    training_started = time.monotonic()
     for epoch in range(epoch0, args.epochs):
         start, seen, running = time.time(), 0, 0.0
         logged = 0
@@ -413,6 +418,8 @@ def main():
             "network_sha256_best": hashlib.sha256(best_blob).hexdigest(),
             "best_epoch": best_epoch, "checkpoint_sha256": hashlib.sha256(checkpoint).hexdigest(),
             "contract": contract, "runtime_python": platform.python_version(),
+            "epoch_seconds": time.time() - start,
+            "training_seconds": time.monotonic() - training_started,
             "args": {k: str(v) for k, v in vars(args).items()},
             "data_manifest": manifest, "history": history,
             "native_reader_stats": native.last_stats if native else None,
@@ -431,6 +438,9 @@ def main():
             atomic_bytes(args.out / "best.pt", checkpoint)
         atomic_json(args.out / "provenance.json", provenance)
         if args.stop_after_epochs is not None and epoch + 1 >= args.stop_after_epochs:
+            break
+        if args.max_train_seconds is not None and time.monotonic() - training_started >= args.max_train_seconds:
+            print("time budget reached; completed epoch checkpoint saved", flush=True)
             break
     print(f"done; best quantized val loss {best:.6f}; nets in {args.out}")
 

@@ -61,6 +61,7 @@ jobs:
           python -m pip install -r tools/requirements-engine-test.txt
           python -m unittest discover -s tools -p test_engine_test.py -v
           python -m unittest discover -s analysis -p test_server.py -v
+          python -m unittest discover -s tools/nnue -p test_corpus_tools.py -v
       - name: Package release candidate
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
