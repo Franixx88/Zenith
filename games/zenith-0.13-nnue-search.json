@@ -1,0 +1,186 @@
+{
+  "engine_sha256": "cbcd7f5f797005d39e523178ae5d387d26106311778e542dcaf951cb910ba6d4",
+  "network_sha256": "357c764b04f240fc26ccb10dbfd6857548e8bbfc4500ceb3f462c60a9ec69d09",
+  "synthetic_weights_only": true,
+  "root_dense_parity": [
+    {
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "raw": -521520,
+      "cp": -12782,
+      "uci_cp": -12782
+    },
+    {
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1",
+      "raw": -521520,
+      "cp": -12782,
+      "uci_cp": -12782
+    },
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
+      "raw": -642678,
+      "cp": -15751,
+      "uci_cp": -15751
+    },
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R4RK1 b kq - 1 1",
+      "raw": -633649,
+      "cp": -15530,
+      "uci_cp": -15530
+    },
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/2KR3R b kq - 1 1",
+      "raw": -630426,
+      "cp": -15451,
+      "uci_cp": -15451
+    },
+    {
+      "fen": "r4rk1/8/8/8/8/8/8/R3K2R w KQ - 1 2",
+      "raw": -633649,
+      "cp": -15530,
+      "uci_cp": -15530
+    },
+    {
+      "fen": "2kr3r/8/8/8/8/8/8/R3K2R w KQ - 1 2",
+      "raw": -630426,
+      "cp": -15451,
+      "uci_cp": -15451
+    },
+    {
+      "fen": "7k/8/8/3pP3/8/8/8/K7 w - d6 0 1",
+      "raw": -708495,
+      "cp": -17365,
+      "uci_cp": -17365
+    },
+    {
+      "fen": "7k/8/3P4/8/8/8/8/K7 b - - 0 1",
+      "raw": -641162,
+      "cp": -15714,
+      "uci_cp": -15714
+    },
+    {
+      "fen": "7k/8/8/8/3Pp3/8/8/K7 b - d3 0 1",
+      "raw": -646234,
+      "cp": -15839,
+      "uci_cp": -15839
+    },
+    {
+      "fen": "7k/8/8/8/8/3p4/8/K7 w - - 0 2",
+      "raw": -693591,
+      "cp": -16999,
+      "uci_cp": -16999
+    },
+    {
+      "fen": "Q6k/8/8/8/8/8/8/7K b - - 0 1",
+      "raw": -630262,
+      "cp": -15447,
+      "uci_cp": -15447
+    },
+    {
+      "fen": "R6k/8/8/8/8/8/8/7K b - - 0 1",
+      "raw": -672487,
+      "cp": -16482,
+      "uci_cp": -16482
+    },
+    {
+      "fen": "7k/8/8/8/8/8/8/q6K w - - 0 2",
+      "raw": -630262,
+      "cp": -15447,
+      "uci_cp": -15447
+    },
+    {
+      "fen": "7k/8/8/8/8/8/8/r6K w - - 0 2",
+      "raw": -672487,
+      "cp": -16482,
+      "uci_cp": -16482
+    },
+    {
+      "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+      "raw": -572417,
+      "cp": -14029,
+      "uci_cp": -14029
+    }
+  ],
+  "searches": [
+    {
+      "threads": 1,
+      "roots": [
+        "c2c3",
+        "f2f3",
+        "a2a4"
+      ],
+      "depths": [
+        3,
+        3,
+        3
+      ],
+      "stats": {
+        "nodes": 865,
+        "tbhits": 0,
+        "tb_errors": 0,
+        "helper_nodes": 0,
+        "helper_failures": 0,
+        "singular_probes": 0,
+        "singular_extensions": 0,
+        "selected_worker": 0,
+        "nnue_refreshes": 1,
+        "nnue_updates": 597,
+        "nnue_evaluations": 637
+      },
+      "evaluation": [
+        "evaluation NNUE v1 backend Avx2 EvalFile D:\\Zenith\\target\\nnue-search-0.13-fixture.znnue"
+      ]
+    },
+    {
+      "threads": 8,
+      "roots": [
+        "c2c3",
+        "f2f3",
+        "g1f3"
+      ],
+      "depths": [
+        3,
+        3,
+        3
+      ],
+      "stats": {
+        "nodes": 2829,
+        "tbhits": 0,
+        "tb_errors": 0,
+        "helper_nodes": 2613,
+        "helper_failures": 0,
+        "singular_probes": 0,
+        "singular_extensions": 0,
+        "selected_worker": 0,
+        "nnue_refreshes": 8,
+        "nnue_updates": 1414,
+        "nnue_evaluations": 1548
+      },
+      "evaluation": [
+        "evaluation NNUE v1 backend Avx2 EvalFile D:\\Zenith\\target\\nnue-search-0.13-fixture.znnue"
+      ]
+    }
+  ],
+  "syzygy_with_nnue": {
+    "threads": 8,
+    "ranks": 3,
+    "stats": {
+      "nodes": 1835,
+      "tbhits": 1,
+      "tb_errors": 0,
+      "helper_nodes": 1835,
+      "helper_failures": 0,
+      "singular_probes": 0,
+      "singular_extensions": 0,
+      "selected_worker": 0,
+      "nnue_refreshes": 8,
+      "nnue_updates": 640,
+      "nnue_evaluations": 512
+    },
+    "scores": [
+      "+29000",
+      "+29000",
+      "+29000"
+    ]
+  },
+  "classical_fallback_cp": 10
+}

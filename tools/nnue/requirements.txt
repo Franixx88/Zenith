@@ -1,0 +1,4 @@
+numpy==2.4.2
+pyarrow==23.0.1
+python-chess==1.999
+torch==2.10.0

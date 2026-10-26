@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.pgn whitespace=-blank-at-eof
+*.binpack -text
+*.png -text
+*.jpg -text
+*.ico -text

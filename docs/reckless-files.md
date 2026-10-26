@@ -1,0 +1,91 @@
+# Карта файлов Reckless
+
+Снимок: 69aea9086899189ee38fd3e556bf9469b805552a. Всего отслеживаемых файлов: 85.
+
+Это инвентаризация архитектурного разбора, а не заявление о формальной проверке каждой инструкции. Подробные выводы и границы исследования — в [reckless-study.md](reckless-study.md).
+
+- [.cargo/config.toml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.cargo/config.toml) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [.github/ISSUE_TEMPLATE/bug_report.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/ISSUE_TEMPLATE/bug_report.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/ISSUE_TEMPLATE/feature_request.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/ISSUE_TEMPLATE/feature_request.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/architectures.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/architectures.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/check_bench.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/check_bench.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/games.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/games.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/pgo.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/pgo.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/release.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/release.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/rust.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/rust.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.github/workflows/webhook.yml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.github/workflows/webhook.yml) — CI, архитектуры, bench signature, игровые smoke-тесты и выпуск.
+- [.gitignore](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/.gitignore) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [Cargo.lock](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/Cargo.lock) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [Cargo.toml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/Cargo.toml) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [LICENSE](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/LICENSE) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [Makefile](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/Makefile) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [README.md](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/README.md) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [build/attacks.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/build/attacks.rs) — Генерация/применение таблиц атак, групповые атаки и cuckoo-повторения.
+- [build/build.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/build/build.rs) — Генерация/применение таблиц атак, групповые атаки и cuckoo-повторения.
+- [build/magics.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/build/magics.rs) — Таблицы ключей/магических множителей: назначение и потребители, без проверки каждой константы.
+- [build/maps.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/build/maps.rs) — Генерация/применение таблиц атак, групповые атаки и cuckoo-повторения.
+- [deps/Fathom/LICENSE](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/LICENSE) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [deps/Fathom/README.md](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/README.md) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [deps/Fathom/stdendian.h](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/stdendian.h) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [deps/Fathom/tbchess.c](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/tbchess.c) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [deps/Fathom/tbconfig.h](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/tbconfig.h) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [deps/Fathom/tbprobe.c](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/tbprobe.c) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [deps/Fathom/tbprobe.h](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/deps/Fathom/tbprobe.h) — Внешняя библиотека Fathom: интеграция Syzygy, отдельный C-аудит не проводился.
+- [rustfmt.toml](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/rustfmt.toml) — Описание, лицензия, сборка, зависимости и конфигурация проекта.
+- [src/board.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/board.rs) — Позиция, правила, генерация/проверка ходов, SEE, make/unmake и тесты.
+- [src/board/makemove.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/board/makemove.rs) — Позиция, правила, генерация/проверка ходов, SEE, make/unmake и тесты.
+- [src/board/movegen.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/board/movegen.rs) — Позиция, правила, генерация/проверка ходов, SEE, make/unmake и тесты.
+- [src/board/parser.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/board/parser.rs) — Позиция, правила, генерация/проверка ходов, SEE, make/unmake и тесты.
+- [src/board/see.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/board/see.rs) — Позиция, правила, генерация/проверка ходов, SEE, make/unmake и тесты.
+- [src/board/tests.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/board/tests.rs) — Позиция, правила, генерация/проверка ходов, SEE, make/unmake и тесты.
+- [src/evaluation.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/evaluation.rs) — Архитектура NNUE и коррекция статической оценки.
+- [src/history.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/history.rs) — Упорядочивание, контекст поиска и ограниченные таблицы истории.
+- [src/lib.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/lib.rs) — Точки входа, протокол, опции и native/browser интеграция.
+- [src/lookup.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/lookup.rs) — Генерация/применение таблиц атак, групповые атаки и cuckoo-повторения.
+- [src/main.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/main.rs) — Точки входа, протокол, опции и native/browser интеграция.
+- [src/misc.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/misc.rs) — Механизм параметров и диагностическая статистика.
+- [src/movepick.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/movepick.rs) — Упорядочивание, контекст поиска и ограниченные таблицы истории.
+- [src/nnue.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue.rs) — Архитектура NNUE и коррекция статической оценки.
+- [src/nnue/accumulator.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/accumulator/psq.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/psq.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/accumulator/threats.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/threats.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/accumulator/threats/scalar.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/threats/scalar.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/accumulator/threats/threat_index.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/threats/threat_index.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/accumulator/threats/vectorized.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/threats/vectorized.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/accumulator/threats/vectorized/avx2.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/threats/vectorized/avx2.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/accumulator/threats/vectorized/avx512.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/accumulator/threats/vectorized/avx512.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/forward/scalar.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/forward/scalar.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/forward/vectorized.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/forward/vectorized.rs) — NNUE: аккумуляторы, признаки, scalar/vectorized inference.
+- [src/nnue/simd/avx2.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/simd/avx2.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/simd/avx512.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/simd/avx512.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/simd/neon.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/simd/neon.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/simd/scalar.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/simd/scalar.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/nnue/simd/wasm.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/nnue/simd/wasm.rs) — Аппаратный backend: интерфейс и роль в эквивалентном inference/обновлении угроз.
+- [src/numa.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/numa.rs) — SMP: потоки, общая статистика, остановка, NUMA и локальные данные.
+- [src/parameters.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/parameters.rs) — Механизм параметров и диагностическая статистика.
+- [src/search.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/search.rs) — Полный поиск: PVS, TT, pruning, reductions/extensions, qsearch и обновление историй.
+- [src/setwise.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/setwise.rs) — Генерация/применение таблиц атак, групповые атаки и cuckoo-повторения.
+- [src/stack.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/stack.rs) — Упорядочивание, контекст поиска и ограниченные таблицы истории.
+- [src/tb.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/tb.rs) — Syzygy API, WDL/DTZ и ранжирование корневых ходов.
+- [src/thread.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/thread.rs) — SMP: потоки, общая статистика, остановка, NUMA и локальные данные.
+- [src/threadpool.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/threadpool.rs) — SMP: потоки, общая статистика, остановка, NUMA и локальные данные.
+- [src/time.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/time.rs) — Soft/hard budget и режимы ограничения поиска.
+- [src/tools/bench.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/tools/bench.rs) — Perft, воспроизводимый bench, прогрев и измерение скорости.
+- [src/tools/mod.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/tools/mod.rs) — Perft, воспроизводимый bench, прогрев и измерение скорости.
+- [src/tools/perft.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/tools/perft.rs) — Perft, воспроизводимый bench, прогрев и измерение скорости.
+- [src/tools/speedtest.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/tools/speedtest.rs) — Perft, воспроизводимый bench, прогрев и измерение скорости.
+- [src/transposition.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/transposition.rs) — Кластерная TT, границы, замещение, возраст, матовые/TB score.
+- [src/types/arrayvec.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/arrayvec.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/bitboard.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/bitboard.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/castling.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/castling.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/color.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/color.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/keys.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/keys.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/mod.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/mod.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/movelist.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/movelist.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/moves.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/moves.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/piece.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/piece.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/score.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/score.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/square.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/square.rs) — Базовые типы: компактные ходы, клетки, битборды, ключи, score и списки.
+- [src/types/zobrist.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/types/zobrist.rs) — Таблицы ключей/магических множителей: назначение и потребители, без проверки каждой константы.
+- [src/uci.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/uci.rs) — Точки входа, протокол, опции и native/browser интеграция.
+- [src/wasm.rs](https://github.com/codedeliveryservice/Reckless/blob/69aea9086899189ee38fd3e556bf9469b805552a/src/wasm.rs) — Точки входа, протокол, опции и native/browser интеграция.

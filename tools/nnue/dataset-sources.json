@@ -1,0 +1,78 @@
+{
+  "checked_on": "2026-10-26",
+  "sources": [
+    {
+      "id": "adamtwiss/t91-binpacks-filtered",
+      "revision": "71c0e79b934bd5f05e52119607e22a1c8d377bc4",
+      "license": "odbl",
+      "downloaded": false,
+      "native_reader_implemented": true,
+      "files": [
+        {
+          "name": "test91-2026-01-jan-69gb6p.min-v2.v6.binpack",
+          "bytes": 5580345401,
+          "sha256": "4de399c711b6baba8ec179feb1b49461daf13a56cf7db76fbf39a43d9b55ce00"
+        },
+        {
+          "name": "test91-2026-02-feb-69gb6p.min-v2.v6.binpack",
+          "bytes": 2686420863,
+          "sha256": "0994dd138e1fae19bfa70b018555f1692fbf819f8f6798eede20a3bb967efe43"
+        },
+        {
+          "name": "test91-2026-03-mar-69gb6p.min-v2.v6.binpack",
+          "bytes": 1412310953,
+          "sha256": "c4df1f5dd08e9113ad58d2e288d7493b331be71552fd954e2b01e015b3da517c"
+        },
+        {
+          "name": "test91-2026-04-apr-69gb6p.min-v2.v6.binpack",
+          "bytes": 1202786867,
+          "sha256": "d7276eff6f33b34a4afd6ef8e4c3dfbe3452f593296e6aae5fdd9dc1c84c464f"
+        },
+        {
+          "name": "test91-2026-05-may-69gb6p.min-v2.v6.binpack",
+          "bytes": 1735406999,
+          "sha256": "60bafeff766f63a4b11d4390d31d97907c2da71c339fcf463cd9fc45fb7ce2aa"
+        }
+      ],
+      "full_corpus_validated": false,
+      "sample": {
+        "file": "test91-2026-04-apr-69gb6p.min-v2.v6.binpack",
+        "range": [
+          0,
+          1048586
+        ],
+        "bytes": 1048587,
+        "sha256": "cd93fd9977ae28cedc0ac4419c4f56d0640d1fdf8e00674ac2249002256543fd",
+        "full_source_hash_verified": false
+      }
+    },
+    {
+      "id": "official-stockfish/master-binpacks",
+      "revision": "1e095a758c630bc58d0b6dac4da44fcd38ac89c2",
+      "license": "odbl",
+      "downloaded": false,
+      "native_reader_implemented": true,
+      "files": [
+        {
+          "name": "T60T70wIsRightFarseer.binpack",
+          "bytes": 32981564118,
+          "sha256": "8c329b988c02bdf4ccc13b3cc627f69531b8b6bb1719f17f775f49476d045c70"
+        },
+        {
+          "name": "dfrc_n5000.binpack",
+          "bytes": 37483192507,
+          "sha256": "d39499f57b07e80715dafefa52e645d509d2d7cd260ed9274633ba87e8151319"
+        }
+      ],
+      "full_corpus_validated": false
+    }
+  ],
+  "reader": {
+    "crate": "sfbinpack",
+    "version": "0.6.5",
+    "upstream_revision": "df32a6b22e28354c9f928cdedbe058336d3bb3fa",
+    "adapter": "tools/binpack",
+    "transport": "ZBSTRM1 framed batches",
+    "variant": "standard chess only"
+  }
+}

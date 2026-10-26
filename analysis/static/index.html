@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#171b20">
+  <title>Zenith — доска анализа</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Zenith — главная"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 25 16 5l11 20H5Zm6-5h10l-5-9-5 9Z"/></svg><span>zenith<span class="brand-dot">.</span></span></a>
+    <nav aria-label="Разделы"><span class="nav-active">Анализ</span><button id="import-top">Импорт партии</button><button id="help-button">Как пользоваться <span class="key">?</span></button></nav>
+    <div class="local-indicator"><span class="status-dot"></span>Локально <span class="local-detail">· на твоём компьютере</span></div>
+  </header>
+  <main class="workspace">
+    <div class="page-title"><div><span class="eyebrow">ЛАБОРАТОРИЯ ZENITH</span><h1>Доска анализа</h1></div><div class="title-actions"><button class="quiet" id="new-button">＋ Новая доска</button><button class="quiet icon-button" id="settings-top" aria-label="Настройки движка" title="Настройки движка">⚙</button></div></div>
+    <section class="board-column" aria-label="Шахматная доска">
+      <div class="player-strip"><div class="avatar black-avatar">♟</div><div><strong id="top-player">Чёрные</strong><span id="top-material" class="material"></span></div><span class="side-label" id="top-side">ЧЁРНЫЕ</span></div>
+      <div class="board-layout">
+        <div class="evaluation" aria-label="Оценка позиции за белых"><span id="eval-top">−</span><div class="eval-track"><div id="eval-fill"></div></div><span id="eval-bottom">+</span></div>
+        <div class="board-frame"><div id="board" class="board" role="grid" aria-label="Доска, белые снизу"></div><svg id="arrows" class="arrows" viewBox="0 0 800 800" aria-hidden="true"><defs><marker id="arrow-mint" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#247e61"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#dc8946"/></marker></defs><g id="arrow-lines"></g></svg><div id="board-message" class="board-message" hidden></div></div>
+      </div>
+      <div class="player-strip bottom-player"><div class="avatar white-avatar">♙</div><div><strong id="bottom-player">Белые</strong><span id="bottom-material" class="material"></span></div><span class="turn-indicator" id="turn-label">Ход белых</span></div>
+      <div class="board-controls"><button class="icon-button" id="flip" title="Перевернуть доску (F)" aria-label="Перевернуть доску">⇅</button><div class="navigation"><button id="first" title="В начало (Home)" aria-label="В начало">⇤</button><button id="previous" title="Предыдущий ход (←)" aria-label="Предыдущий ход">‹</button><button id="next" title="Следующий ход (→)" aria-label="Следующий ход">›</button><button id="last" title="В конец (End)" aria-label="В конец">⇥</button></div><button class="icon-button" id="arrow-toggle" title="Показывать лучший ход (A)" aria-label="Показывать лучший ход" aria-pressed="true">↗</button></div>
+      <div class="chart-card"><div class="chart-heading"><span>Оценка по ходу анализа</span><span id="chart-caption">Ходы появятся здесь</span></div><svg id="eval-chart" viewBox="0 0 640 60" role="img" aria-label="График оценок посещённых позиций"><path class="chart-center" d="M0 30H640"/><path id="chart-line"/><line id="chart-cursor" y1="0" y2="60"/></svg></div>
+      <p class="board-hint"><span>← →</span> по ходам <i></i><span>F</span> переворот <i></i>Правая кнопка — стрелка</p>
+    </section>
+    <aside class="analysis-column">
+      <section class="engine-card" aria-label="Анализ движка">
+        <div class="engine-heading"><div class="engine-identity"><span class="engine-mark">Z</span><div><h2 id="engine-name">Zenith</h2><div class="engine-subtitle"><span class="status-dot" id="engine-dot"></span><span id="engine-subtitle">Подключение к движку…</span></div></div></div><button id="analysis-toggle" class="switch" role="switch" aria-checked="true" aria-label="Непрерывный анализ"><span></span></button></div>
+        <div class="evaluation-heading"><div><strong id="score">—</strong><span id="assessment">Начинаем анализ</span></div><span class="live-badge" id="analysis-status">UCI</span></div>
+        <div class="engine-stats"><div><span>ГЛУБИНА</span><strong id="depth">—</strong></div><div><span>УЗЛОВ / С</span><strong id="nps">—</strong></div><div><span>УЗЛЫ</span><strong id="nodes">—</strong></div><div><span>SYZYGY</span><strong id="tbhits">0</strong></div></div>
+        <div class="principal"><div class="section-label"><span><span class="pv-dot"></span><span id="pv-title">ЛУЧШИЙ ВАРИАНТ</span></span><div class="pv-actions"><select id="pv-count" aria-label="Количество вариантов анализа" hidden><option value="1">1 линия</option><option value="2">2 линии</option><option value="3">3 линии</option><option value="5">5 линий</option><option value="8">8 линий</option></select><button id="play-best" class="text-button" disabled>Сделать ход ↗</button></div></div><div id="pv" class="pv-line"><span class="muted">Движок ищет продолжение…</span></div></div>
+        <div id="engine-error" class="error-box" hidden></div>
+        <button id="settings-button" class="engine-footer"><span id="resource-label">8 потоков · 128 МБ хеш</span><span>Настройки <span aria-hidden="true">⚙</span></span></button>
+      </section>
+      <section class="moves-card" aria-label="История и варианты">
+        <div class="card-heading"><h2>Ходы и варианты</h2><button id="promote" class="text-button" title="Сделать выбранный вариант основным">В основной ↥</button></div>
+        <div id="moves" class="move-tree"><div class="empty-state"><span class="empty-board">♘</span><strong>Исследуй позицию</strong><p>Сделай ход на доске или импортируй партию. Ответвления сохранятся как варианты.</p></div></div>
+        <div id="game-result" class="game-result" hidden></div>
+        <div class="moves-footer"><span id="move-counter">Начальная позиция</span><button id="export-button" class="text-button">Скачать PGN ↓</button></div>
+      </section>
+      <section class="position-card"><div class="card-heading"><h2>Позиция</h2><button id="copy-fen" class="text-button">Копировать FEN</button></div><div class="fen-wrap"><input id="fen" aria-label="Текущий FEN" readonly spellcheck="false"><span class="fen-label">FEN</span></div><button id="import-button" class="import-button">＋ Загрузить FEN или PGN</button></section>
+      <div class="offline-note"><span>◈</span><p>Нативный движок. Полная мощность.<br><span>Позиции остаются на этом компьютере.</span></p></div>
+    </aside>
+  </main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="import-dialog"><form id="import-form"><div class="dialog-heading"><h2>Загрузить позицию</h2><button type="button" class="close-dialog" aria-label="Закрыть">×</button></div><div class="tabs"><button type="button" id="tab-fen" class="active">FEN</button><button type="button" id="tab-pgn">PGN</button></div><label id="import-label" for="import-text">Описание позиции FEN</label><textarea id="import-text" rows="6" spellcheck="false" placeholder="Вставь FEN позиции…" required></textarea><label class="file-picker" id="pgn-file-label" hidden>Или выбери .pgn файл<input type="file" id="pgn-file" accept=".pgn,text/plain,application/x-chess-pgn"></label><p class="dialog-note">Импорт заменит текущую доску. Сначала скачай PGN, если хочешь сохранить её отдельно.</p><div id="import-error" class="error-box" hidden></div><button type="submit" class="primary-button">Открыть на доске →</button></form></dialog>
+  <dialog id="settings-dialog"><div class="dialog-heading"><div><span class="eyebrow">НАТИВНЫЙ UCI</span><h2>Настройки Zenith</h2></div><button class="close-dialog" aria-label="Закрыть">×</button></div><p class="dialog-note">Без ограничения глубины и времени. Анализ обновляется после каждого завершённого уровня.</p><form id="settings-form"><div id="settings-fields"></div><details><summary>Эксперименты и параметры поиска</summary><div id="advanced-fields"></div><p class="dialog-note">Singular и SMP voting пока не подтвердили прирост SPRT. По умолчанию выключены.</p></details><div id="settings-error" class="error-box" hidden></div><div class="dialog-actions"><button type="button" id="clear-hash" class="quiet">Очистить хеш</button><button type="submit" class="primary-button">Применить</button></div></form></dialog>
+  <dialog id="promotion-dialog"><div class="dialog-heading"><h2>Превращение пешки</h2><button class="close-dialog" aria-label="Отмена">×</button></div><div id="promotion-choices"></div></dialog>
+  <dialog id="help-dialog"><div class="dialog-heading"><h2>Твоя шахматная лаборатория</h2><button class="close-dialog" aria-label="Закрыть">×</button></div><div class="help-content"><p>Перетаскивай фигуры или нажимай на начальную и конечную клетки. Изменяй ход в любой точке партии — продолжение сохранится отдельной веткой.</p><p>Zenith анализирует без лимита времени, использует все 8 потоков и локальные Syzygy. Переключатель рядом с названием движка ставит анализ на паузу.</p><p>Нажми ход в лучшем варианте, чтобы перенести его продолжение на доску. Клавиши <kbd>←</kbd> <kbd>→</kbd> листают ходы, <kbd>Home</kbd>/<kbd>End</kbd> переходят в начало/конец, <kbd>F</kbd> переворачивает доску, <kbd>Space</kbd> ставит анализ на паузу.</p><p>Правая кнопка мыши рисует стрелки и круги. Повторный рисунок удаляет отметку. Оценки показаны за белых; это классическая оценка Zenith, игровая NNUE пока не подключена.</p><p>Партия с вариантами сохраняется локально между запусками. Если закрыть вкладку, вычисления остановятся автоматически. PGN можно скачать в любой момент.</p><p class="credits">Фигуры: Colin M. L. Burnett, GPL-2.0-or-later. Интерфейс и движок Zenith — GPL-3.0-or-later.</p></div></dialog>
+</body>
+</html>

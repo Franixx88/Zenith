@@ -1,0 +1,17 @@
+format=zenith-outcomes-v1
+engine=0.7.0
+games=160
+train_positions=859
+validation_positions=233
+excluded_ply_limit_games=1
+quarantined_cross_split_positions=0
+label=mean_white_game_outcome
+teacher=none
+split=FNV1a(opening_family)%5==0 validation
+sample=quiet non-check positions every 4 plies after max(16,opening+8)
+source=games\zenith-0.7.0-enhancements-vs-0.6.0-10k.uci
+source_fnv64=7f9651ed87e25107
+source=games\zenith-0.7.0-tt-vs-0.6.0-10k.uci
+source_fnv64=735566c57befd60b
+source=games\zenith-0.7.0-enhancements-vs-0.6.0-50ms.uci
+source_fnv64=7592dac89a492bdf

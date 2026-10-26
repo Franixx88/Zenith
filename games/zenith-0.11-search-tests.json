@@ -1,0 +1,1303 @@
+{
+  "version": "0.11.0",
+  "confirmed_gain": false,
+  "singular_default": false,
+  "voting_default": false,
+  "experiments": [
+    {
+      "name": "singular-calibration-safe",
+      "manifest": {
+        "started_utc": "2026-10-26T10:21:25.460319+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\release\\zenith.exe",
+          "name=candidate",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.Singular Extensions=true",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:02+0.05",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "128",
+          "-repeat",
+          "-concurrency",
+          "4",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\singular-calibration-safe\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\singular-calibration-safe\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\singular-calibration-safe\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8",
+          "-sprt",
+          "elo0=0.0",
+          "elo1=5.0",
+          "alpha=0.05",
+          "beta=0.05",
+          "model=normalized"
+        ],
+        "args": {
+          "candidate": "target/release/zenith.exe",
+          "baseline": "target/baselines/zenith-0.10.1.exe",
+          "output": "target/matches/singular-calibration-safe",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 128,
+          "tc": "0:02+0.05",
+          "nodes": null,
+          "threads": 1,
+          "concurrency": 4,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "calibration",
+          "candidate_option": [
+            "Singular Extensions=true"
+          ],
+          "baseline_option": [],
+          "sprt": [
+            0.0,
+            5.0
+          ]
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "Singular Extensions": true
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\release\\zenith.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\singular-calibration-safe\\openings.pgn": "640fac0240cbf1c18bddd2620b28e95fca6a0dedac346ec08ab7a1d4aca52e63"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "b7bd0856fa7a5d2322dfb2c9fb0946e37f9523944e8c0bb5703e9c1f16436c69",
+        "tablebases": "disabled"
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 665.0779999999941,
+        "sprt_decision": "inconclusive",
+        "faults": [],
+        "pgn": {
+          "games": 256,
+          "pairs": 128,
+          "wdl": {
+            "wins": 96,
+            "losses": 111,
+            "draws": 49
+          },
+          "pentanomial": [
+            22,
+            24,
+            46,
+            19,
+            17
+          ],
+          "terminations": {
+            "normal": 256
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "voting-holdout",
+      "manifest": {
+        "started_utc": "2026-10-26T10:32:45.286527+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "name=candidate",
+          "option.Threads=8",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.SMP Voting=true",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=8",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:01+0.03",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "32",
+          "-repeat",
+          "-concurrency",
+          "1",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\voting-holdout\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\voting-holdout\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\voting-holdout\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8",
+          "-sprt",
+          "elo0=0.0",
+          "elo1=5.0",
+          "alpha=0.05",
+          "beta=0.05",
+          "model=normalized"
+        ],
+        "args": {
+          "candidate": "target/candidates/zenith-0.11.0-rc1.exe",
+          "baseline": "target/baselines/zenith-0.10.1.exe",
+          "output": "target/matches/voting-holdout",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 32,
+          "tc": "0:01+0.03",
+          "nodes": null,
+          "threads": 8,
+          "concurrency": 1,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "holdout",
+          "candidate_option": [
+            "SMP Voting=true"
+          ],
+          "baseline_option": [],
+          "sprt": [
+            0.0,
+            5.0
+          ],
+          "engine_log": false
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 8,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "SMP Voting": true
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 8,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\voting-holdout\\openings.pgn": "75818360943bdb6190e7fb64f79195ba89473b1d692f74031b06b99b77b6ceef"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "e915bd0a7a470cddf92570392591b670cab0e51ec028e0a9c8e9fa1914c1b241",
+        "tablebases": "disabled",
+        "workspace_source_sha256": {
+          "src\\bench.rs": "050c8ca2bb54abf3749416cd0a3cd8734553faed6fb00af000b31a6728567e50",
+          "src\\board\\move_list.rs": "6abeec0d380d5176b4f492d4d9f3aefb9f88279e9b3f3fa05cd279c3d311fac1",
+          "src\\board\\see.rs": "9e9863155aa8a535355e123d96665b568959650aa2abe2232d575e405bd53962",
+          "src\\board.rs": "1d8fe5be1a74fe2908c25aae2c92ac0f1ade69fd0a3770afef35595c94fda2fa",
+          "src\\dataset.rs": "f94bc043cbd01eed9d9559208c7128b91260b5028c1ba9ecae65aac13f764ce4",
+          "src\\eval\\psqt.rs": "1c1d40982e867d1a33194979a3defa5134ebf7897c865b243027fbc956ca4fd7",
+          "src\\eval.rs": "0377afa060a22aa3bfa3426fb30060665eb513e28431f4385a6a74f831bf038a",
+          "src\\lib.rs": "54418bb0db5778d1275e9d0699b6f735a12f11b7935d305d6520617c9eca7dc6",
+          "src\\main.rs": "a1e9ef9baba8fc1f3e101acc7303e5282233977f8fe503dca3ac484ccb4b3f3a",
+          "src\\movepick.rs": "dea8abfcd07e0d2213b1f60152d86aa24ecd71e73b81c0570c68a539a939fe27",
+          "src\\nnue\\format.rs": "ef4fbcacf9a54bfa0397f56943e194e59a9d94b876fac4bba1dafeb4ec2ba161",
+          "src\\nnue\\kernels.rs": "c0277c628562214de281d20ae464ce8cfd5d79fa94f45d437500c1f84335dd7a",
+          "src\\nnue.rs": "d508d0fa37896722452ce0ef8667f838f91b7784613479ef58788a961365b55f",
+          "src\\openings.rs": "ea664b8a2060a7c2a585bad05ff0d5adb000d79794697d8f19bd311cde15e1b3",
+          "src\\search\\params.rs": "002a787658b7ac27d60546d0aab345c1e263e5dd3b9cd3232adf537ac978adc2",
+          "src\\search\\smp.rs": "5e66b301962853017f2ad20b933987829cd7690883fce095362deeb6c2dd1cf4",
+          "src\\search\\tt.rs": "36866ca0424892368a9e6205d42afb2adc9d650d7c3f2ab45602cc079d965700",
+          "src\\search.rs": "051dbd97ece51ec2291f140a89ed0d018408581c5e134e4fa00b3c31e748d653",
+          "src\\syzygy.rs": "f153895b3741052074754b87cf82bed564d337947748235e900675d0dd9634bd",
+          "src\\uci.rs": "5a905802c535a1b78008eea86989a5c73b916ba65b2ba9e1d9be23648287942c",
+          "Cargo.toml": "7a532c939ef0b1ea404a5ac602c156bc18b1142a11f7bd4b8c605d18e07288b2",
+          "Cargo.lock": "90df1862181aa0878ceacc409944ad528300350f26957a26b794b30b8e705d75"
+        },
+        "source_note": "Workspace snapshot for provenance; binary hashes identify the actual tested engines."
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 386.5149999999994,
+        "sprt_decision": "inconclusive",
+        "faults": [],
+        "pgn": {
+          "games": 64,
+          "pairs": 32,
+          "wdl": {
+            "wins": 33,
+            "draws": 14,
+            "losses": 17
+          },
+          "paired_wdl": {
+            "wins": 33,
+            "draws": 14,
+            "losses": 17
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            1,
+            6,
+            10,
+            6,
+            9
+          ],
+          "terminations": {
+            "normal": 64
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "parameter-screen/lmr-275",
+      "manifest": {
+        "started_utc": "2026-10-26T10:39:22.340255+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "name=candidate",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.LMR Divisor=275",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:01+0.03",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "32",
+          "-repeat",
+          "-concurrency",
+          "4",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\lmr-275\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\lmr-275\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\parameter-screen\\lmr-275\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8"
+        ],
+        "args": {
+          "candidate": "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "baseline": "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "output": "D:\\Zenith\\target\\matches\\parameter-screen\\lmr-275",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 32,
+          "tc": "0:01+0.03",
+          "nodes": null,
+          "threads": 1,
+          "concurrency": 4,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "calibration",
+          "candidate_option": [
+            "LMR Divisor=275"
+          ],
+          "baseline_option": [],
+          "sprt": null,
+          "engine_log": false
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "LMR Divisor": 275
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\parameter-screen\\lmr-275\\openings.pgn": "640fac0240cbf1c18bddd2620b28e95fca6a0dedac346ec08ab7a1d4aca52e63"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "e915bd0a7a470cddf92570392591b670cab0e51ec028e0a9c8e9fa1914c1b241",
+        "tablebases": "disabled",
+        "workspace_source_sha256": {
+          "src\\bench.rs": "050c8ca2bb54abf3749416cd0a3cd8734553faed6fb00af000b31a6728567e50",
+          "src\\board\\move_list.rs": "6abeec0d380d5176b4f492d4d9f3aefb9f88279e9b3f3fa05cd279c3d311fac1",
+          "src\\board\\see.rs": "9e9863155aa8a535355e123d96665b568959650aa2abe2232d575e405bd53962",
+          "src\\board.rs": "1d8fe5be1a74fe2908c25aae2c92ac0f1ade69fd0a3770afef35595c94fda2fa",
+          "src\\dataset.rs": "f94bc043cbd01eed9d9559208c7128b91260b5028c1ba9ecae65aac13f764ce4",
+          "src\\eval\\psqt.rs": "1c1d40982e867d1a33194979a3defa5134ebf7897c865b243027fbc956ca4fd7",
+          "src\\eval.rs": "0377afa060a22aa3bfa3426fb30060665eb513e28431f4385a6a74f831bf038a",
+          "src\\lib.rs": "54418bb0db5778d1275e9d0699b6f735a12f11b7935d305d6520617c9eca7dc6",
+          "src\\main.rs": "a1e9ef9baba8fc1f3e101acc7303e5282233977f8fe503dca3ac484ccb4b3f3a",
+          "src\\movepick.rs": "dea8abfcd07e0d2213b1f60152d86aa24ecd71e73b81c0570c68a539a939fe27",
+          "src\\nnue\\format.rs": "ef4fbcacf9a54bfa0397f56943e194e59a9d94b876fac4bba1dafeb4ec2ba161",
+          "src\\nnue\\kernels.rs": "c0277c628562214de281d20ae464ce8cfd5d79fa94f45d437500c1f84335dd7a",
+          "src\\nnue.rs": "d508d0fa37896722452ce0ef8667f838f91b7784613479ef58788a961365b55f",
+          "src\\openings.rs": "ea664b8a2060a7c2a585bad05ff0d5adb000d79794697d8f19bd311cde15e1b3",
+          "src\\search\\params.rs": "002a787658b7ac27d60546d0aab345c1e263e5dd3b9cd3232adf537ac978adc2",
+          "src\\search\\smp.rs": "5e66b301962853017f2ad20b933987829cd7690883fce095362deeb6c2dd1cf4",
+          "src\\search\\tt.rs": "36866ca0424892368a9e6205d42afb2adc9d650d7c3f2ab45602cc079d965700",
+          "src\\search.rs": "35cabac8f5f3440cd35d34bbe10c6494b029c32b4d73491ab5e7f73f5dc8b47f",
+          "src\\syzygy.rs": "f153895b3741052074754b87cf82bed564d337947748235e900675d0dd9634bd",
+          "src\\uci.rs": "5a905802c535a1b78008eea86989a5c73b916ba65b2ba9e1d9be23648287942c",
+          "Cargo.toml": "7a532c939ef0b1ea404a5ac602c156bc18b1142a11f7bd4b8c605d18e07288b2",
+          "Cargo.lock": "90df1862181aa0878ceacc409944ad528300350f26957a26b794b30b8e705d75"
+        },
+        "source_note": "Workspace snapshot for provenance; binary hashes identify the actual tested engines."
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 100.75,
+        "sprt_decision": "fixed_length",
+        "faults": [],
+        "pgn": {
+          "games": 64,
+          "pairs": 32,
+          "wdl": {
+            "losses": 30,
+            "wins": 22,
+            "draws": 12
+          },
+          "paired_wdl": {
+            "losses": 30,
+            "wins": 22,
+            "draws": 12
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            6,
+            6,
+            13,
+            4,
+            3
+          ],
+          "terminations": {
+            "normal": 64
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "parameter-screen/nmp-4",
+      "manifest": {
+        "started_utc": "2026-10-26T10:41:03.994102+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "name=candidate",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.NMP Base Reduction=4",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:01+0.03",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "32",
+          "-repeat",
+          "-concurrency",
+          "4",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\nmp-4\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\nmp-4\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\parameter-screen\\nmp-4\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8"
+        ],
+        "args": {
+          "candidate": "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "baseline": "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "output": "D:\\Zenith\\target\\matches\\parameter-screen\\nmp-4",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 32,
+          "tc": "0:01+0.03",
+          "nodes": null,
+          "threads": 1,
+          "concurrency": 4,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "calibration",
+          "candidate_option": [
+            "NMP Base Reduction=4"
+          ],
+          "baseline_option": [],
+          "sprt": null,
+          "engine_log": false
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "NMP Base Reduction": 4
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\parameter-screen\\nmp-4\\openings.pgn": "640fac0240cbf1c18bddd2620b28e95fca6a0dedac346ec08ab7a1d4aca52e63"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "e915bd0a7a470cddf92570392591b670cab0e51ec028e0a9c8e9fa1914c1b241",
+        "tablebases": "disabled",
+        "workspace_source_sha256": {
+          "src\\bench.rs": "050c8ca2bb54abf3749416cd0a3cd8734553faed6fb00af000b31a6728567e50",
+          "src\\board\\move_list.rs": "6abeec0d380d5176b4f492d4d9f3aefb9f88279e9b3f3fa05cd279c3d311fac1",
+          "src\\board\\see.rs": "9e9863155aa8a535355e123d96665b568959650aa2abe2232d575e405bd53962",
+          "src\\board.rs": "1d8fe5be1a74fe2908c25aae2c92ac0f1ade69fd0a3770afef35595c94fda2fa",
+          "src\\dataset.rs": "f94bc043cbd01eed9d9559208c7128b91260b5028c1ba9ecae65aac13f764ce4",
+          "src\\eval\\psqt.rs": "1c1d40982e867d1a33194979a3defa5134ebf7897c865b243027fbc956ca4fd7",
+          "src\\eval.rs": "0377afa060a22aa3bfa3426fb30060665eb513e28431f4385a6a74f831bf038a",
+          "src\\lib.rs": "54418bb0db5778d1275e9d0699b6f735a12f11b7935d305d6520617c9eca7dc6",
+          "src\\main.rs": "a1e9ef9baba8fc1f3e101acc7303e5282233977f8fe503dca3ac484ccb4b3f3a",
+          "src\\movepick.rs": "dea8abfcd07e0d2213b1f60152d86aa24ecd71e73b81c0570c68a539a939fe27",
+          "src\\nnue\\format.rs": "ef4fbcacf9a54bfa0397f56943e194e59a9d94b876fac4bba1dafeb4ec2ba161",
+          "src\\nnue\\kernels.rs": "c0277c628562214de281d20ae464ce8cfd5d79fa94f45d437500c1f84335dd7a",
+          "src\\nnue.rs": "d508d0fa37896722452ce0ef8667f838f91b7784613479ef58788a961365b55f",
+          "src\\openings.rs": "ea664b8a2060a7c2a585bad05ff0d5adb000d79794697d8f19bd311cde15e1b3",
+          "src\\search\\params.rs": "002a787658b7ac27d60546d0aab345c1e263e5dd3b9cd3232adf537ac978adc2",
+          "src\\search\\smp.rs": "5e66b301962853017f2ad20b933987829cd7690883fce095362deeb6c2dd1cf4",
+          "src\\search\\tt.rs": "36866ca0424892368a9e6205d42afb2adc9d650d7c3f2ab45602cc079d965700",
+          "src\\search.rs": "35cabac8f5f3440cd35d34bbe10c6494b029c32b4d73491ab5e7f73f5dc8b47f",
+          "src\\syzygy.rs": "f153895b3741052074754b87cf82bed564d337947748235e900675d0dd9634bd",
+          "src\\uci.rs": "5a905802c535a1b78008eea86989a5c73b916ba65b2ba9e1d9be23648287942c",
+          "Cargo.toml": "7a532c939ef0b1ea404a5ac602c156bc18b1142a11f7bd4b8c605d18e07288b2",
+          "Cargo.lock": "90df1862181aa0878ceacc409944ad528300350f26957a26b794b30b8e705d75"
+        },
+        "source_note": "Workspace snapshot for provenance; binary hashes identify the actual tested engines."
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 100.0,
+        "sprt_decision": "fixed_length",
+        "faults": [],
+        "pgn": {
+          "games": 64,
+          "pairs": 32,
+          "wdl": {
+            "losses": 24,
+            "wins": 27,
+            "draws": 13
+          },
+          "paired_wdl": {
+            "losses": 24,
+            "wins": 27,
+            "draws": 13
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            4,
+            7,
+            10,
+            4,
+            7
+          ],
+          "terminations": {
+            "normal": 64
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "parameter-screen/rfp-100",
+      "manifest": {
+        "started_utc": "2026-10-26T10:42:45.021798+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "name=candidate",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.RFP Margin=100",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:01+0.03",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "32",
+          "-repeat",
+          "-concurrency",
+          "4",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\rfp-100\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\rfp-100\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\parameter-screen\\rfp-100\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8"
+        ],
+        "args": {
+          "candidate": "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "baseline": "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "output": "D:\\Zenith\\target\\matches\\parameter-screen\\rfp-100",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 32,
+          "tc": "0:01+0.03",
+          "nodes": null,
+          "threads": 1,
+          "concurrency": 4,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "calibration",
+          "candidate_option": [
+            "RFP Margin=100"
+          ],
+          "baseline_option": [],
+          "sprt": null,
+          "engine_log": false
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "RFP Margin": 100
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\parameter-screen\\rfp-100\\openings.pgn": "640fac0240cbf1c18bddd2620b28e95fca6a0dedac346ec08ab7a1d4aca52e63"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "e915bd0a7a470cddf92570392591b670cab0e51ec028e0a9c8e9fa1914c1b241",
+        "tablebases": "disabled",
+        "workspace_source_sha256": {
+          "src\\bench.rs": "050c8ca2bb54abf3749416cd0a3cd8734553faed6fb00af000b31a6728567e50",
+          "src\\board\\move_list.rs": "6abeec0d380d5176b4f492d4d9f3aefb9f88279e9b3f3fa05cd279c3d311fac1",
+          "src\\board\\see.rs": "9e9863155aa8a535355e123d96665b568959650aa2abe2232d575e405bd53962",
+          "src\\board.rs": "1d8fe5be1a74fe2908c25aae2c92ac0f1ade69fd0a3770afef35595c94fda2fa",
+          "src\\dataset.rs": "f94bc043cbd01eed9d9559208c7128b91260b5028c1ba9ecae65aac13f764ce4",
+          "src\\eval\\psqt.rs": "1c1d40982e867d1a33194979a3defa5134ebf7897c865b243027fbc956ca4fd7",
+          "src\\eval.rs": "0377afa060a22aa3bfa3426fb30060665eb513e28431f4385a6a74f831bf038a",
+          "src\\lib.rs": "54418bb0db5778d1275e9d0699b6f735a12f11b7935d305d6520617c9eca7dc6",
+          "src\\main.rs": "a1e9ef9baba8fc1f3e101acc7303e5282233977f8fe503dca3ac484ccb4b3f3a",
+          "src\\movepick.rs": "dea8abfcd07e0d2213b1f60152d86aa24ecd71e73b81c0570c68a539a939fe27",
+          "src\\nnue\\format.rs": "ef4fbcacf9a54bfa0397f56943e194e59a9d94b876fac4bba1dafeb4ec2ba161",
+          "src\\nnue\\kernels.rs": "c0277c628562214de281d20ae464ce8cfd5d79fa94f45d437500c1f84335dd7a",
+          "src\\nnue.rs": "d508d0fa37896722452ce0ef8667f838f91b7784613479ef58788a961365b55f",
+          "src\\openings.rs": "ea664b8a2060a7c2a585bad05ff0d5adb000d79794697d8f19bd311cde15e1b3",
+          "src\\search\\params.rs": "002a787658b7ac27d60546d0aab345c1e263e5dd3b9cd3232adf537ac978adc2",
+          "src\\search\\smp.rs": "5e66b301962853017f2ad20b933987829cd7690883fce095362deeb6c2dd1cf4",
+          "src\\search\\tt.rs": "36866ca0424892368a9e6205d42afb2adc9d650d7c3f2ab45602cc079d965700",
+          "src\\search.rs": "35cabac8f5f3440cd35d34bbe10c6494b029c32b4d73491ab5e7f73f5dc8b47f",
+          "src\\syzygy.rs": "f153895b3741052074754b87cf82bed564d337947748235e900675d0dd9634bd",
+          "src\\uci.rs": "5a905802c535a1b78008eea86989a5c73b916ba65b2ba9e1d9be23648287942c",
+          "Cargo.toml": "7a532c939ef0b1ea404a5ac602c156bc18b1142a11f7bd4b8c605d18e07288b2",
+          "Cargo.lock": "90df1862181aa0878ceacc409944ad528300350f26957a26b794b30b8e705d75"
+        },
+        "source_note": "Workspace snapshot for provenance; binary hashes identify the actual tested engines."
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 96.76600000000326,
+        "sprt_decision": "fixed_length",
+        "faults": [],
+        "pgn": {
+          "games": 64,
+          "pairs": 32,
+          "wdl": {
+            "wins": 29,
+            "losses": 25,
+            "draws": 10
+          },
+          "paired_wdl": {
+            "wins": 29,
+            "losses": 25,
+            "draws": 10
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            4,
+            5,
+            13,
+            3,
+            7
+          ],
+          "terminations": {
+            "normal": 64
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "parameter-screen/futility-100",
+      "manifest": {
+        "started_utc": "2026-10-26T10:44:22.638757+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "name=candidate",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.Futility Margin=100",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:01+0.03",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "32",
+          "-repeat",
+          "-concurrency",
+          "4",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\futility-100\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\parameter-screen\\futility-100\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\parameter-screen\\futility-100\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8"
+        ],
+        "args": {
+          "candidate": "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "baseline": "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "output": "D:\\Zenith\\target\\matches\\parameter-screen\\futility-100",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 32,
+          "tc": "0:01+0.03",
+          "nodes": null,
+          "threads": 1,
+          "concurrency": 4,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "calibration",
+          "candidate_option": [
+            "Futility Margin=100"
+          ],
+          "baseline_option": [],
+          "sprt": null,
+          "engine_log": false
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "Futility Margin": 100
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\parameter-screen\\futility-100\\openings.pgn": "640fac0240cbf1c18bddd2620b28e95fca6a0dedac346ec08ab7a1d4aca52e63"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "e915bd0a7a470cddf92570392591b670cab0e51ec028e0a9c8e9fa1914c1b241",
+        "tablebases": "disabled",
+        "workspace_source_sha256": {
+          "src\\bench.rs": "050c8ca2bb54abf3749416cd0a3cd8734553faed6fb00af000b31a6728567e50",
+          "src\\board\\move_list.rs": "6abeec0d380d5176b4f492d4d9f3aefb9f88279e9b3f3fa05cd279c3d311fac1",
+          "src\\board\\see.rs": "9e9863155aa8a535355e123d96665b568959650aa2abe2232d575e405bd53962",
+          "src\\board.rs": "1d8fe5be1a74fe2908c25aae2c92ac0f1ade69fd0a3770afef35595c94fda2fa",
+          "src\\dataset.rs": "f94bc043cbd01eed9d9559208c7128b91260b5028c1ba9ecae65aac13f764ce4",
+          "src\\eval\\psqt.rs": "1c1d40982e867d1a33194979a3defa5134ebf7897c865b243027fbc956ca4fd7",
+          "src\\eval.rs": "0377afa060a22aa3bfa3426fb30060665eb513e28431f4385a6a74f831bf038a",
+          "src\\lib.rs": "54418bb0db5778d1275e9d0699b6f735a12f11b7935d305d6520617c9eca7dc6",
+          "src\\main.rs": "a1e9ef9baba8fc1f3e101acc7303e5282233977f8fe503dca3ac484ccb4b3f3a",
+          "src\\movepick.rs": "dea8abfcd07e0d2213b1f60152d86aa24ecd71e73b81c0570c68a539a939fe27",
+          "src\\nnue\\format.rs": "ef4fbcacf9a54bfa0397f56943e194e59a9d94b876fac4bba1dafeb4ec2ba161",
+          "src\\nnue\\kernels.rs": "c0277c628562214de281d20ae464ce8cfd5d79fa94f45d437500c1f84335dd7a",
+          "src\\nnue.rs": "d508d0fa37896722452ce0ef8667f838f91b7784613479ef58788a961365b55f",
+          "src\\openings.rs": "ea664b8a2060a7c2a585bad05ff0d5adb000d79794697d8f19bd311cde15e1b3",
+          "src\\search\\params.rs": "002a787658b7ac27d60546d0aab345c1e263e5dd3b9cd3232adf537ac978adc2",
+          "src\\search\\smp.rs": "5e66b301962853017f2ad20b933987829cd7690883fce095362deeb6c2dd1cf4",
+          "src\\search\\tt.rs": "36866ca0424892368a9e6205d42afb2adc9d650d7c3f2ab45602cc079d965700",
+          "src\\search.rs": "35cabac8f5f3440cd35d34bbe10c6494b029c32b4d73491ab5e7f73f5dc8b47f",
+          "src\\syzygy.rs": "f153895b3741052074754b87cf82bed564d337947748235e900675d0dd9634bd",
+          "src\\uci.rs": "5a905802c535a1b78008eea86989a5c73b916ba65b2ba9e1d9be23648287942c",
+          "Cargo.toml": "7a532c939ef0b1ea404a5ac602c156bc18b1142a11f7bd4b8c605d18e07288b2",
+          "Cargo.lock": "90df1862181aa0878ceacc409944ad528300350f26957a26b794b30b8e705d75"
+        },
+        "source_note": "Workspace snapshot for provenance; binary hashes identify the actual tested engines."
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 100.60899999999674,
+        "sprt_decision": "fixed_length",
+        "faults": [],
+        "pgn": {
+          "games": 64,
+          "pairs": 32,
+          "wdl": {
+            "wins": 22,
+            "losses": 24,
+            "draws": 18
+          },
+          "paired_wdl": {
+            "wins": 22,
+            "losses": 24,
+            "draws": 18
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            3,
+            9,
+            11,
+            5,
+            4
+          ],
+          "terminations": {
+            "normal": 64
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "name": "rfp-holdout",
+      "manifest": {
+        "started_utc": "2026-10-26T10:46:13.255887+00:00",
+        "argv": [
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe",
+          "name=candidate",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "option.RFP Margin=100",
+          "-engine",
+          "cmd=D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe",
+          "name=baseline",
+          "option.Threads=1",
+          "option.Hash=16",
+          "option.Move Overhead=30",
+          "option.SyzygyPath=<empty>",
+          "-each",
+          "tc=0:01+0.03",
+          "timemargin=100",
+          "proto=uci",
+          "-rounds",
+          "64",
+          "-repeat",
+          "-concurrency",
+          "4",
+          "-openings",
+          "file=D:\\Zenith\\target\\matches\\rfp-holdout\\openings.pgn",
+          "format=pgn",
+          "order=random",
+          "plies=8",
+          "-srand",
+          "20261026",
+          "-output",
+          "format=fastchess",
+          "-report",
+          "penta=true",
+          "-pgnout",
+          "file=D:\\Zenith\\target\\matches\\rfp-holdout\\games.pgn",
+          "notation=san",
+          "nodes=true",
+          "append=false",
+          "-config",
+          "outname=D:\\Zenith\\target\\matches\\rfp-holdout\\fastchess.json",
+          "-scoreinterval",
+          "8",
+          "-ratinginterval",
+          "8",
+          "-sprt",
+          "elo0=0.0",
+          "elo1=5.0",
+          "alpha=0.05",
+          "beta=0.05",
+          "model=normalized"
+        ],
+        "args": {
+          "candidate": "target/candidates/zenith-0.11.0-rc1.exe",
+          "baseline": "target/baselines/zenith-0.10.1.exe",
+          "output": "target/matches/rfp-holdout",
+          "fastchess": "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe",
+          "book": "D:\\Zenith\\data\\openings.txt",
+          "pairs": 64,
+          "tc": "0:01+0.03",
+          "nodes": null,
+          "threads": 1,
+          "concurrency": 4,
+          "hash": 16,
+          "overhead": 30,
+          "timeout": 3600,
+          "seed": 20261026,
+          "split": "holdout",
+          "candidate_option": [
+            "RFP Margin=100"
+          ],
+          "baseline_option": [],
+          "sprt": [
+            0.0,
+            5.0
+          ],
+          "engine_log": false
+        },
+        "engines": [
+          {
+            "id": {
+              "name": "Zenith 0.11.0",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>",
+              "RFP Margin": 100
+            }
+          },
+          {
+            "id": {
+              "name": "Zenith 0.10.1",
+              "author": "Zenith contributors"
+            },
+            "options": {
+              "Threads": 1,
+              "Hash": 16,
+              "Move Overhead": 30,
+              "SyzygyPath": "<empty>"
+            }
+          }
+        ],
+        "logical_cpus": 8,
+        "sha256": {
+          "D:\\Zenith\\target\\candidates\\zenith-0.11.0-rc1.exe": "c06f1e8260c35a38ec34f557e41e8db9be369cd73f7525380f2578d7c7605000",
+          "D:\\Zenith\\target\\baselines\\zenith-0.10.1.exe": "f8a3468310c55d95ea3c98b9bfd7184112de2a382ca687a5dd69f47578c46807",
+          "D:\\Zenith\\target\\fastchess\\fastchess-windows-x86-64\\fastchess.exe": "c6d7e4458a58025983c81bf38c524cb213e6f27559657dcfd72543392a431a71",
+          "D:\\Zenith\\data\\openings.txt": "84741a8b4a2d9fe19a9f915b592955ce2f00836e82482a782010cac98732b87f",
+          "D:\\Zenith\\target\\matches\\rfp-holdout\\openings.pgn": "75818360943bdb6190e7fb64f79195ba89473b1d692f74031b06b99b77b6ceef"
+        },
+        "openings": 64,
+        "python_chess": "1.11.2",
+        "runner_sha256": "e915bd0a7a470cddf92570392591b670cab0e51ec028e0a9c8e9fa1914c1b241",
+        "tablebases": "disabled",
+        "workspace_source_sha256": {
+          "src\\bench.rs": "050c8ca2bb54abf3749416cd0a3cd8734553faed6fb00af000b31a6728567e50",
+          "src\\board\\move_list.rs": "6abeec0d380d5176b4f492d4d9f3aefb9f88279e9b3f3fa05cd279c3d311fac1",
+          "src\\board\\see.rs": "9e9863155aa8a535355e123d96665b568959650aa2abe2232d575e405bd53962",
+          "src\\board.rs": "1d8fe5be1a74fe2908c25aae2c92ac0f1ade69fd0a3770afef35595c94fda2fa",
+          "src\\dataset.rs": "f94bc043cbd01eed9d9559208c7128b91260b5028c1ba9ecae65aac13f764ce4",
+          "src\\eval\\psqt.rs": "1c1d40982e867d1a33194979a3defa5134ebf7897c865b243027fbc956ca4fd7",
+          "src\\eval.rs": "0377afa060a22aa3bfa3426fb30060665eb513e28431f4385a6a74f831bf038a",
+          "src\\lib.rs": "54418bb0db5778d1275e9d0699b6f735a12f11b7935d305d6520617c9eca7dc6",
+          "src\\main.rs": "a1e9ef9baba8fc1f3e101acc7303e5282233977f8fe503dca3ac484ccb4b3f3a",
+          "src\\movepick.rs": "dea8abfcd07e0d2213b1f60152d86aa24ecd71e73b81c0570c68a539a939fe27",
+          "src\\nnue\\format.rs": "ef4fbcacf9a54bfa0397f56943e194e59a9d94b876fac4bba1dafeb4ec2ba161",
+          "src\\nnue\\kernels.rs": "c0277c628562214de281d20ae464ce8cfd5d79fa94f45d437500c1f84335dd7a",
+          "src\\nnue.rs": "d508d0fa37896722452ce0ef8667f838f91b7784613479ef58788a961365b55f",
+          "src\\openings.rs": "ea664b8a2060a7c2a585bad05ff0d5adb000d79794697d8f19bd311cde15e1b3",
+          "src\\search\\params.rs": "002a787658b7ac27d60546d0aab345c1e263e5dd3b9cd3232adf537ac978adc2",
+          "src\\search\\smp.rs": "5e66b301962853017f2ad20b933987829cd7690883fce095362deeb6c2dd1cf4",
+          "src\\search\\tt.rs": "36866ca0424892368a9e6205d42afb2adc9d650d7c3f2ab45602cc079d965700",
+          "src\\search.rs": "35cabac8f5f3440cd35d34bbe10c6494b029c32b4d73491ab5e7f73f5dc8b47f",
+          "src\\syzygy.rs": "f153895b3741052074754b87cf82bed564d337947748235e900675d0dd9634bd",
+          "src\\uci.rs": "5a905802c535a1b78008eea86989a5c73b916ba65b2ba9e1d9be23648287942c",
+          "Cargo.toml": "7a532c939ef0b1ea404a5ac602c156bc18b1142a11f7bd4b8c605d18e07288b2",
+          "Cargo.lock": "90df1862181aa0878ceacc409944ad528300350f26957a26b794b30b8e705d75"
+        },
+        "source_note": "Workspace snapshot for provenance; binary hashes identify the actual tested engines."
+      },
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 212.0,
+        "sprt_decision": "inconclusive",
+        "faults": [],
+        "pgn": {
+          "games": 128,
+          "pairs": 64,
+          "wdl": {
+            "losses": 51,
+            "wins": 41,
+            "draws": 36
+          },
+          "paired_wdl": {
+            "losses": 51,
+            "draws": 36,
+            "wins": 41
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            9,
+            15,
+            23,
+            11,
+            6
+          ],
+          "terminations": {
+            "normal": 128
+          },
+          "errors": [],
+          "valid": true
+        }
+      }
+    }
+  ],
+  "validation": {
+    "ordinary_rust_tests": 132,
+    "real_syzygy_tests": 5,
+    "python_runner_tests": 7,
+    "clippy": "passed",
+    "format": "passed",
+    "locked_binpack_check": "passed"
+  },
+  "benchmark": {
+    "nodes": 128490,
+    "times_us": {
+      "baseline": [
+        423725,
+        356871,
+        418072,
+        403328,
+        322423,
+        323099,
+        319792,
+        323484,
+        324581
+      ],
+      "candidate": [
+        380067,
+        326842,
+        402722,
+        332797,
+        332829,
+        320259,
+        319254,
+        330266,
+        329266
+      ],
+      "final": [
+        431085,
+        334057,
+        389449,
+        331001,
+        315295,
+        326281,
+        321182,
+        309527,
+        321293
+      ]
+    },
+    "median_us": {
+      "baseline": 324581,
+      "candidate": 330266,
+      "final": 326281
+    },
+    "final_over_baseline": 1.0052375216047766
+  },
+  "build_comparison": {
+    "only_linker_metadata_changed": true,
+    "different_bytes": 24,
+    "text_sha256": {
+      ".text": "a9df6ab201a21baff336f3c648f5e8e7d25d879deb2d76ee03e3585a5dfcb426"
+    },
+    "normalization": "COFF timestamp, IMAGE_DEBUG_DIRECTORY timestamps, CodeView RSDS GUID only"
+  },
+  "final_exe_sha256": "d399c049386f9d562f4e5306cc565b8291fd961c06eef812287a3f1e1b5e8743"
+}

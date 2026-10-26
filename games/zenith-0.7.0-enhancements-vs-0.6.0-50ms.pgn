@@ -1,0 +1,932 @@
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "1"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F17"]
+[OpeningId "1b0ce5b918bdb5a9"]
+[PlyCount "89"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. g3 g5 5. c4 Nb4 6. Bxg5 Bf5 7. Na3 N8c6 8. Nf3
+h6 9. Be3 Rg8 10. exd6 cxd6 11. Be2 Qa5 12. O-O Bg7 13. Nh4 Bh3 14. Re1 Rc8 15.
+Bg4 Bxg4 16. Qxg4 Rd8 17. Nf5 Nd3 18. Nxg7+ Rxg7 19. Qxg7 Nxe1 20. Qg8+ Kd7 21.
+Qxf7 Nd3 22. d5 Nce5 23. Qf5+ Ke8 24. Rb1 Qb4 25. Bxh6 a6 26. Bg7 Qc5 27. h4 Qc8
+28. Qh5+ Kd7 29. Qe2 Qc5 30. h5 Kc7 31. Rd1 Nxb2 32. Qxb2 Nxc4 33. Nxc4 b5 34.
+Na5 Qb6 35. Nc6 Re8 36. Qc2 Kb7 37. Qg6 Rc8 38. Re1 Qc5 39. Rxe7+ Ka8 40. Qxd6
+Qc1+ 41. Kg2 Qxc6 42. dxc6 a5 43. Bd4 Rc7 44. Qd8+ Rc8 45. Qxc8# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "2"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F17"]
+[OpeningId "1b0ce5b918bdb5a9"]
+[PlyCount "173"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. g3 g5 5. c4 Nb4 6. Bxg5 dxe5 7. dxe5 Qxd1+ 8.
+Kxd1 N8c6 9. a3 Na6 10. Nf3 Bg4 11. Nd2 Nxe5 12. Be2 Nxf3 13. Bxf3 Rg8 14. Be3
+O-O-O 15. Bxg4+ Rxg4 16. Kc2 Kb8 17. Rad1 Bg7 18. f3 Rg6 19. Ne4 Rg8 20. Rd7 Rc6
+21. Rxe7 f5 22. Nd2 Nc5 23. Re1 a6 24. Rf7 Re6 25. Rxf5 Rge8 26. Rxc5 Rxe3 27.
+Rxe3 Rxe3 28. Rg5 Bf6 29. Rf5 Re6 30. Ne4 Bd4 31. Rf8+ Ka7 32. Rd8 c5 33. Rd7
+Rh6 34. h4 Kb6 35. Re7 Kc6 36. f4 b5 37. f5 bxc4 38. f6 Rg6 39. Rxh7 Bxf6 40. h5
+Rg4 41. Nxf6 Rxg3 42. Rf7 Rh3 43. Ra7 Kb5 44. Rb7+ Kc6 45. Ra7 Kb5 46. Rb7+ Kc6
+47. Rg7 a5 48. Rg6 Rh2+ 49. Kc3 Kb5 50. h6 Rh3+ 51. Kc2 Rh2+ 52. Kb1 Rh1+ 53.
+Ka2 c3 54. bxc3 Kc4 55. Ne4 Rh2+ 56. Kb1 Rh4 57. Re6 Kd5 58. Ng5 c4 59. Kc1 Rh1+
+60. Kd2 Rh2+ 61. Ke3 Rh1 62. Ra6 Kc5 63. a4 Re1+ 64. Kf4 Rf1+ 65. Nf3 Rh1 66.
+Rxa5+ Kb6 67. Rb5+ Kc7 68. Kg5 Rh3 69. Rf5 Kb6 70. Kg6 Rg3+ 71. Ng5 Re3 72. h7
+Re8 73. Nf7 Rc8 74. Rh5 Rc6+ 75. Kf5 Rc8 76. h8=Q Rxh8 77. Rxh8 Ka5 78. Ra8+ Kb6
+79. Ne5 Kb7 80. Ra5 Kb8 81. Rb5+ Ka7 82. Nxc4 Ka6 83. Rb6+ Ka7 84. a5 Ka8 85.
+Ne5 Ka7 86. Nc6+ Ka8 87. Rb8# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "3"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F18"]
+[OpeningId "0e1544c1457318e4"]
+[PlyCount "200"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. e4 g6 2. d4 Bg7 3. Nc3 d6 4. Nb5 Nc6 5. d5 Ne5 6. Nf3 Kf8 7. Nxe5 Bxe5 8. f4
+Bg7 9. Bd3 c6 10. Nc3 Bxc3+ 11. bxc3 cxd5 12. exd5 Nf6 13. Bc4 Qc7 14. Qd4 Bf5
+15. Bb3 Rc8 16. Bb2 Qc5 17. O-O-O Qxd4 18. Rxd4 Be4 19. Rg1 h5 20. c4 Rh6 21.
+Kb1 h4 22. Rd2 h3 23. g3 Nd7 24. Re1 Nc5 25. Bd4 f5 26. Kb2 Kf7 27. Rde2 b6 28.
+a3 a5 29. g4 Rh4 30. gxf5 gxf5 31. Rf1 Rg8 32. Be3 Rhg4 33. Bxc5 bxc5 34. Re3
+Rh4 35. Re2 Rg2 36. Ref2 e6 37. dxe6+ Kxe6 38. Ba4 Rhg4 39. Kc3 Rxf2 40. Rxf2
+Rg2 41. Rd2 Rg4 42. Rf2 Rg1 43. Bb5 Rg6 44. Re2 Rg2 45. Rd2 Ke7 46. Ba4 Rg4 47.
+Rf2 Rg2 48. Rd2 Rg4 49. Rf2 Ke6 50. Bb5 Rg7 51. Re2 Rg2 52. Rd2 Bb7 53. Be8 Ba8
+54. Ba4 Bb7 55. Be8 Ba8 56. Ba4 Rxd2 57. Kxd2 Be4 58. Ke3 Kf6 59. Kf2 Ke6 60.
+Kg3 Bg2 61. Bb5 Ke7 62. Kh4 Kf6 63. Bd7 Be4 64. Ba4 Bg2 65. Bd7 Kg6 66. Kg3 Be4
+67. Kxh3 Bxc2 68. Kg3 Bd3 69. Bb5 Be4 70. h4 d5 71. cxd5 Bxd5 72. Be8+ Kg7 73.
+Bh5 c4 74. Bd1 c3 75. Kf2 Be4 76. Ke3 c2 77. Bxc2 Bxc2 78. Kd2 Be4 79. Ke3 Kg6
+80. Kf2 Kh5 81. Kg3 a4 82. Kh3 Bf3 83. Kg3 Bg4 84. Kf2 Kxh4 85. Kg2 Bd1 86. Kf2
+Kg4 87. Ke3 Bb3 88. Ke2 Kxf4 89. Kf2 Ke4 90. Kg2 f4 91. Kg1 Ke3 92. Kg2 f3+ 93.
+Kh3 f2 94. Kh4 f1=Q 95. Kh5 Qf8 96. Kg5 Qxa3 97. Kg4 Qc5 98. Kg3 Qg5+ 99. Kh2
+Kf2 100. Kh1 Qg2# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "4"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F18"]
+[OpeningId "0e1544c1457318e4"]
+[PlyCount "193"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. e4 g6 2. d4 Bg7 3. Nc3 d6 4. Nb5 Nc6 5. d5 Ne5 6. Nf3 Nxf3+ 7. Qxf3 Nf6 8.
+Qc3 O-O 9. Qc4 Bd7 10. Qxc7 Qxc7 11. Nxc7 Rac8 12. Nb5 Nxe4 13. f3 Nc3 14. Nxc3
+Rxc3 15. Bd3 Rc5 16. c4 Bd4 17. Bd2 b5 18. Bb4 Rc7 19. cxb5 Bxb2 20. Rd1 Rb8 21.
+a4 Be5 22. Kf1 a6 23. b6 Rxb6 24. Ba5 Rbb7 25. Bxc7 Rxc7 26. Rb1 Bxa4 27. Bxa6
+Rc5 28. Rb8+ Kg7 29. Kf2 Rc2+ 30. Ke3 Rxg2 31. Rb7 Kf6 32. f4 Bc3 33. Be2 Bc2
+34. Rc1 Bd4+ 35. Kxd4 Rxe2 36. Rb2 Re4+ 37. Kc3 Ba4 38. Rb4 Rxb4 39. Kxb4 Bd7
+40. Ra1 Bg4 41. Kc4 Kf5 42. Ra7 Kf6 43. Kd4 Bf5 44. h4 Bb1 45. Ke3 h6 46. Ra8
+Bf5 47. Ra7 Bc2 48. Ra3 Bb1 49. Ra8 h5 50. Rc8 Bf5 51. Ra8 Bg4 52. Ra7 Bh3 53.
+Kd4 Bc8 54. Ke3 Bh3 55. Kd4 Bf5 56. Ke3 Bc2 57. Ra8 Kg7 58. Re8 Kf6 59. Rb8 Kg7
+60. Kd4 Kf6 61. Ke3 Bf5 62. Ra8 Bh3 63. Kf3 Bd7 64. Ke3 Bf5 65. Ra7 Bg4 66. Ra1
+Bh3 67. Ra8 Bg2 68. Ra5 Kf5 69. Ra7 Kf6 70. Ra5 Kf5 71. Ra7 Bxd5 72. Rxe7 Be6
+73. Kf3 Bd5+ 74. Ke3 Be6 75. Kf3 f6 76. Ke3 Bd5 77. Re8 Bh1 78. Rc8 Bg2 79. Rb8
+Bh1 80. Rb6 d5 81. Kd4 Be4 82. Ke3 Kg4 83. Rxf6 Kxh4 84. Re6 Kh3 85. Re5 h4 86.
+Rg5 Kh2 87. Kd4 h3 88. Ke3 Kh1 89. Kf2 Bf5 90. Rg1+ Kh2 91. Rd1 Be4 92. Rc1 Bh1
+93. Rd1 Bg2 94. Ra1 Be4 95. Rc1 Bd3 96. Rd1 Be4 97. Rc1 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "5"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F19"]
+[OpeningId "6edddace754bdbbe"]
+[PlyCount "143"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. Bg5 g6 5. e3 Qd6 6. Nc3 Qb4 7. Qd2 Nc6 8. d5
+Na5 9. Bf4 Qc5 10. Be2 Bg7 11. O-O O-O 12. Qd4 Qb6 13. Qxb6 cxb6 14. Ne5 b5 15.
+Rfd1 Nd7 16. Nxd7 Bxd7 17. d6 Rfe8 18. dxe7 Rxe7 19. Nd5 Re4 20. Rd2 Rae8 21.
+Bf3 c3 22. Nxc3 Bxc3 23. bxc3 R4e7 24. Bg5 Re5 25. Bf4 R5e7 26. Bg5 Re5 27. Rxd7
+Rxg5 28. Rad1 Rc5 29. Bxb7 Nxb7 30. Rxb7 Rxc3 31. Rxa7 Rc2 32. g3 Kg7 33. Rdd7
+Rf8 34. Rdb7 Rb2 35. Rc7 Rd2 36. Kg2 h6 37. a3 Kg8 38. Rcb7 Rb2 39. Ra5 Ra2 40.
+Rbxb5 Rc8 41. Rb4 Rcc2 42. Rf4 f5 43. Ra7 Re2 44. Ra6 Kg7 45. Ra7+ Kg8 46. Rf3
+Rec2 47. a4 h5 48. a5 Ra3 49. Ra8+ Kg7 50. Ra7+ Kf6 51. h4 Ra4 52. Ra8 Rc6 53.
+Rf4 Rxf4 54. exf4 Rd6 55. a6 Kf7 56. Kf3 Re6 57. a7 Ra6 58. Rh8 Ra3+ 59. Kg2
+Rxa7 60. Rh7+ Ke6 61. Rxa7 Kf6 62. Kf3 Ke6 63. Ra6+ Kf7 64. Ke3 Kg7 65. Kd4 Kf7
+66. Ke5 Kg7 67. Ra7+ Kf8 68. Ke6 Kg8 69. Kf6 g5 70. fxg5 Kh8 71. g6 Kg8 72. Ra8#
+1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "6"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F19"]
+[OpeningId "6edddace754bdbbe"]
+[PlyCount "112"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. Bg5 g6 5. Na3 Be6 6. Rc1 c3 7. Nb5 Bxa2 8. Qa4
+c6 9. Qxa2 cxb5 10. e3 cxb2 11. Bxb5+ Nbd7 12. Qxb2 a6 13. Bxf6 exf6 14. Bxd7+
+Qxd7 15. O-O Be7 16. Qb6 Rb8 17. Rc7 Bd8 18. Rxd7 Bxb6 19. Rd5 Rd8 20. Rxd8+
+Kxd8 21. Rb1 Kc7 22. Nd2 Re8 23. Nc4 Ba7 24. Rxb7+ Kxb7 25. Nd6+ Kc6 26. Nxe8 f5
+27. Nf6 h5 28. Nh7 Bb6 29. Ng5 f6 30. Ne6 h4 31. g3 hxg3 32. fxg3 a5 33. Nf4 g5
+34. Nh5 a4 35. Nxf6 a3 36. d5+ Kb5 37. Ne8 a2 38. Nd6+ Kb4 39. Nxf5 a1=Q+ 40.
+Kg2 Qe5 41. g4 Qxd5+ 42. Kf2 Qh1 43. Ke2 Qxh2+ 44. Kd3 Qg2 45. Nd4 Qd5 46. Ke2
+Bxd4 47. exd4 Qxd4 48. Kf3 Qf4+ 49. Kg2 Kc4 50. Kh3 Qf3+ 51. Kh2 Qxg4 52. Kh1
+Qe2 53. Kg1 g4 54. Kh1 g3 55. Kg1 Kd5 56. Kh1 Qf1# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "7"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F20"]
+[OpeningId "06e3b676061bea1c"]
+[PlyCount "199"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. e3 Ne4 5. cxd5 Qa5+ 6. Bd2 Nxd2 7. Qxd2 Qxd2+ 8.
+Kxd2 cxd5 9. Nc3 e6 10. Ne5 a6 11. Be2 Nd7 12. Nd3 Be7 13. a3 O-O 14. Rhc1 b5
+15. Kc2 Bb7 16. b3 Rfc8 17. Kb2 Rc6 18. Rc2 Rd8 19. Rac1 Re8 20. Bf3 Rec8 21. g3
+g6 22. b4 Nb6 23. Nc5 Nc4+ 24. Kb3 Rb6 25. Bg4 h5 26. Nxb7 Rxb7 27. Be2 Kg7 28.
+h4 Rd7 29. Bxc4 dxc4+ 30. Kb2 Rcd8 31. Ne4 a5 32. a4 bxa4 33. bxa5 Rb8+ 34. Ka2
+Ra7 35. Rxc4 Rxa5 36. Rc7 Bd8 37. Rc8 Rab5 38. Rxb8 Rxb8 39. Ka3 Ra8 40. Nc5 Be7
+41. Ra1 Rb8 42. Ra2 e5 43. Kxa4 Rd8 44. Nb7 Rb8 45. Nc5 exd4 46. exd4 Rd8 47.
+Nb3 Ra8+ 48. Na5 Bf6 49. d5 Be5 50. Kb3 Bd4 51. f4 Bc5 52. Ka4 Bd6 53. Kb5 Be7
+54. Re2 Rb8+ 55. Kc6 Bb4 56. Kc7 Rb5 57. Nc6 Bc5 58. d6 Bb6+ 59. Kc8 Rb3 60. d7
+Kf6 61. Re4 Rc3 62. Kb7 Rb3 63. Kc8 Rc3 64. Kb7 Rb3 65. Rb4 Rxb4 66. Nxb4 Ba5
+67. Nc6 Ke6 68. Nxa5 Kxd7 69. Nc4 Ke6 70. Ne3 Kd7 71. Kb6 Kd6 72. Kb5 Ke7 73.
+Kc5 Ke6 74. Kc6 f6 75. Kb5 f5 76. Kc6 Ke7 77. Nd5+ Ke6 78. Nc7+ Ke7 79. Kc5 Kd7
+80. Nd5 Ke6 81. Kc6 Kf7 82. Kd6 Kg7 83. Ke6 Kf8 84. Kf6 Ke8 85. Kxg6 Kd7 86.
+Nf6+ Ke6 87. Nxh5 Kd5 88. Nf6+ Kd4 89. h5 Ke3 90. Kxf5 Kf3 91. g4 Kg2 92. h6 Kf3
+93. h7 Ke3 94. h8=Q Kd4 95. Ne4+ Kc4 96. Qc3+ Kb5 97. Qc5+ Ka6 98. Qb4 Ka7 99.
+Nc5 Ka8 100. Qb7# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "8"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F20"]
+[OpeningId "06e3b676061bea1c"]
+[PlyCount "106"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. e3 Ne4 5. cxd5 Qa5+ 6. Bd2 Nxd2 7. Qxd2 Qxd2+ 8.
+Nbxd2 cxd5 9. Bd3 Nc6 10. O-O e6 11. Rfe1 Bd6 12. Rac1 O-O 13. Ng5 h6 14. Nh7
+Re8 15. g4 f5 16. gxf5 exf5 17. Bb5 Bd7 18. Bc4 dxc4 19. Nxc4 Bb4 20. d5 Bxe1
+21. dxc6 Bxc6 22. Nf6+ gxf6 23. Rxe1 Rad8 24. Rc1 Kf7 25. Na5 Rg8+ 26. Kf1 Bb5+
+27. Nc4 Rg4 28. f4 Rdg8 29. Rc3 Rg1+ 30. Ke2 R8g2+ 31. Kf3 Bc6+ 32. e4 fxe4+ 33.
+Ke3 Re1+ 34. Kd4 Rd1+ 35. Kc5 Rxh2 36. Nd6+ Kf8 37. Nc4 Rd5+ 38. Kb4 Rf5 39. Kb3
+Bd5 40. Ka3 Be6 41. Nd6 Ra5+ 42. Kb4 Rd5 43. f5 Rxd6 44. fxe6 Rxb2+ 45. Ka3 Rb1
+46. Rb3 Rxb3+ 47. Kxb3 e3 48. e7+ Kxe7 49. a4 e2 50. Kc3 e1=Q+ 51. Kb2 Rd3 52.
+a5 Qe2+ 53. Kb1 Rd1# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "9"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F21"]
+[OpeningId "c128cda457e8acd8"]
+[PlyCount "76"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. Bg5 Be7 5. Bf4 dxc4 6. Nf3 Nf6 7. e3 b5 8. Be2
+O-O 9. O-O Nbd7 10. Qc2 Nh5 11. Be5 f6 12. Ng5 fxg5 13. Bxh5 Nxe5 14. dxe5 Qd3
+15. Rac1 Rd8 16. Rfd1 Qxc2 17. Rxd8+ Bxd8 18. Rxc2 a5 19. Ne4 a4 20. Rd2 Ba5 21.
+Rd6 Bc7 22. Rxc6 Bxe5 23. Rc5 Bxb2 24. Rxb5 c3 25. Rc5 Rb8 26. Nxg5 Ba3 27. Bf7+
+Kh8 28. Rxc8+ Rxc8 29. Bxe6 Rf8 30. Nf7+ Rxf7 31. Bxf7 c2 32. g3 c1=Q+ 33. Kg2
+Qc6+ 34. f3 Qc2+ 35. Kg1 Bc5 36. Kh1 Bxe3 37. a3 Qf2 38. Bb3 Qxf3# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "10"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F21"]
+[OpeningId "c128cda457e8acd8"]
+[PlyCount "88"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 c6 3. Nc3 e6 4. Bg5 Be7 5. Bf4 dxc4 6. Nf3 Nf6 7. e3 b5 8. Be2
+O-O 9. O-O Nbd7 10. Qc2 Nh5 11. Be5 f6 12. Ng5 fxg5 13. Bxh5 Nxe5 14. dxe5 Qd3
+15. Rac1 Rd8 16. Bf3 Qxc2 17. Rxc2 Bd7 18. Bg4 g6 19. Rd1 Bc8 20. Rxd8+ Bxd8 21.
+Bf3 Bb7 22. Nxb5 g4 23. Be4 cxb5 24. Bxb7 Rb8 25. Bc6 Bc7 26. a4 bxa4 27. Bd7 a3
+28. Bxe6+ Kf8 29. b4 cxb3 30. Bxb3 Rxb3 31. f4 Rb1+ 32. Kf2 Rb2 33. Re2 Rxe2+
+34. Kxe2 a2 35. Kf2 a1=Q 36. h3 gxh3 37. gxh3 Bb6 38. h4 Qc1 39. Kf3 Qxe3+ 40.
+Kg2 Qxf4 41. Kh3 Bg1 42. h5 Qf3+ 43. Kh4 h6 44. hxg6 Bf2# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "11"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F22"]
+[OpeningId "315bde86b549188d"]
+[PlyCount "157"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. Nb5 Bd7 5. Bf4 Bxb5 6. cxb5 Qa5+ 7. Qd2 Qxd2+ 8.
+Bxd2 cxd4 9. Nf3 Bc5 10. Rc1 Nd7 11. b4 Bd6 12. Nxd4 Ngf6 13. f3 O-O 14. Kf2
+Rfc8 15. Rxc8+ Rxc8 16. g3 e5 17. Nf5 Bf8 18. a3 Rc2 19. Bg5 Rc3 20. b6 axb6 21.
+Bg2 Rxa3 22. Rb1 Ra2 23. h3 h6 24. Bc1 d4 25. f4 d3 26. Rb2 Rxb2 27. Bxb2 d2 28.
+Ne3 Bxb4 29. Nd1 exf4 30. gxf4 Nh5 31. e3 Nc5 32. Bd4 Nd3+ 33. Ke2 Ndxf4+ 34.
+exf4 Nxf4+ 35. Kf3 Nxg2 36. Kxg2 b5 37. Kf3 f5 38. Be3 Kf7 39. Ke2 Bd6 40. Bxd2
+b4 41. Ne3 Kg6 42. Nc4 Be7 43. Na5 Kf6 44. Kd3 Ke6 45. Kc4 b6 46. Nc6 Bd6 47.
+Bxb4 Bg3 48. Nd4+ Kf6 49. Be7+ Kg6 50. Bd8 f4 51. Bc7 b5+ 52. Nxb5 Kh5 53. Nd4
+Kh4 54. Be5 g5 55. Bg7 Kxh3 56. Bxh6 g4 57. Kd3 f3 58. Be3 f2 59. Bxf2 Bxf2 60.
+Nf5 Be1 61. Ke3 Bb4 62. Kd4 Bd2 63. Kd3 Bg5 64. Ke4 Kg2 65. Nd6 Kf1 66. Nf5 Kf2
+67. Ke5 Be3 68. Ke4 Bd2 69. Kd3 Bf4 70. Ke4 Bc7 71. Kd5 Bf4 72. Ke4 Bc7 73. Kd5
+Bb8 74. Ke4 Bd6 75. Nxd6 g3 76. Nf7 g2 77. Ng5 g1=Q 78. Nh3+ Ke1 79. Nxg1
+1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "12"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F22"]
+[OpeningId "315bde86b549188d"]
+[PlyCount "308"]
+[Termination "adjudication"]
+[TerminationDetails "ply_limit"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. c4 e6 3. Nc3 c5 4. Nb5 Bd7 5. Nf3 dxc4 6. Nc3 Nf6 7. e3 cxd4 8. Qxd4
+b5 9. Qf4 Bb4 10. Bd2 O-O 11. O-O-O Qb6 12. Nd4 Na6 13. Kb1 Bd6 14. Qg5 Nc5 15.
+f3 b4 16. Nce2 c3 17. Bc1 Ba4 18. b3 Bd7 19. Ng3 a5 20. Bc4 a4 21. Rhe1 axb3 22.
+Nxb3 c2+ 23. Kxc2 Rxa2+ 24. Kb1 Rxg2 25. Rxd6 Qxd6 26. Nxc5 h6 27. Nce4 Nxe4 28.
+Nxe4 hxg5 29. Nxd6 Rxh2 30. e4 f6 31. Re2 Rh3 32. Rf2 Ra8 33. Bd2 Ra3 34. Kc2
+Raxf3 35. Rxf3 Rxf3 36. Bxb4 g4 37. Be2 Ba4+ 38. Kd2 Rg3 39. Bc3 Kf8 40. Nb7 Kf7
+41. Nd6+ Kg6 42. Bd4 Bd7 43. Bf2 Rg2 44. Ke3 g3 45. Be1 Rg1 46. Bd2 Rh1 47. Kf3
+Rg1 48. Nc4 Ba4 49. Ne3 Bc6 50. Bd3 f5 51. Bc3 Bxe4+ 52. Bxe4 fxe4+ 53. Kg4 Rf1
+54. Be5 Rf3 55. Ng2 Kf7 56. Bxg3 g5 57. Bc7 Kg6 58. Bb6 Rb3 59. Bd8 Rb1 60. Ne3
+Rg1+ 61. Kh3 Rb1 62. Kg3 Rb3 63. Kf2 Rb2+ 64. Kg3 Rb3 65. Kf2 Rb7 66. Kg3 Rb1
+67. Be7 Rb3 68. Bc5 Kh5 69. Kf2 Kh4 70. Bd4 g4 71. Ng2+ Kg5 72. Be3+ Kf5 73. Kg3
+e5 74. Nh4+ Kf6 75. Ng2 Rb2 76. Nh4 Rb3 77. Ng2 Kf5 78. Nh4+ Ke6 79. Ng2 Rb2 80.
+Bf2 Rb7 81. Ne3 Rg7 82. Kh4 Kf6 83. Nxg4+ Ke6 84. Be3 Kf5 85. Nh6+ Kf6 86. Kh3
+Ke6 87. Ng4 Kf5 88. Nh6+ Kf6 89. Ng4+ Kf5 90. Nh6+ Ke6 91. Ng4 Rc7 92. Kg3 Rc3
+93. Kg2 Kd5 94. Bb6 Rb3 95. Bf2 Ke6 96. Be3 Rc3 97. Kg3 Ra3 98. Kg2 Kf5 99. Bc5
+Rd3 100. Ne3+ Kf4 101. Kf2 Rd2+ 102. Ke1 Rb2 103. Ba3 Rb3 104. Bc1 Kf3 105. Nc4
+e3 106. Nxe5+ Ke4 107. Nd7 Rb1 108. Nc5+ Kd4 109. Ke2 Kxc5 110. Bxe3+ Kc4 111.
+Kf3 Kd3 112. Bf4 Rf1+ 113. Kg4 Ke4 114. Bd6 Rg1+ 115. Bg3 Rg2 116. Kh4 Kf5 117.
+Bb8 Rg7 118. Kh3 Rd7 119. Kh4 Rg7 120. Kh3 Rd7 121. Kh4 Rd2 122. Bc7 Rd3 123.
+Bb6 Rc3 124. Ba5 Rb3 125. Bd8 Rc3 126. Ba5 Rb3 127. Bd8 Rb7 128. Kg3 Ra7 129.
+Bb6 Ra3+ 130. Kh4 Rf3 131. Bc5 Rc3 132. Bd6 Rc6 133. Be7 Rc7 134. Bd6 Rc3 135.
+Bg3 Rc4+ 136. Kh3 Rc3 137. Kh4 Rc4+ 138. Kh3 Rc2 139. Kh4 Rc6 140. Bf2 Kf4 141.
+Bg3+ Kf5 142. Be1 Rc4+ 143. Kg3 Ra4 144. Bd2 Ra3+ 145. Kf2 Ke4 146. Bb4 Rf3+
+147. Kg2 Rd3 148. Kf2 Rd4 149. Ba5 Ra4 150. Be1 Ra3 151. Bb4 Rf3+ 152. Kg2 Rd3
+153. Kf2 Rb3 154. Be7 Rc3 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "13"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F23"]
+[OpeningId "be87c353629a9a21"]
+[PlyCount "98"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. Bd2 g5 5. Bxg5 Nc6 6. Nf3 h6 7. Bd2 Bxc3 8.
+Bxc3 Ne4 9. Qc2 d5 10. e3 O-O 11. O-O-O Nxc3 12. Qxc3 Qf6 13. cxd5 exd5 14. Qb3
+Rd8 15. Bd3 Rb8 16. Kb1 Bg4 17. Rhg1 Rd6 18. Rc1 Bf5 19. Rgd1 Be4 20. Rg1 Bxd3+
+21. Qxd3 Nb4 22. Qb3 Qf5+ 23. Ka1 Nc6 24. h3 a6 25. Rgd1 Qe4 26. Rc5 Rg6 27. Rf1
+b6 28. Rc3 Na5 29. Qd1 c6 30. Rg1 Re8 31. Ra3 Ra8 32. Nd2 Qf5 33. Qe2 h5 34. f3
+Qg5 35. f4 Qg3 36. b4 Nb7 37. Nf1 Qh4 38. f5 Rg5 39. Nd2 Rxf5 40. Rxa6 Rxa6 41.
+Qxa6 Qe7 42. Nf1 Qxb4 43. Qa8+ Kh7 44. Qxb7 Rf2 45. Qxf7+ Rxf7 46. Ng3 Rf2 47.
+Ne2 Rxe2 48. Rb1 Qc3+ 49. Rb2 Qxb2# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "14"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F23"]
+[OpeningId "be87c353629a9a21"]
+[PlyCount "111"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. Bd2 g5 5. Bxg5 Nc6 6. Nf3 h6 7. Bd2 Bxc3 8.
+Bxc3 Ne4 9. Qc2 d5 10. e3 O-O 11. O-O-O Nxc3 12. Qxc3 Qf6 13. cxd5 exd5 14. Qb3
+Rd8 15. Bd3 Rb8 16. Kb1 Bg4 17. Rhg1 Rd6 18. Rc1 Bf5 19. Rgd1 Be4 20. Rg1 Bxd3+
+21. Qxd3 Nb4 22. Qb3 Qf5+ 23. Ka1 Nc6 24. h3 a6 25. Rgd1 Qe4 26. Ne5 Nxe5 27.
+dxe5 Rd7 28. f4 Kg7 29. Rc2 Re8 30. Qc3 Kg8 31. Kb1 c6 32. Rd4 Qg6 33. e4 Red8
+34. f5 Qg5 35. e6 fxe6 36. fxe6 Re7 37. exd5 Rxd5 38. Rg4 Qxg4 39. hxg4 Rxe6 40.
+Qb4 b5 41. Rc1 Re2 42. g3 Re6 43. Qa3 Rd2 44. Qxa6 Rdd6 45. Qa7 Rf6 46. Qc7 Rfe6
+47. Rf1 Rf6 48. Re1 Rfe6 49. Rf1 Rf6 50. Rf5 Rd1+ 51. Kc2 Rfd6 52. Rf2 R1d4 53.
+Qf7+ Kh8 54. Qf8+ Kh7 55. Rf7+ Kg6 56. Rg7# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "15"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F24"]
+[OpeningId "a8eb0d081782d8b5"]
+[PlyCount "104"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. b4 Ne4 5. b5 a6 6. Nbd2 Bb4 7. Qb3 c5 8. dxc5
+bxc5 9. Qc2 Bb7 10. Rb1 Qa5 11. a3 Bc3 12. bxa6 Bc6 13. Rb3 f6 14. Bb2 Bxb2 15.
+a7 Na6 16. Rxb2 O-O 17. Qb3 Rxa7 18. Qb6 Qc3 19. Rb1 Rb7 20. Qxb7 Bxb7 21. e3
+Bc6 22. h4 Qxa3 23. Rd1 Qc3 24. Be2 Ba4 25. O-O Bxd1 26. Nxe4 Qc2 27. Rxd1 Qxe2
+28. Rxd7 Qxc4 29. Nfd2 Qa4 30. Rb7 Qc6 31. Ra7 c4 32. Nc3 Rf7 33. Rxf7 Kxf7 34.
+Nf3 Qd7 35. Nd4 e5 36. Ndb5 Nc5 37. h5 Qd3 38. Kh2 f5 39. Kg3 f4+ 40. Kh3 fxe3
+41. fxe3 Qxe3+ 42. Kh4 Qd2 43. g3 e4 44. Kg4 Kf6 45. Kh3 Kg5 46. h6 gxh6 47. g4
+Kf4 48. Nd5+ Qxd5 49. Kg2 e3+ 50. Kf1 Qf3+ 51. Kg1 Kg3 52. Nc3 Qg2# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "16"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F24"]
+[OpeningId "a8eb0d081782d8b5"]
+[PlyCount "92"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. b4 Ne4 5. b5 a6 6. Nbd2 Bb4 7. Qb3 c5 8. dxc5
+bxc5 9. Qc2 Bb7 10. Rb1 Qa5 11. a3 Bc3 12. bxa6 Bc6 13. Rb3 f6 14. Bb2 Bxb2 15.
+a7 Na6 16. Rxb2 O-O 17. Qb3 Rxa7 18. Qb6 Qc3 19. Rb1 Rb8 20. Qxb8+ Nxb8 21.
+Rxb8+ Kf7 22. Rb1 Rxa3 23. e3 Nxf2 24. Kxf2 Qxe3+ 25. Kg3 Qxd2 26. h4 e5 27. Rh3
+h5 28. Rb6 Be4 29. Rb5 Qe1+ 30. Kh2 Qxf1 31. Rb2 Ra1 32. Kg3 Qxc4 33. Rf2 Bxf3
+34. gxf3 Qf4+ 35. Kg2 c4 36. Rf1 Qd2+ 37. Rf2 Qe3 38. f4 Qe1 39. fxe5 Qg1+ 40.
+Kf3 Qg4+ 41. Ke3 Qxh3+ 42. Ke4 Qg4+ 43. Kd5 Ra5+ 44. Kd6 Qe6+ 45. Kc7 Qc6+ 46.
+Kb8 Ra8# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "17"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F25"]
+[OpeningId "181ec73c8e83c83d"]
+[PlyCount "80"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. Bd2 Nbd7 5. Nxd5 Nxd5 6. cxd5 Nf6 7. Nf3 Bg7 8.
+Qc2 Bf5 9. Qc4 O-O 10. Qb4 b6 11. Rc1 Nxd5 12. Qb5 a6 13. Qc6 Re8 14. Ne5 a5 15.
+Rc4 Qd6 16. Qxd6 exd6 17. Nf3 c5 18. dxc5 dxc5 19. b3 Nb4 20. Bxb4 axb4 21. e3
+Rxa2 22. g4 Be6 23. Rc1 Bc3+ 24. Rxc3 bxc3 25. Bb5 Rea8 26. Rg1 Rd8 27. Kf1 c2
+28. Kg2 Rd1 29. h3 Bxb3 30. Kg3 c1=Q 31. Rg2 Bd5 32. h4 Qb1 33. Be8 Qe4 34.
+Bxf7+ Bxf7 35. Nh2 Bd5 36. f3 Qe5+ 37. Kh3 Rg1 38. f4 Qxe3+ 39. Nf3 Qxf3+ 40.
+Rg3 Rxg3# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "18"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F25"]
+[OpeningId "181ec73c8e83c83d"]
+[PlyCount "92"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. Bd2 Nbd7 5. Nxd5 Nxd5 6. cxd5 Nf6 7. Qa4+ Qd7 8.
+Qc2 Qxd5 9. Nf3 c6 10. e3 Bf5 11. Qa4 b5 12. Qa6 Bc8 13. Qa5 Bg7 14. a4 O-O 15.
+axb5 Bf5 16. bxc6 Qxc6 17. Rc1 Qe4 18. Rc7 Qb1+ 19. Bc1 Rfc8 20. Be2 Rxc7 21.
+Qxc7 Rc8 22. Qxc8+ Bxc8 23. O-O Qc2 24. Re1 Ne4 25. h3 a5 26. h4 Bf6 27. h5 gxh5
+28. g3 Bg4 29. Kg2 h4 30. gxh4 Bxf3+ 31. Kxf3 Bxh4 32. b3 Bxf2 33. Rf1 h5 34.
+Bc4 a4 35. Bd5 Ng5+ 36. Kf4 Nh3+ 37. Kf3 Qf5+ 38. Kg2 Qxd5+ 39. Kh2 Qd6+ 40. Kh1
+axb3 41. Bb2 Bxe3 42. Ra1 Qg3 43. Ra8+ Kh7 44. Rh8+ Kxh8 45. d5+ Kg8 46. Bc3
+Nf2# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "19"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F26"]
+[OpeningId "4353d0be9aeee1df"]
+[PlyCount "135"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 c5 3. d5 e6 4. Nd2 g5 5. dxe6 fxe6 6. Ngf3 g4 7. Ng5 Qa5 8. Qc2
+Nc6 9. Ne4 Be7 10. h3 Nxe4 11. Qxe4 g3 12. fxg3 O-O 13. Qg4+ Kh8 14. Kd1 Ne5 15.
+Qe4 Bd6 16. Kc2 Rf2 17. Qe3 Rf6 18. b3 Rf5 19. Bb2 Qc7 20. g4 Rf6 21. Nf3 Rxf3
+22. gxf3 Kg8 23. Rd1 Ng6 24. Kb1 Bf4 25. Qe4 d6 26. e3 Be5 27. Bd3 Bxb2 28. Kxb2
+Bd7 29. Rd2 Re8 30. Be2 Ne5 31. Rhd1 Bc6 32. Qc2 Nxf3 33. Rxd6 Nd4 34. R6xd4
+cxd4 35. exd4 Qh2 36. Bf1 Qxc2+ 37. Kxc2 Rf8 38. Re1 Rf3 39. Bd3 Kf7 40. h4 Rf4
+41. Rf1 Rxf1 42. Bxf1 h6 43. Be2 Kf6 44. Kc3 Bg2 45. c5 Bd5 46. Bc4 Be4 47. a4
+e5 48. b4 Bc6 49. dxe5+ Kxe5 50. b5 Bf3 51. g5 hxg5 52. hxg5 Kf5 53. a5 Kxg5 54.
+Kd4 Kf5 55. Bd5 Kf4 56. Bxf3 Kf5 57. Bxb7 Ke6 58. Bc6 Ke7 59. a6 Ke6 60. b6 axb6
+61. cxb6 Kd6 62. b7 Kxc6 63. b8=Q Kd7 64. Kd5 Ke7 65. Qf4 Kd7 66. Qf7+ Kc8 67.
+a7 Kd8 68. a8=Q# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "20"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F26"]
+[OpeningId "4353d0be9aeee1df"]
+[PlyCount "242"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 Nf6 2. c4 c5 3. d5 e6 4. Nd2 g5 5. dxe6 fxe6 6. Ngf3 g4 7. Ng5 Qa5 8. Qc2
+Nc6 9. Ne4 Be7 10. Qc3 Qxc3 11. Nxc3 Nd4 12. Rb1 O-O 13. Nb3 Nxb3 14. axb3 Rf7
+15. Bg5 Nd5 16. Bxe7 Nxe7 17. h3 gxh3 18. Rxh3 b6 19. Nb5 Nc6 20. Nd6 Rg7 21. g3
+Nd4 22. Bg2 Rb8 23. Ne8 Re7 24. Nf6+ Kg7 25. Nxh7 Bb7 26. Bxb7 Rxb7 27. Ng5 Nxb3
+28. Rd1 Nd4 29. Rh7+ Kf8 30. Rh8+ Kg7 31. Rh7+ Kf8 32. Rh5 Kg7 33. g4 d5 34. e3
+Nc2+ 35. Kf1 Nb4 36. cxd5 exd5 37. f4 Nc2 38. Rd3 c4 39. Rc3 Nb4 40. Nf3 Nd3 41.
+Nh4 Red7 42. Nf5+ Kg8 43. b3 Rbc7 44. Nd4 a5 45. Rh6 Rf7 46. Kg2 Rce7 47. Kf3
+Ne5+ 48. Kg3 Nd3 49. Kf3 Ne1+ 50. Ke2 Rxf4 51. Nf5 Re5 52. Rh5 Kf8 53. Rh8+ Kf7
+54. Kxe1 b5 55. Rh7+ Kf6 56. Rh6+ Kg5 57. Rh5+ Kf6 58. Rh6+ Kg5 59. Rh5+ Kf6 60.
+Nd6 Rxg4 61. Rxe5 Kxe5 62. Nxb5 cxb3 63. Rxb3 Rb4 64. Rxb4 axb4 65. Kd2 b3 66.
+Nd4 b2 67. Kc2 Ke4 68. Kxb2 Kxe3 69. Kc3 Ke4 70. Nc2 d4+ 71. Kd2 d3 72. Ne1 Kf4
+73. Ng2+ Ke5 74. Ne3 Ke4 75. Nd1 Kf4 76. Nc3 Ke5 77. Nd1 Kd5 78. Nc3+ Ke6 79.
+Nd1 Kd6 80. Ne3 Ke5 81. Nd1 Kd5 82. Nf2 Ke5 83. Ng4+ Kf5 84. Nh2 Kf4 85. Nf1 Ke5
+86. Nh2 Kf4 87. Nf1 Ke5 88. Ne3 Ke6 89. Ng2 Ke5 90. Nh4 Ke4 91. Ng6 Kd5 92. Nh8
+Ke6 93. Ng6 Kf6 94. Nf8 Ke7 95. Nh7 Ke6 96. Ng5+ Ke5 97. Nf7+ Ke4 98. Nh6 Kf4
+99. Nf7 Ke4 100. Nd6+ Ke5 101. Ne8 Ke6 102. Nc7+ Kd6 103. Nb5+ Ke5 104. Na7 Ke4
+105. Nc8 Kd5 106. Nb6+ Kd6 107. Nc4+ Kd5 108. Nb2 Kc5 109. Na4+ Kd5 110. Nc3+
+Kd6 111. Ne4+ Ke6 112. Nc5+ Kd6 113. Ne4+ Ke6 114. Ng5+ Ke5 115. Nh7 Ke6 116.
+Nf8+ Kd6 117. Ng6 Kd5 118. Nh4 Ke4 119. Kc1 Ke5 120. Kd1 Ke4 121. Kd2 Kf4
+1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "21"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F27"]
+[OpeningId "e7a4334fb3347ee1"]
+[PlyCount "194"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 f5 2. g3 Nf6 3. Bg2 e6 4. Bg5 Nc6 5. Nf3 Bd6 6. O-O h6 7. Bd2 O-O 8. Nc3
+Ne4 9. d5 Nb4 10. dxe6 Nxd2 11. Nxd2 dxe6 12. a3 Nc6 13. Bxc6 bxc6 14. Nc4 Ba6
+15. Qd3 Rb8 16. b4 Qf6 17. b5 Bxb5 18. Nxb5 Rxb5 19. Nxd6 cxd6 20. Qxd6 Qe5 21.
+Qxe5 Rxe5 22. e3 Rc5 23. Ra2 Rb8 24. Rd1 Rd5 25. Raa1 Rb2 26. c4 Rdd2 27. Rxd2
+Rxd2 28. Rb1 Rd7 29. Rb8+ Kh7 30. Rc8 Rd6 31. c5 Rd1+ 32. Kg2 Kg6 33. Rxc6 Kf6
+34. Kf3 g5 35. h3 h5 36. Rc7 g4+ 37. hxg4 hxg4+ 38. Ke2 Rc1 39. Kd2 Rc4 40. c6
+Ke5 41. Rxa7 Rxc6 42. a4 Ke4 43. Rh7 Kf3 44. Rh2 Ra6 45. Kc2 Rxa4 46. Kb2 Rc4
+47. Kb1 Ra4 48. Kb2 e5 49. Kb1 e4 50. Kb2 Ra7 51. Kb1 Ke2 52. Kb2 Kf1 53. Kc3
+Kg1 54. Rh5 Rf7 55. Kd4 Kxf2 56. Ke5 Kxg3 57. Ke6 Rf8 58. Ke7 Ra8 59. Rxf5 Ra3
+60. Ke6 Rxe3 61. Ke5 Re2 62. Rf1 e3 63. Ke4 Kg2 64. Rf4 Kg3 65. Rf1 Kg2 66. Rf4
+Kh3 67. Kd3 Re1 68. Re4 g3 69. Re7 g2 70. Rh7+ Kg3 71. Rg7+ Kf3 72. Rf7+ Kg3 73.
+Rg7+ Kf3 74. Rf7+ Kg4 75. Rg7+ Kf4 76. Rxg2 Kf3 77. Rg6 Rd1+ 78. Kc4 e2 79. Rf6+
+Kg3 80. Re6 e1=Q 81. Rxe1 Rxe1 82. Kd4 Kf4 83. Kd5 Rd1+ 84. Kc4 Ke4 85. Kc5 Rc1+
+86. Kd6 Rc2 87. Ke6 Rc6+ 88. Kd7 Kd5 89. Ke7 Ke5 90. Kf7 Re6 91. Kg7 Kf5 92. Kf7
+Re1 93. Kg7 Re7+ 94. Kf8 Kf6 95. Kg8 Rc7 96. Kh8 Kg6 97. Kg8 Rc8# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "22"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F27"]
+[OpeningId "e7a4334fb3347ee1"]
+[PlyCount "78"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 f5 2. g3 Nf6 3. Bg2 e6 4. Bg5 Nc6 5. Nf3 Bd6 6. O-O O-O 7. Nc3 h6 8. Be3
+Ng4 9. Bd2 a6 10. e4 Qe8 11. h3 fxe4 12. Nxe4 Nf6 13. Nxd6 cxd6 14. Re1 Qe7 15.
+c4 d5 16. Ne5 Qd6 17. cxd5 Nxd5 18. Nc4 Qc7 19. Qg4 Nf6 20. Qh4 d5 21. Ne5 Qb6
+22. Nxc6 bxc6 23. b3 a5 24. Rab1 Ra7 25. a4 Rb7 26. Bf3 c5 27. dxc5 Qxc5 28.
+Rec1 Qa3 29. Bxa5 Rxb3 30. Bg2 Rxb1 31. Rxb1 Bd7 32. Bb4 Qa2 33. Rc1 Qb2 34. Rc7
+g5 35. Qxh6 Qxb4 36. Qg6+ Kh8 37. Qh6+ Kg8 38. Qg6+ Kh8 39. Qh6+ Kg8 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "23"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F28"]
+[OpeningId "0704d359bfe3522b"]
+[PlyCount "127"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. Nf3 Nf6 3. Bf4 e6 4. g3 Ng4 5. Bh3 h5 6. O-O Nc6 7. Nc3 Bd6 8. Bxd6
+cxd6 9. Qd3 O-O 10. a3 Nf6 11. Ng5 Qb6 12. Nb5 Bd7 13. Bg2 Ne7 14. a4 a6 15. Nc3
+Nc6 16. e3 h4 17. gxh4 Rac8 18. b3 Nb4 19. Qd2 Qc7 20. Ne2 Nxc2 21. Ra2 Nh7 22.
+Rc1 Qb6 23. Raxc2 Nxg5 24. hxg5 Qxb3 25. Rb2 Rxc1+ 26. Qxc1 Qxa4 27. Rxb7 Rc8
+28. Nc3 Qc6 29. Qb2 a5 30. Ra7 Qxc3 31. Qxc3 Rxc3 32. Rxd7 Kf8 33. Ra7 Ra3 34.
+Bf1 Ra1 35. Ra8+ Ke7 36. Kg2 e5 37. Bb5 Ke6 38. Re8+ Kf5 39. Bd7+ Ke4 40. Re7 f5
+41. Rxg7 f4 42. exf4 Kxd4 43. f5 Rb1 44. f6 Rb8 45. h4 Kc5 46. h5 d4 47. Kf3 Kd5
+48. h6 e4+ 49. Kg3 d3 50. Ba4 d2 51. Ra7 Rc8 52. Rxa5+ Ke6 53. Bb3+ d5 54. Kf4
+Rc3 55. Ra6+ Kd7 56. Bd1 Rh3 57. Ke5 e3 58. Ra7+ Kc6 59. f7 Kb6 60. Ra1 exf2 61.
+f8=Q Rh2 62. Qb8+ Kc5 63. Ra5+ Kc4 64. Qb3# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "24"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F28"]
+[OpeningId "0704d359bfe3522b"]
+[PlyCount "130"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. d4 d5 2. Nf3 Nf6 3. Bf4 e6 4. g3 Ng4 5. Bh3 h5 6. O-O Nc6 7. Nc3 Bd6 8. Bxd6
+cxd6 9. Qd3 O-O 10. a3 Nf6 11. Ng5 Qb6 12. Nb5 Rd8 13. c4 dxc4 14. Qxc4 a6 15.
+Nc3 Qxd4 16. Qxd4 Nxd4 17. Bg2 d5 18. Rad1 Nc6 19. Rd2 Bd7 20. Nf3 Na5 21. Ne5
+Nb3 22. Rd3 Nc5 23. Rd4 Rac8 24. Rfd1 Rc7 25. f3 Rdc8 26. e3 Nb3 27. Rb4 Nc5 28.
+Rc1 Be8 29. b3 Ncd7 30. Nxd7 Bxd7 31. e4 a5 32. Rb6 d4 33. Rc2 dxc3 34. Rd6 a4
+35. b4 Bb5 36. Bf1 Bxf1 37. Kxf1 Rd7 38. Rxd7 Nxd7 39. Ke2 Kh7 40. f4 Nf6 41.
+Kd3 Kg6 42. Rxc3 Rxc3+ 43. Kxc3 Nxe4+ 44. Kc4 h4 45. gxh4 Kh5 46. Kd4 Nd2 47.
+Kc5 Kxh4 48. Kb6 Kg4 49. b5 Nc4+ 50. Kxb7 Nxa3 51. b6 Nc4 52. h3+ Kxh3 53. Kc6
+Nxb6 54. Kxb6 a3 55. Kc5 a2 56. f5 exf5 57. Kc4 a1=Q 58. Kd5 Qc3 59. Kd6 f4 60.
+Ke7 Qf6+ 61. Kd7 f3 62. Kc7 f2 63. Kd7 f1=Q 64. Kc7 Q1a6 65. Kb8 Qfb6# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "25"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F29"]
+[OpeningId "7a692b2bcd1c1c51"]
+[PlyCount "111"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. Nf3 d5 2. c4 e6 3. g3 Nf6 4. d4 Bd6 5. c5 Be7 6. Qa4+ Nc6 7. Ne5 Bd7 8. Nxd7
+Qxd7 9. Bg2 O-O 10. O-O b6 11. Be3 Rfb8 12. cxb6 axb6 13. Qb3 Ng4 14. Nd2 Nxe3
+15. Qxe3 Ra4 16. Nf3 Rba8 17. a3 Bd6 18. Rac1 Ne7 19. Qb3 Nf5 20. e3 R4a5 21.
+Bh3 Ne7 22. Rc3 Qb5 23. Rfc1 Qe2 24. Ng5 Qh5 25. f4 h6 26. Nxe6 Qxh3 27. Nxc7
+Rb8 28. Nb5 Qd7 29. Nxd6 Qxd6 30. Rc7 Qe6 31. Qd3 Nf5 32. R1c3 Re8 33. Kf2 Raa8
+34. R7c6 Qd7 35. Rc7 Qe6 36. R7c6 Nd6 37. Kg1 b5 38. Qd1 Rac8 39. Rxc8 Rxc8 40.
+Rxc8+ Qxc8 41. Kg2 Nc4 42. Qe2 Qf5 43. Kf2 Qb1 44. Kg2 Qc1 45. b3 Nxe3+ 46. Kf3
+Nc2 47. Kg2 Nxd4 48. Qe8+ Kh7 49. Qxf7 Qc2+ 50. Kh3 Qxb3 51. f5 Qf3 52. Qg6+ Kg8
+53. Qe8+ Kh7 54. Qg6+ Kg8 55. Qe8+ Kh7 56. Qg6+ 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "26"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F29"]
+[OpeningId "7a692b2bcd1c1c51"]
+[PlyCount "170"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. Nf3 d5 2. c4 e6 3. g3 Nf6 4. d4 Bd6 5. c5 Be7 6. Qa4+ Nc6 7. Ne5 Bd7 8. Nxd7
+Qxd7 9. Bg2 O-O 10. O-O b6 11. Be3 Rfb8 12. cxb6 axb6 13. Qb3 Ng4 14. Nd2 Nxe3
+15. Qxe3 Ra4 16. Nf3 Rba8 17. a3 Bd6 18. Rac1 Ne7 19. Qb3 Nf5 20. e3 R4a5 21.
+Bh3 Ne7 22. Rc3 Qb5 23. Rfc1 Qe2 24. Ng5 Rb5 25. Qc2 Qxc2 26. R3xc2 h6 27. Nf3
+c5 28. Bf1 c4 29. Kg2 Rba5 30. Be2 b5 31. Ne5 b4 32. axb4 Bxb4 33. Bf3 Rf8 34.
+h3 Ra2 35. Bh5 g6 36. Be2 Kg7 37. Nd7 Rfa8 38. h4 h5 39. Rd1 Nf5 40. Rdc1 Bd6
+41. Kh3 R8a7 42. Nc5 R2a5 43. b4 Rb5 44. Bxc4 dxc4 45. Rxc4 Be7 46. Nd3 Ra3 47.
+Rd1 Rb3 48. e4 Nh6 49. f3 Bxb4 50. Kh2 Rb8 51. Kg2 Ba5 52. Rc2 Bc3 53. d5 exd5
+54. exd5 Nf5 55. Re2 Bd4 56. d6 Ne3+ 57. Rxe3 Bxe3 58. Ne5 Ra8 59. Kh3 Bb6 60.
+Nc4 Bf2 61. Kg2 Bc5 62. Rd5 Bb4 63. Rb5 Ra2+ 64. Kh3 Rb1 65. g4 Rc2 66. Rxb4
+Rxb4 67. d7 hxg4+ 68. Kg3 Rb8 69. Ne5 Rd8 70. Kxg4 f6 71. Nd3 Rxd7 72. Nf4 Rd1
+73. Kg3 Rg1+ 74. Kh3 Kf7 75. h5 Rh1+ 76. Kg4 gxh5+ 77. Kg3 h4+ 78. Kg4 Rc4 79.
+Kf5 Rd1 80. Kg4 Rg1+ 81. Kh3 Rxf4 82. Kh2 Rg3 83. Kh1 Rfxf3 84. Kh2 Rg5 85. Kh1
+Rh3# 0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "27"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F30"]
+[OpeningId "6eaf5f40d1e401c5"]
+[PlyCount "87"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. f4 d5 2. Nf3 Nf6 3. e3 g6 4. d3 Bg7 5. Nc3 O-O 6. Be2 Nc6 7. O-O a6 8. Ne5
+Qd6 9. Nxc6 Qxc6 10. Bd2 Bf5 11. g4 Be6 12. f5 gxf5 13. gxf5 Bd7 14. Rf4 Qb6 15.
+Qc1 c5 16. a4 Qd6 17. Qe1 Rfd8 18. Qh4 Qe5 19. Raf1 d4 20. exd4 cxd4 21. Rxd4
+Bxf5 22. Rb4 Rab8 23. Bf3 Qc5+ 24. Rf2 Rd7 25. Qc4 Qe5 26. Bf4 Bxd3 27. cxd3
+Qe1+ 28. Rf1 Qh4 29. Bxb8 Qg5+ 30. Kh1 b5 31. Qc8+ Bf8 32. Rg1 Qxg1+ 33. Kxg1
+Rxd3 34. Be2 Rd2 35. Bf4 Rxe2 36. Nxe2 Kg7 37. Bh6+ Kxh6 38. Qxf8+ Kg6 39. Qxe7
+h5 40. Rf4 Ng4 41. Qxf7+ Kh6 42. Rf5 Nf6 43. h4 bxa4 44. Rxf6# 1-0
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "28"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F30"]
+[OpeningId "6eaf5f40d1e401c5"]
+[PlyCount "75"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. f4 d5 2. Nf3 Nf6 3. e3 g6 4. d3 Bg7 5. Nc3 O-O 6. Be2 Nc6 7. O-O a6 8. Ne5
+Qd6 9. d4 Be6 10. Bd2 Rfe8 11. Nd3 Bf5 12. Nc5 Bc8 13. a3 b6 14. Nd3 Bf5 15. Qe1
+e6 16. Qh4 Ne4 17. Nxe4 Bxe4 18. Rab1 a5 19. Bf3 Bf5 20. Qg5 Rad8 21. Qh4 Rd7
+22. Rf2 Bf8 23. Re2 Be7 24. Qg3 Bf6 25. Rd1 Rc8 26. Rf1 Re8 27. Rd1 Be4 28. Ne5
+Bxe5 29. dxe5 Qc5 30. Bc3 Bxf3 31. Qxf3 Qb5 32. Red2 a4 33. Rd3 Qc5 34. Qf2 Qc4
+35. Qh4 Qc5 36. Qf2 Qc4 37. Qh4 Qc5 38. Qf2 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "29"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F31"]
+[OpeningId "c4388df0a661d741"]
+[PlyCount "165"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. g3 d5 2. Bg2 Nf6 3. d3 e5 4. b3 g5 5. Bxg5 Nc6 6. Bxf6 Qxf6 7. Bxd5 e4 8.
+Bxc6+ Qxc6 9. dxe4 Bg7 10. c3 Qxe4 11. Nf3 O-O 12. O-O Bg4 13. Re1 Rad8 14. Qc1
+Bxf3 15. exf3 Qxf3 16. Qe3 Qxe3 17. Rxe3 Rfe8 18. Rxe8+ Rxe8 19. Kf1 Bf6 20. a4
+Rd8 21. Ke2 Re8+ 22. Kd2 Bg5+ 23. f4 Be7 24. Na3 Bxa3 25. Rxa3 Kg7 26. Ra1 Kf6
+27. Re1 Rxe1 28. Kxe1 Kf5 29. b4 b6 30. h4 Ke4 31. Ke2 a5 32. h5 f6 33. h6 c6
+34. bxa5 bxa5 35. Kf2 c5 36. f5 Kxf5 37. Kf3 Kg5 38. Ke4 Kxh6 39. Kd5 Kg5 40.
+Kxc5 Kg4 41. Kb5 h5 42. c4 Kxg3 43. c5 h4 44. c6 h3 45. c7 h2 46. c8=Q h1=Q 47.
+Qc7+ Kg4 48. Qc4+ Kg5 49. Kxa5 f5 50. Kb6 Qe4 51. Qxe4 fxe4 52. a5 e3 53. a6 e2
+54. a7 e1=Q 55. a8=Q Qb4+ 56. Kc7 Qe7+ 57. Kb6 Qb4+ 58. Kc7 Qf4+ 59. Kb6 Qd4+
+60. Kb5 Qd3+ 61. Kc5 Qe3+ 62. Kc4 Qf4+ 63. Kc5 Qc1+ 64. Kd6 Qf4+ 65. Kc5 Qe3+
+66. Kc4 Qe2+ 67. Kc5 Qf2+ 68. Kc4 Qc2+ 69. Kb4 Qd2+ 70. Kc4 Qc2+ 71. Kb4 Qb2+
+72. Kc4 Qc1+ 73. Kb3 Qd1+ 74. Kc4 Qf1+ 75. Kc3 Qe1+ 76. Kc4 Qf1+ 77. Kc3 Qe1+
+78. Kc4 Qe2+ 79. Kd4 Qd2+ 80. Kc4 Qc1+ 81. Kb3 Qd1+ 82. Kc3 Qc1+ 83. Kb3 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "30"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1/2-1/2"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F31"]
+[OpeningId "c4388df0a661d741"]
+[PlyCount "168"]
+[Termination "normal"]
+[TerminationDetails "draw_claim"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. g3 d5 2. Bg2 Nf6 3. d3 e5 4. b3 g5 5. Bxg5 Nc6 6. Bxf6 Qxf6 7. Bxd5 e4 8.
+Bxc6+ Qxc6 9. dxe4 Bg7 10. c3 O-O 11. Nf3 Re8 12. O-O Bh3 13. Re1 Rad8 14. Qc1
+Rxe4 15. Nbd2 Ree8 16. Nc4 b5 17. Na5 Qxc3 18. Qxc3 Bxc3 19. Nc6 Rd6 20. Nxa7
+Bxa1 21. Nxb5 Rb6 22. Nxc7 Re4 23. Rxa1 Rxe2 24. Nd5 Rd6 25. Ne3 Be6 26. Ng5
+Rdd2 27. Rc1 Rxa2 28. Nxe6 fxe6 29. Ng4 h5 30. Nf6+ Kf7 31. Nxh5 e5 32. Rf1 Reb2
+33. g4 Rxb3 34. Kg2 Rc2 35. h3 Kg6 36. Ng3 Rbb2 37. Ne4 Re2 38. Kf3 Rec2 39. Re1
+Rb3+ 40. Re3 Rxe3+ 41. fxe3 Rc1 42. h4 Rf1+ 43. Kg2 Rc1 44. h5+ Kh6 45. Kf3 Rd1
+46. Kg3 Re1 47. Kf2 Rb1 48. Ng3 Kg5 49. Kf3 Rd1 50. Ne4+ Kh6 51. Kg2 Re1 52. Kf2
+Rb1 53. Kg2 Re1 54. Ng3 Kg5 55. Kf2 Rc1 56. Kf3 Rd1 57. Nf5 Rf1+ 58. Kg2 Kxg4
+59. Kxf1 Kxf5 60. Kf2 e4 61. h6 Kg6 62. Kg3 Kxh6 63. Kf4 Kg6 64. Kxe4 Kf6 65.
+Kd5 Ke7 66. e4 Kd7 67. e5 Ke7 68. e6 Ke8 69. Ke4 Kf8 70. Kf4 Ke7 71. Kf5 Ke8 72.
+Kf6 Kf8 73. Kg6 Ke7 74. Kf5 Ke8 75. Ke4 Ke7 76. Ke5 Ke8 77. Kd5 Ke7 78. Ke5 Ke8
+79. Kd6 Kd8 80. Kc5 Ke7 81. Kd5 Ke8 82. Kd6 Kd8 83. Kc5 Ke7 84. Kc4 Kxe6 1/2-1/2
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "31"]
+[White "Zenith 0.7.0 tuned enhancements"]
+[Black "Zenith 0.6.0"]
+[Result "0-1"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F32"]
+[OpeningId "2786ec7c641b8e76"]
+[PlyCount "144"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. c4 c5 2. Nc3 Nc6 3. Nf3 Nf6 4. e3 b6 5. Be2 e6 6. O-O Be7 7. Ng5 O-O 8. Re1
+Bb7 9. b3 Qc7 10. Bd3 Nb4 11. Bb1 Bd6 12. f4 Rae8 13. a3 Nc6 14. Nb5 Qb8 15. Bb2
+e5 16. Bf5 g6 17. Bd3 a6 18. Nxd6 Qxd6 19. fxe5 Nxe5 20. Bc2 Neg4 21. g3 h6 22.
+Bxf6 Nxf6 23. Nf3 Ne4 24. Rf1 Re6 25. Qe1 Rf6 26. g4 Re8 27. d4 cxd4 28. exd4
+Rf4 29. h3 Nf6 30. Qc3 Bxf3 31. Rf2 Nxg4 32. hxg4 Qf6 33. Re1 Rxe1+ 34. Qxe1
+Rxg4+ 35. Kf1 Bg2+ 36. Kg1 Be4+ 37. Kf1 Bg2+ 38. Kg1 Be4+ 39. Kf1 Qg5 40. Qxe4
+Rxe4 41. Bxe4 Qc1+ 42. Kg2 f5 43. Bd5+ Kg7 44. a4 Qe3 45. b4 a5 46. b5 h5 47.
+Rf1 Qxd4 48. Re1 Qd2+ 49. Kf1 Kf6 50. Re8 Qd1+ 51. Kf2 Qxa4 52. Rd8 Qc2+ 53. Ke3
+Qc3+ 54. Ke2 Ke7 55. Rg8 f4 56. Kf1 a4 57. Ra8 a3 58. Kg2 Qb2+ 59. Kf3 g5 60.
+Ra7 a2 61. c5 a1=Q 62. Rxa1 Qxa1 63. Kg2 Qb2+ 64. Kf3 Qxb5 65. Ke4 bxc5 66. Kf5
+c4 67. Kxg5 Qxd5+ 68. Kxf4 c3 69. Kg3 c2 70. Kh3 c1=Q 71. Kg3 Qe1+ 72. Kh3 Qdh1#
+0-1
+
+[Event "Zenith paired development match"]
+[Site "Local"]
+[Date "2026.10.24"]
+[Round "32"]
+[White "Zenith 0.6.0"]
+[Black "Zenith 0.7.0 tuned enhancements"]
+[Result "1-0"]
+[TimeControl "-"]
+[MoveTimeMilliseconds "50"]
+[OpeningPlies "8"]
+[OpeningFamily "F32"]
+[OpeningId "2786ec7c641b8e76"]
+[PlyCount "165"]
+[Termination "normal"]
+[TerminationDetails "checkmate"]
+
+{Fixed opening: first 8 plies. Engines use a fixed time per move.}
+1. c4 c5 2. Nc3 Nc6 3. Nf3 Nf6 4. e3 b6 5. Be2 e6 6. O-O Be7 7. d4 O-O 8. d5
+exd5 9. cxd5 Bd6 10. dxc6 dxc6 11. Qc2 Bg4 12. Rd1 Re8 13. h3 Bh5 14. Qd3 Bc7
+15. Qc2 Qe7 16. Qa4 b5 17. Qa6 b4 18. Na4 Rad8 19. Qxc6 Rxd1+ 20. Bxd1 Ne4 21.
+Be2 Rd8 22. b3 Bg6 23. Bb2 a5 24. Bc4 Bh5 25. g4 Bg6 26. Rc1 Rd6 27. Qa8+ Rd8
+28. Qc6 Rd6 29. Qb7 Rd7 30. Qa6 Qd8 31. Kg2 Qb8 32. Qc6 Rd6 33. Qb5 Qxb5 34.
+Bxb5 Rd5 35. Bc6 Rd6 36. Bb7 f6 37. Nxc5 Nxc5 38. Rxc5 Bb6 39. Bd5+ Bf7 40. Rc8+
+Bd8 41. Bxf7+ Kxf7 42. Bd4 Rd7 43. g5 Kg6 44. h4 Rd5 45. Rc6 Kf7 46. e4 Rb5 47.
+e5 fxg5 48. hxg5 Rd5 49. e6+ Ke8 50. Bxg7 Bxg5 51. Bd4 h5 52. Kg3 Bd8 53. Kf4
+Kf8 54. Ke4 Rb5 55. Bc5+ Ke8 56. Rc8 Rb7 57. Ne5 Rc7 58. Rxc7 Bxc7 59. Ng6 Bd8
+60. Kf5 h4 61. Kg4 h3 62. Kxh3 Bf6 63. Kg4 Bd8 64. f4 Bf6 65. f5 Bd8 66. Bd4 a4
+67. bxa4 b3 68. axb3 Bf6 69. Be5 Bxe5 70. Nxe5 Ke7 71. a5 Kd6 72. Kf4 Kc5 73. f6
+Kb4 74. f7 Kxb3 75. a6 Kc3 76. f8=Q Kd2 77. a7 Kc3 78. e7 Kd2 79. e8=Q Ke2 80.
+Qd7 Kf2 81. Qd2+ Kg1 82. Kg3 Kh1 83. Qe1# 1-0
+

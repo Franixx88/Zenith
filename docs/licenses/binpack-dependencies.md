@@ -1,0 +1,48 @@
+# Optional binpack adapter dependencies
+
+Pinned by tools/binpack/Cargo.lock; the adapter is GPL-3.0-only.
+
+- arrayvec 0.7.8: MIT OR Apache-2.0. https://github.com/bluss/arrayvec. Notices: arrayvec-0.7.8-LICENSE-APACHE.txt, arrayvec-0.7.8-LICENSE-MIT.txt.
+- autocfg 1.5.1: Apache-2.0 OR MIT. https://github.com/cuviper/autocfg. Notices: autocfg-1.5.1-LICENSE-APACHE.txt, autocfg-1.5.1-LICENSE-MIT.txt.
+- bitflags 2.13.2: MIT OR Apache-2.0. https://github.com/bitflags/bitflags. Notices: bitflags-2.13.2-LICENSE-APACHE.txt, bitflags-2.13.2-LICENSE-MIT.txt.
+- btoi 0.5.0: MIT OR Apache-2.0. https://github.com/niklasf/rust-btoi. Notices: btoi-0.5.0-LICENSE-APACHE.txt, btoi-0.5.0-LICENSE-MIT.txt.
+- bumpalo 3.20.3: MIT OR Apache-2.0. https://github.com/fitzgen/bumpalo. Notices: bumpalo-3.20.3-LICENSE-APACHE.txt, bumpalo-3.20.3-LICENSE-MIT.txt.
+- byteorder 1.5.0: Unlicense OR MIT. https://github.com/BurntSushi/byteorder. Notices: byteorder-1.5.0-COPYING.txt, byteorder-1.5.0-LICENSE-MIT.txt.
+- cfg-if 1.0.5: MIT OR Apache-2.0. https://github.com/rust-lang/cfg-if. Notices: cfg-if-1.0.5-LICENSE-APACHE.txt, cfg-if-1.0.5-LICENSE-MIT.txt.
+- futures-core 0.3.34: MIT OR Apache-2.0. https://github.com/rust-lang/futures-rs. Notices: futures-core-0.3.34-LICENSE-APACHE.txt, futures-core-0.3.34-LICENSE-MIT.txt.
+- futures-task 0.3.34: MIT OR Apache-2.0. https://github.com/rust-lang/futures-rs. Notices: futures-task-0.3.34-LICENSE-APACHE.txt, futures-task-0.3.34-LICENSE-MIT.txt.
+- futures-util 0.3.34: MIT OR Apache-2.0. https://github.com/rust-lang/futures-rs. Notices: futures-util-0.3.34-LICENSE-APACHE.txt, futures-util-0.3.34-LICENSE-MIT.txt.
+- itoa 1.0.18: MIT OR Apache-2.0. https://github.com/dtolnay/itoa. Notices: itoa-1.0.18-LICENSE-APACHE.txt, itoa-1.0.18-LICENSE-MIT.txt.
+- js-sys 0.3.106: MIT OR Apache-2.0. https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys. Notices: js-sys-0.3.106-LICENSE-APACHE.txt, js-sys-0.3.106-LICENSE-MIT.txt.
+- libc 0.2.191: MIT OR Apache-2.0. https://github.com/rust-lang/libc. Notices: libc-0.2.191-LICENSE-APACHE.txt, libc-0.2.191-LICENSE-MIT.txt.
+- memchr 2.8.3: Unlicense OR MIT. https://github.com/BurntSushi/memchr. Notices: memchr-2.8.3-COPYING.txt, memchr-2.8.3-LICENSE-MIT.txt.
+- nohash-hasher 0.2.0: Apache-2.0 OR MIT. https://github.com/paritytech/nohash-hasher. Notices: nohash-hasher-0.2.0-LICENSE-APACHE.txt, nohash-hasher-0.2.0-LICENSE-MIT.txt.
+- num-traits 0.2.19: MIT OR Apache-2.0. https://github.com/rust-num/num-traits. Notices: num-traits-0.2.19-LICENSE-APACHE.txt, num-traits-0.2.19-LICENSE-MIT.txt.
+- once_cell 1.21.4: MIT OR Apache-2.0. https://github.com/matklad/once_cell. Notices: once_cell-1.21.4-LICENSE-APACHE.txt, once_cell-1.21.4-LICENSE-MIT.txt.
+- pin-project-lite 0.2.17: Apache-2.0 OR MIT. https://github.com/taiki-e/pin-project-lite. Notices: pin-project-lite-0.2.17-LICENSE-APACHE.txt, pin-project-lite-0.2.17-LICENSE-MIT.txt.
+- proc-macro2 1.0.107: MIT OR Apache-2.0. https://github.com/dtolnay/proc-macro2. Notices: proc-macro2-1.0.107-LICENSE-APACHE.txt, proc-macro2-1.0.107-LICENSE-MIT.txt.
+- quote 1.0.47: MIT OR Apache-2.0. https://github.com/dtolnay/quote. Notices: quote-1.0.47-LICENSE-APACHE.txt, quote-1.0.47-LICENSE-MIT.txt.
+- raw-cpuid 11.6.0: MIT. https://github.com/gz/rust-cpuid. Notices: raw-cpuid-11.6.0-LICENSE.md.txt.
+- rustc-hash 2.1.3: Apache-2.0 OR MIT. https://github.com/rust-lang/rustc-hash. Notices: rustc-hash-2.1.3-LICENSE-APACHE.txt, rustc-hash-2.1.3-LICENSE-MIT.txt.
+- rustversion 1.0.23: MIT OR Apache-2.0. https://github.com/dtolnay/rustversion. Notices: rustversion-1.0.23-LICENSE-APACHE.txt, rustversion-1.0.23-LICENSE-MIT.txt.
+- serde 1.0.228: MIT OR Apache-2.0. https://github.com/serde-rs/serde. Notices: serde-1.0.228-LICENSE-APACHE.txt, serde-1.0.228-LICENSE-MIT.txt.
+- serde_core 1.0.228: MIT OR Apache-2.0. https://github.com/serde-rs/serde. Notices: serde_core-1.0.228-LICENSE-APACHE.txt, serde_core-1.0.228-LICENSE-MIT.txt.
+- serde_derive 1.0.228: MIT OR Apache-2.0. https://github.com/serde-rs/serde. Notices: serde_derive-1.0.228-LICENSE-APACHE.txt, serde_derive-1.0.228-LICENSE-MIT.txt.
+- serde_json 1.0.149: MIT OR Apache-2.0. https://github.com/serde-rs/json. Notices: serde_json-1.0.149-LICENSE-APACHE.txt, serde_json-1.0.149-LICENSE-MIT.txt.
+- sfbinpack 0.6.5: GPL-3.0. https://github.com/Disservin/binpack-rust. Notices: sfbinpack-0.6.5-LICENSE.txt.
+- shakmaty 0.30.2: GPL-3.0-or-later. https://github.com/niklasf/shakmaty. Notices: GPL license in root LICENSE; no separate file in crate archive.
+- shakmaty-syzygy 0.28.1: GPL-3.0-or-later. https://github.com/niklasf/shakmaty. Notices: GPL license in root LICENSE; no separate file in crate archive.
+- slab 0.4.12: MIT. https://github.com/tokio-rs/slab. Notices: slab-0.4.12-LICENSE.txt.
+- syn 2.0.119: MIT OR Apache-2.0. https://github.com/dtolnay/syn. Notices: syn-2.0.119-LICENSE-APACHE.txt, syn-2.0.119-LICENSE-MIT.txt.
+- syn 3.0.9: MIT OR Apache-2.0. https://github.com/dtolnay/syn. Notices: syn-3.0.9-LICENSE-APACHE.txt, syn-3.0.9-LICENSE-MIT.txt.
+- thiserror 2.0.21: MIT OR Apache-2.0. https://github.com/dtolnay/thiserror. Notices: thiserror-2.0.21-LICENSE-APACHE.txt, thiserror-2.0.21-LICENSE-MIT.txt.
+- thiserror-impl 2.0.21: MIT OR Apache-2.0. https://github.com/dtolnay/thiserror. Notices: thiserror-impl-2.0.21-LICENSE-APACHE.txt, thiserror-impl-2.0.21-LICENSE-MIT.txt.
+- tracing 0.1.44: MIT. https://github.com/tokio-rs/tracing. Notices: tracing-0.1.44-LICENSE.txt.
+- tracing-attributes 0.1.31: MIT. https://github.com/tokio-rs/tracing. Notices: tracing-attributes-0.1.31-LICENSE.txt.
+- tracing-core 0.1.36: MIT. https://github.com/tokio-rs/tracing. Notices: tracing-core-0.1.36-LICENSE.txt.
+- unicode-ident 1.0.27: (MIT OR Apache-2.0) AND Unicode-3.0. https://github.com/dtolnay/unicode-ident. Notices: unicode-ident-1.0.27-LICENSE-APACHE.txt, unicode-ident-1.0.27-LICENSE-MIT.txt, unicode-ident-1.0.27-LICENSE-UNICODE.txt.
+- wasm-bindgen 0.2.129: MIT OR Apache-2.0. https://github.com/wasm-bindgen/wasm-bindgen. Notices: wasm-bindgen-0.2.129-LICENSE-APACHE.txt, wasm-bindgen-0.2.129-LICENSE-MIT.txt.
+- wasm-bindgen-macro 0.2.129: MIT OR Apache-2.0. https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro. Notices: wasm-bindgen-macro-0.2.129-LICENSE-APACHE.txt, wasm-bindgen-macro-0.2.129-LICENSE-MIT.txt.
+- wasm-bindgen-macro-support 0.2.129: MIT OR Apache-2.0. https://github.com/wasm-bindgen/wasm-bindgen/tree/main/crates/macro-support. Notices: wasm-bindgen-macro-support-0.2.129-LICENSE-APACHE.txt, wasm-bindgen-macro-support-0.2.129-LICENSE-MIT.txt.
+- wasm-bindgen-shared 0.2.129: MIT OR Apache-2.0. https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared. Notices: wasm-bindgen-shared-0.2.129-LICENSE-APACHE.txt, wasm-bindgen-shared-0.2.129-LICENSE-MIT.txt.
+- zmij 1.0.23: MIT. https://github.com/dtolnay/zmij. Notices: zmij-1.0.23-LICENSE-MIT.txt.

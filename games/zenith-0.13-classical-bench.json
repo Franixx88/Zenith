@@ -1,0 +1,97 @@
+{
+  "binaries": {
+    "baseline": {
+      "path": "target\\baselines\\zenith-0.12.1.exe",
+      "sha256": "5f7b4d3601cec53ff9761e747dab10f4ebdcaf239a5a77331a411c8381912a72"
+    },
+    "candidate": {
+      "path": "target\\candidates\\zenith-0.13.0-nnue.exe",
+      "sha256": "cbcd7f5f797005d39e523178ae5d387d26106311778e542dcaf951cb910ba6d4"
+    }
+  },
+  "parity": [
+    {
+      "args": [
+        "6"
+      ],
+      "nodes": 128490,
+      "identical": true
+    },
+    {
+      "args": [
+        "7"
+      ],
+      "nodes": 291901,
+      "identical": true
+    },
+    {
+      "args": [
+        "6",
+        "--classic"
+      ],
+      "nodes": 364409,
+      "identical": true
+    },
+    {
+      "args": [
+        "6",
+        "--no-see"
+      ],
+      "nodes": 102856,
+      "identical": true
+    },
+    {
+      "args": [
+        "6",
+        "--history"
+      ],
+      "nodes": 121900,
+      "identical": true
+    },
+    {
+      "args": [
+        "4",
+        "--no-pruning",
+        "--no-lmr",
+        "--no-enhancements",
+        "--classic"
+      ],
+      "nodes": 113500,
+      "identical": true
+    }
+  ],
+  "times_us": {
+    "baseline": [
+      919272,
+      939905,
+      935326,
+      1030791,
+      917616,
+      943322,
+      951312,
+      969957,
+      1366743
+    ],
+    "candidate": [
+      959721,
+      928186,
+      937086,
+      1097966,
+      1066715,
+      923531,
+      949685,
+      914038,
+      1033686
+    ]
+  },
+  "warmups": 1,
+  "repetitions": 9,
+  "timing_depth": 8,
+  "timing_nodes": 502651,
+  "median_us": {
+    "baseline": 943322,
+    "candidate": 949685
+  },
+  "nps_ratio": 0.9932998836456298,
+  "time_reduction_percent": -0.6745310721047559
+}

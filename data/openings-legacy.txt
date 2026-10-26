@@ -1,0 +1,9 @@
+# Original eight opening seeds from Zenith 0.6.0, six fixed plies.
+L01|e2e4 e7e5 g1f3 b8c6 f1b5 a7a6
+L02|d2d4 d7d5 c2c4 e7e6 b1c3 g8f6
+L03|e2e4 c7c5 g1f3 d7d6 d2d4 c5d4
+L04|c2c4 e7e5 b1c3 g8f6 g2g3 d7d5
+L05|e2e4 c7c6 d2d4 d7d5 b1c3 d5e4
+L06|e2e4 e7e6 d2d4 d7d5 b1c3 g8f6
+L07|d2d4 g8f6 c2c4 g7g6 b1c3 f8g7
+L08|e2e4 d7d6 d2d4 g8f6 b1c3 g7g6

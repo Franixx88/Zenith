@@ -1,0 +1,62 @@
+[
+  {
+    "file": "KQvK.rtbw",
+    "bytes": 272,
+    "sha256": "517667DFF787162DBB1ED9D5D6484D30EE854E686EE0675C08D99ECF045D2D50",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-wdl/KQvK.rtbw"
+  },
+  {
+    "file": "KQvK.rtbz",
+    "bytes": 5392,
+    "sha256": "71EA9444FA5BD42897D781A0C356975EA6F23E0F65A4254E470897031C161C8C",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-dtz/KQvK.rtbz"
+  },
+  {
+    "file": "KRvK.rtbw",
+    "bytes": 208,
+    "sha256": "386FBDE73308E49A4207836922C68B30B664E83C5A37F7FA37305A15CD16F2F1",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-wdl/KRvK.rtbw"
+  },
+  {
+    "file": "KRvK.rtbz",
+    "bytes": 7632,
+    "sha256": "CAB59F42E75C2A25DA3939231850A79FA838593FFF5C28D7772DA92062ED965A",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-dtz/KRvK.rtbz"
+  },
+  {
+    "file": "KBvK.rtbw",
+    "bytes": 80,
+    "sha256": "BC0D8AB3560DE9038460F0E8F61E3B7EFD3E3D0327D19AE0387C0DA7DDEB244D",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-wdl/KBvK.rtbw"
+  },
+  {
+    "file": "KBvK.rtbz",
+    "bytes": 80,
+    "sha256": "6246C8A5C643EEC9D4758D55ED843E31CC28A9B82A6F630C1C950D8B7755975B",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-dtz/KBvK.rtbz"
+  },
+  {
+    "file": "KNvK.rtbw",
+    "bytes": 80,
+    "sha256": "9D3518B12DF3D2006441DF758BCE31E961346E70A11920AAAD75C647003BB6E7",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-wdl/KNvK.rtbw"
+  },
+  {
+    "file": "KNvK.rtbz",
+    "bytes": 80,
+    "sha256": "0E49A0F2810A131C32FC14872E83044AA9810CE2C86DF071851512077291FC25",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-dtz/KNvK.rtbz"
+  },
+  {
+    "file": "KPvK.rtbw",
+    "bytes": 7824,
+    "sha256": "02FD2BDCD92821C869458F019F63524DEF1C9E7A2862CA8D2B16DC7712B16183",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-wdl/KPvK.rtbw"
+  },
+  {
+    "file": "KPvK.rtbz",
+    "bytes": 4176,
+    "sha256": "AD01AF2076183C90CCEE662CA6C5D74DA3222FF1FEE47C01B5D4E56ED01938DE",
+    "source": "https://tablebase.lichess.ovh/tables/standard/3-4-5-dtz/KPvK.rtbz"
+  }
+]

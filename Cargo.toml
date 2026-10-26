@@ -1,0 +1,31 @@
+[package]
+name = "zenith"
+version = "0.13.0"
+edition = "2024"
+description = "A Rust chess engine with a tested rules core and UCI interface"
+publish = false
+license = "GPL-3.0-or-later"
+
+[dependencies]
+arrayvec = "=0.7.8"
+shakmaty = "=0.30.2"
+shakmaty-syzygy = "=0.28.1"
+
+[lib]
+name = "zenith"
+path = "src/lib.rs"
+
+[[bin]]
+name = "zenith"
+path = "src/main.rs"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[lints.rust]
+unsafe_code = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+all = "warn"
