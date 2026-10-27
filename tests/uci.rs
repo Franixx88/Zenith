@@ -47,7 +47,21 @@ impl NeuralFiles {
         }
         p.output_weights[0] = 64;
         p.output_weights[nnue::HIDDEN] = -64;
-        let network = Network::new(p).unwrap();
+        let network = if buckets == 16 {
+            let mut p = nnue::v3::Parameters::default();
+            p.feature_bias.fill(128);
+            for (i, w) in p.feature_weights.iter_mut().enumerate() {
+                *w = (i % 7) as i16 - 3;
+            }
+            for head in &mut p.heads {
+                head.l1_weights[0] = 64;
+                head.l2_weights[0] = 64;
+                head.output_weights[0] = 64;
+            }
+            Network::new_v3(p).unwrap()
+        } else {
+            Network::new(p).unwrap()
+        };
         network.save(&model).unwrap();
         let mut bytes = network.to_bytes();
         bytes[64] ^= 1;
@@ -581,6 +595,7 @@ fn nnue_file_loading_search_switches_and_hash_resets_are_atomic() {
 fn nnue_smp_multipv_and_failed_load_during_search_remain_responsive() {
     check_neural_smp(1);
     check_neural_smp(4);
+    check_neural_smp(16);
 }
 
 fn check_neural_smp(buckets: usize) {
@@ -656,7 +671,7 @@ fn check_neural_smp(buckets: usize) {
         .iter()
         .position(|&word| word == "nnue_bucket_refreshes")
         .unwrap();
-    assert_eq!(words[count + 1].parse::<u64>().unwrap() > 0, buckets == 4);
+    assert_eq!(words[count + 1].parse::<u64>().unwrap() > 0, buckets > 1);
     let _ = engine.bestmove();
     engine.quit();
 }

@@ -1,11 +1,12 @@
-//! Zenith NNUE v1/v2: shared 768 -> 256 feature transformer, two perspectives,
-//! clipped ReLU and a 512 -> 1 output. Scalar reference and runtime AVX2 backend.
-//! Search can load a validated v1 model; no trained network is bundled.
+//! Zenith NNUE: legacy 256-lane v1/v2 and mirrored, layered 512-lane v3.
+//! Two perspectives, scalar reference and runtime AVX2 integer inference.
+//! Search can load validated models; no trained network is bundled.
 //! Without an EvalFile the playing evaluator remains classical.
 
 use crate::board::{Board, Color, Piece};
 
 mod format;
+pub mod v3;
 // Audited pointer intrinsics are confined to this private implementation module.
 #[allow(unsafe_code)]
 mod kernels;
@@ -160,6 +161,7 @@ pub struct Network {
     parameters: Parameters,
     backend: Backend,
     king_buckets: usize,
+    v3: Option<Box<v3::Parameters>>,
 }
 
 impl Network {
@@ -199,6 +201,7 @@ impl Network {
         }
         Ok(Self {
             parameters,
+            v3: None,
             king_buckets,
             backend: if Backend::Avx2.available() {
                 Backend::Avx2
@@ -215,14 +218,18 @@ impl Network {
         self.king_buckets
     }
     pub fn format_version(&self) -> u32 {
-        if self.king_buckets == 1 {
+        if self.v3.is_some() {
+            3
+        } else if self.king_buckets == 1 {
             FORMAT_VERSION
         } else {
             FORMAT_VERSION_V2
         }
     }
     pub fn file_bytes(&self) -> usize {
-        if self.king_buckets == 1 {
+        if self.v3.is_some() {
+            v3::FILE_BYTES
+        } else if self.king_buckets == 1 {
             FILE_BYTES
         } else {
             V2_FILE_BYTES
@@ -246,11 +253,50 @@ impl Network {
     }
 
     pub fn parameters(&self) -> &Parameters {
+        assert!(self.v3.is_none(), "use v3_parameters for a v3 model");
         &self.parameters
     }
 
+    pub fn v3_parameters(&self) -> Option<&v3::Parameters> {
+        self.v3.as_deref()
+    }
+    pub fn hidden_size(&self) -> usize {
+        if self.v3.is_some() {
+            v3::HIDDEN
+        } else {
+            HIDDEN
+        }
+    }
+    pub fn new_v3(parameters: v3::Parameters) -> Result<Self, String> {
+        parameters.validate()?;
+        Ok(Self {
+            parameters: Parameters {
+                feature_bias: [0; HIDDEN],
+                feature_weights: Vec::new(),
+                output_weights: [0; HIDDEN * 2],
+                output_bias: 0,
+            },
+            backend: if Backend::Avx2.available() {
+                Backend::Avx2
+            } else {
+                Backend::Scalar
+            },
+            king_buckets: v3::BANKS,
+            v3: Some(Box::new(parameters)),
+        })
+    }
+
     pub fn accumulator(&self, board: &Board) -> Accumulator<'_> {
-        let mut accumulator = Accumulator {
+        if let Some(p) = &self.v3 {
+            Accumulator::V3(p.accumulator(board, self.backend))
+        } else {
+            Accumulator::Legacy(self.legacy_accumulator(board))
+        }
+    }
+
+    pub(crate) fn legacy_accumulator(&self, board: &Board) -> LegacyAccumulator<'_> {
+        assert!(self.v3.is_none());
+        let mut accumulator = LegacyAccumulator {
             network: self,
             board: *board,
             sums: [self.parameters.feature_bias; 2],
@@ -270,6 +316,9 @@ impl Network {
     }
 
     pub fn raw_reference(&self, board: &Board) -> i64 {
+        if let Some(p) = &self.v3 {
+            return p.raw_reference(board);
+        }
         let mut raw = i64::from(self.parameters.output_bias);
         for (half, perspective) in [board.side_to_move, board.side_to_move.other()]
             .into_iter()
@@ -316,7 +365,7 @@ pub struct FeatureChanges {
 /// Exact unclipped sums for both colors plus their board snapshot. Clone before
 /// exploring a child, or update back to a parent board to undo. No heap storage.
 #[derive(Clone)]
-pub struct Accumulator<'net> {
+pub struct LegacyAccumulator<'net> {
     network: &'net Network,
     board: Board,
     sums: [[i16; HIDDEN]; 2],
@@ -324,7 +373,7 @@ pub struct Accumulator<'net> {
     bucket_refreshes: u32,
 }
 
-impl Accumulator<'_> {
+impl LegacyAccumulator<'_> {
     pub fn board(&self) -> &Board {
         &self.board
     }
@@ -434,6 +483,53 @@ impl Accumulator<'_> {
     /// Draw/mate adjudication and the fifty-move rule belong to search.
     pub fn evaluate(&self) -> i32 {
         score_from_raw(self.raw_score())
+    }
+}
+
+/// Public arithmetic harness interface. Search keeps separately typed frame
+/// vectors so v1/v2 do not copy the wider v3 buffers on every search node.
+#[derive(Clone)]
+#[allow(clippy::large_enum_variant)] // Harness only; search stores separately typed, allocation-free frames.
+pub enum Accumulator<'net> {
+    Legacy(LegacyAccumulator<'net>),
+    V3(v3::V3Accumulator<'net>),
+}
+impl Accumulator<'_> {
+    pub fn board(&self) -> &Board {
+        match self {
+            Self::Legacy(a) => a.board(),
+            Self::V3(a) => a.board(),
+        }
+    }
+    pub fn lanes(&self, p: Color) -> &[i16] {
+        match self {
+            Self::Legacy(a) => a.lanes(p),
+            Self::V3(a) => a.lanes(p),
+        }
+    }
+    pub fn bucket_refreshes(&self) -> u32 {
+        match self {
+            Self::Legacy(a) => a.bucket_refreshes(),
+            Self::V3(a) => a.bucket_refreshes(),
+        }
+    }
+    pub fn update(&mut self, board: &Board) -> FeatureChanges {
+        match self {
+            Self::Legacy(a) => a.update(board),
+            Self::V3(a) => a.update(board),
+        }
+    }
+    pub fn raw_score(&self) -> i64 {
+        match self {
+            Self::Legacy(a) => a.raw_score(),
+            Self::V3(a) => a.raw_score(),
+        }
+    }
+    pub fn evaluate(&self) -> i32 {
+        match self {
+            Self::Legacy(a) => a.evaluate(),
+            Self::V3(a) => a.evaluate(),
+        }
     }
 }
 

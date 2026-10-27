@@ -57,6 +57,7 @@ struct Engine {
     pruning: bool,
     enhancements: bool,
     modern: bool,
+    context_histories: bool,
     singular: bool,
     smp_voting: bool,
     parameters: SearchParameters,
@@ -100,6 +101,7 @@ impl Engine {
             pruning: true,
             enhancements: true,
             modern: DEFAULT_MODERN_SEARCH,
+            context_histories: false,
             singular: DEFAULT_SINGULAR,
             smp_voting: DEFAULT_SMP_VOTING,
             parameters: SearchParameters::default(),
@@ -118,6 +120,7 @@ impl Engine {
         search.set_pruning(self.pruning);
         search.set_enhancements(self.enhancements);
         search.set_modern_search(self.modern);
+        search.set_context_histories(self.context_histories);
         search.set_singular_extensions(self.singular);
         search.set_smp_voting(self.smp_voting);
         search
@@ -376,6 +379,18 @@ impl Engine {
                     .expect("idle search")
                     .set_modern_search(enabled);
             }
+            "context histories" => {
+                let enabled = value
+                    .to_ascii_lowercase()
+                    .parse::<bool>()
+                    .map_err(|_| "Context Histories must be true or false")?;
+                self.stop_search();
+                self.context_histories = enabled;
+                self.search
+                    .as_mut()
+                    .expect("idle search")
+                    .set_context_histories(enabled);
+            }
             "singular extensions" | "smp voting" => {
                 let enabled = value
                     .to_ascii_lowercase()
@@ -505,6 +520,7 @@ impl Engine {
                 ));
                 emit("option name Selective Pruning type check default true");
                 emit("option name Search Enhancements type check default true");
+                emit("option name Context Histories type check default false");
                 emit(&format!(
                     "option name Modern Search type check default {DEFAULT_MODERN_SEARCH}"
                 ));
@@ -785,6 +801,7 @@ mod tests {
             "setoption name Threads value 1",
             "setoption name Singular Extensions value true",
             "setoption name SMP Voting value true",
+            "setoption name Context Histories value true",
             "setoption name RFP Margin value 100",
             "setoption name Futility Margin value 140",
             "setoption name NMP Base Reduction value 4",
@@ -797,6 +814,7 @@ mod tests {
         for command in [
             "setoption name Singular Extensions value maybe",
             "setoption name SMP Voting value yes",
+            "setoption name Context Histories value yes",
             "setoption name RFP Margin value 0",
             "setoption name Futility Margin value 301",
             "setoption name NMP Base Reduction value 65535",
@@ -805,6 +823,7 @@ mod tests {
             assert!(engine.command(command).is_err(), "{command}");
         }
         assert!(engine.singular && engine.smp_voting);
+        assert!(engine.context_histories);
         assert_eq!(
             engine.parameters,
             SearchParameters {
@@ -817,6 +836,7 @@ mod tests {
         let mut reference = Search::new(1);
         reference.set_singular_extensions(true);
         reference.set_smp_voting(true);
+        reference.set_context_histories(true);
         reference.set_parameters(engine.parameters).unwrap();
         let limits = Limits {
             depth: Some(5),

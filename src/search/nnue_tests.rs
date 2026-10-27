@@ -278,3 +278,50 @@ fn lazy_frames_handle_special_moves_skipped_parents_and_sibling_reuse() {
         }
     }
 }
+
+#[test]
+fn v3_lazy_frames_match_refresh_tree_with_context_histories_and_mirror_changes() {
+    let mut p = nnue::v3::Parameters::default();
+    p.feature_bias.fill(128);
+    for (i, w) in p.feature_weights.iter_mut().enumerate() {
+        *w = (((i * 17) ^ (i >> 9)) % 17) as i16 - 8;
+    }
+    for h in &mut p.heads {
+        for (i, w) in h.l1_weights.iter_mut().enumerate() {
+            *w = (i % 19) as i16 - 9;
+        }
+        h.l1_bias.fill(6000);
+        h.l2_weights[0] = 64;
+        h.output_weights[0] = 64;
+    }
+    let network = Arc::new(Network::new_v3(p).unwrap());
+    for fen in [
+        crate::bench::POSITIONS[1].1,
+        "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
+    ] {
+        let board = Board::from_fen(fen).unwrap();
+        let mut a = Search::new(1);
+        let mut b = Search::new(1);
+        for search in [&mut a, &mut b] {
+            search.set_network(Some(network.clone()));
+            search.set_context_histories(true);
+        }
+        b.reference_nnue = true;
+        let a = run(&mut a, board, 4, 4000);
+        let b = run(&mut b, board, 4, 4000);
+        assert_eq!(
+            (a.score, a.best_move, a.nodes, a.pv),
+            (b.score, b.best_move, b.nodes, b.pv)
+        );
+    }
+    let root = Board::from_fen("7k/8/8/8/8/8/8/3K4 w - - 0 1").unwrap();
+    let child = root.make_move(root.parse_uci_move("d1e1").unwrap());
+    let mut stack = NnueStack::new(&network, &root);
+    stack.enter(&child, 1);
+    if let Some(null) = child.null_move() {
+        stack.enter(&null, 2);
+        assert_eq!(stack.evaluate(2), network.evaluate_reference(&null));
+    }
+    assert_eq!(stack.evaluate(1), network.evaluate_reference(&child));
+    assert_eq!(stack.evaluate(0), network.evaluate_reference(&root));
+}

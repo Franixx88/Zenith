@@ -1,14 +1,57 @@
 //! All architecture-specific unsafe operations are confined here. Runtime AVX2
 //! detection guards each entry. Loads/stores are unaligned and always 16 i16s
-//! within fixed 256-lane arrays. Validated model bounds keep intermediate sums
+//! within validated slices whose lengths are multiples of 16. Model bounds keep FT sums
 //! within +/-20480; output pairwise i32 sums and horizontal sums cannot overflow.
-use super::{Backend, HIDDEN, QA};
+use super::{Backend, QA};
 
-pub(super) fn update(backend: Backend, sums: &mut [i16; HIDDEN], weights: &[i16], adding: bool) {
-    let weights: &[i16; HIDDEN] = weights.try_into().expect("256 weights");
+/// Pair matching halves into 256 unsigned clipped products divided by 255.
+pub(super) fn pair(backend: Backend, sums: &[i16; 512], output: &mut [i16; 256]) {
     #[cfg(target_arch = "x86_64")]
     if backend == Backend::Avx2 && std::is_x86_feature_detected!("avx2") {
-        // SAFETY: CPU/OS support checked above, lengths guaranteed by array types.
+        // SAFETY: CPU support checked; all fixed-size loads/stores are in bounds.
+        unsafe { avx2_pair(sums, output) };
+        return;
+    }
+    let _ = backend;
+    for (i, value) in output.iter_mut().enumerate() {
+        *value =
+            (i32::from(sums[i]).clamp(0, QA) * i32::from(sums[i + 256]).clamp(0, QA) / QA) as i16;
+    }
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn avx2_pair(sums: &[i16; 512], output: &mut [i16; 256]) {
+    use std::arch::x86_64::*;
+    for i in (0..256).step_by(16) {
+        // SAFETY: i+16<=256 and i+256+16<=512; unaligned loads/stores are supported.
+        unsafe {
+            let a = _mm256_loadu_si256(sums.as_ptr().add(i).cast());
+            let b = _mm256_loadu_si256(sums.as_ptr().add(i + 256).cast());
+            let zero = _mm256_setzero_si256();
+            let max = _mm256_set1_epi16(255);
+            let a = _mm256_min_epi16(_mm256_max_epi16(a, zero), max);
+            let b = _mm256_min_epi16(_mm256_max_epi16(b, zero), max);
+            let product = _mm256_mullo_epi16(a, b);
+            // Exact unsigned floor(x/255) for 0<=x<=65025; sum<=65280 fits u16.
+            let adjusted = _mm256_add_epi16(
+                _mm256_add_epi16(product, _mm256_set1_epi16(1)),
+                _mm256_srli_epi16::<8>(product),
+            );
+            _mm256_storeu_si256(
+                output.as_mut_ptr().add(i).cast(),
+                _mm256_srli_epi16::<8>(adjusted),
+            );
+        }
+    }
+}
+
+pub(super) fn update(backend: Backend, sums: &mut [i16], weights: &[i16], adding: bool) {
+    assert_eq!(sums.len(), weights.len());
+    assert!([256, 512].contains(&sums.len()));
+    #[cfg(target_arch = "x86_64")]
+    if backend == Backend::Avx2 && std::is_x86_feature_detected!("avx2") {
+        // SAFETY: CPU/OS support checked above; equal validated lengths are multiples of 16.
         unsafe { avx2_update(sums, weights, adding) };
         return;
     }
@@ -17,11 +60,12 @@ pub(super) fn update(backend: Backend, sums: &mut [i16; HIDDEN], weights: &[i16]
         *sum = if adding { *sum + weight } else { *sum - weight };
     }
 }
-pub(super) fn output(backend: Backend, sums: &[i16; HIDDEN], weights: &[i16]) -> i64 {
-    let weights: &[i16; HIDDEN] = weights.try_into().expect("256 output weights");
+pub(super) fn output(backend: Backend, sums: &[i16], weights: &[i16]) -> i64 {
+    assert_eq!(sums.len(), weights.len());
+    assert!([16, 32, 256, 512].contains(&sums.len()));
     #[cfg(target_arch = "x86_64")]
     if backend == Backend::Avx2 && std::is_x86_feature_detected!("avx2") {
-        // SAFETY: CPU/OS support checked above, exactly 256 lanes in both arrays.
+        // SAFETY: CPU/OS support checked above; equal validated lengths are multiples of 16.
         return unsafe { avx2_output(sums, weights) };
     }
     let _ = backend;
@@ -33,10 +77,10 @@ pub(super) fn output(backend: Backend, sums: &[i16; HIDDEN], weights: &[i16]) ->
 
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "avx2")]
-unsafe fn avx2_update(sums: &mut [i16; HIDDEN], weights: &[i16; HIDDEN], adding: bool) {
+unsafe fn avx2_update(sums: &mut [i16], weights: &[i16], adding: bool) {
     use std::arch::x86_64::*;
-    for index in (0..HIDDEN).step_by(16) {
-        // SAFETY: index<=240; both 32-byte ranges lie inside their arrays.
+    for index in (0..sums.len()).step_by(16) {
+        // SAFETY: index + 16 <= len; both 32-byte ranges lie inside the slices.
         unsafe {
             let a = _mm256_loadu_si256(sums.as_ptr().add(index).cast());
             let b = _mm256_loadu_si256(weights.as_ptr().add(index).cast());
@@ -51,11 +95,11 @@ unsafe fn avx2_update(sums: &mut [i16; HIDDEN], weights: &[i16; HIDDEN], adding:
 }
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "avx2")]
-unsafe fn avx2_output(sums: &[i16; HIDDEN], weights: &[i16; HIDDEN]) -> i64 {
+unsafe fn avx2_output(sums: &[i16], weights: &[i16]) -> i64 {
     use std::arch::x86_64::*;
     let mut total = _mm256_setzero_si256();
-    for index in (0..HIDDEN).step_by(16) {
-        // SAFETY: index<=240; both 32-byte loads lie inside their arrays.
+    for index in (0..sums.len()).step_by(16) {
+        // SAFETY: index + 16 <= len; both 32-byte loads lie inside the slices.
         unsafe {
             let input = _mm256_loadu_si256(sums.as_ptr().add(index).cast());
             let clipped = _mm256_min_epi16(
@@ -70,4 +114,37 @@ unsafe fn avx2_output(sums: &[i16; HIDDEN], weights: &[i16; HIDDEN]) -> i64 {
     // SAFETY: lanes provides exactly 32 writable bytes; no alignment required.
     unsafe { _mm256_storeu_si256(lanes.as_mut_ptr().cast(), total) };
     lanes.into_iter().map(i64::from).sum()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn pair_products_are_exact_for_every_clipped_input_combination() {
+        let mut input = [0i16; 512];
+        let mut output = [0i16; 256];
+        for a in 0..=255 {
+            input[..256].fill(a);
+            for (b, v) in input[256..].iter_mut().enumerate() {
+                *v = b as i16;
+            }
+            for backend in [Backend::Scalar, Backend::Avx2] {
+                if !backend.available() {
+                    continue;
+                }
+                pair(backend, &input, &mut output);
+                for (b, &v) in output.iter().enumerate() {
+                    assert_eq!(i32::from(v), i32::from(a) * b as i32 / 255);
+                }
+            }
+        }
+        input[..256].fill(i16::MIN);
+        input[256..].fill(i16::MAX);
+        pair(Backend::Scalar, &input, &mut output);
+        assert_eq!(output, [0; 256]);
+        if Backend::Avx2.available() {
+            pair(Backend::Avx2, &input, &mut output);
+            assert_eq!(output, [0; 256]);
+        }
+    }
 }

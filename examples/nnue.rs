@@ -38,6 +38,10 @@ fn run() -> Result<(), String> {
     }
     eprintln!("NNUE backend: {:?}; accumulator lanes: i16", net.backend());
     match command.as_str() {
+        "inspect" if args.len() == 2 && net.format_version() == 3 => println!(
+            "Zenith NNUE v3: 16 king banks x 768 -> 512; mirrored pairwise -> 512 -> 16 -> 32 -> 1; 8 output heads; {} bytes; QA=255 QB=64 CP=400",
+            net.file_bytes()
+        ),
         "inspect" if args.len() == 2 => println!(
             "Zenith NNUE v{}: {} king banks x 768 -> 256 x 2 -> 1; CReLU; {} bytes; QA=255 QB=64 CP=400; validated (training provenance must be supplied separately)",
             net.format_version(),

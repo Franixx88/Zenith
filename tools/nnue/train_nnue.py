@@ -35,6 +35,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import nn
+import v3_model
 from records import RECORD, check_records, record_count, sample_records, shuffled_batches, dataset_identity
 
 INPUTS, HIDDEN = 768, 256
@@ -113,6 +114,11 @@ class Net(nn.Module):
 
 def initialize_from_checkpoint(model, initial):
     """Copy v1 banks exactly into v2; optimizer/schedule intentionally reset."""
+    if getattr(model, "architecture", None) == "v3":
+        if initial.get("contract", {}).get("architecture") != "v3":
+            raise ValueError("v3 requires v3 weights; legacy mirroring/pairwise cannot be warm-started exactly")
+        model.load_state_dict(initial["model"])
+        return
     state = dict(initial["model"])
     shape = tuple(state["ft.weight"].shape)
     if shape == (HIDDEN, INPUTS) and model.king_buckets == KING_BUCKETS:
@@ -140,6 +146,8 @@ def _round_away(values, scale, bound, name):
 
 
 def quantize(model):
+    if getattr(model, "architecture", None) == "v3":
+        return v3_model.quantize(model)
     ft_w = model.ft.weight.detach().cpu().numpy().astype(np.float32).T  # feature-major
     return {
         "ft_b": _round_away(model.ft.bias.detach().cpu().numpy(), QA, MAX_FT_B, "ft bias"),
@@ -153,6 +161,8 @@ def quantize(model):
 
 def quantized_cp(q, x_stm, x_opp):
     """Exact integer arithmetic of the Rust engine (float64 is exact at these magnitudes)."""
+    if q.get("version") == 3:
+        return v3_model.quantized_cp(q, x_stm, x_opp)
     dev = x_stm.device
     ft_w = torch.as_tensor(q["ft_w"], dtype=torch.float64, device=dev)
     buckets = ft_w.shape[0] // INPUTS
@@ -176,6 +186,8 @@ def fnv1a64(data):
 
 
 def to_bytes(q):
+    if q.get("version") == 3:
+        return v3_model.to_bytes(q)
     buckets = q["ft_w"].shape[0] // INPUTS
     if buckets not in (1, KING_BUCKETS) or q["ft_w"].shape != (buckets * INPUTS, HIDDEN):
         raise ValueError("unsupported NNUE feature dimensions")
@@ -245,6 +257,13 @@ def prefetch(generator, depth=6):
 
 
 # ----------------------------------------------------------------- evaluation
+def prediction(model, x, xo, scale):
+    # Preserve the exact v1/v2 operation order for existing resume contracts.
+    logits = (model.forward_cp(x, xo) / scale if getattr(model, "architecture", None) == "v3"
+              else model(x, xo) * (CP_SCALE / scale))
+    return torch.sigmoid(logits)
+
+
 @torch.no_grad()
 def validate(model, val, scale, device, inv, chunk=4096):
     if len(val) == 0:
@@ -258,7 +277,7 @@ def validate(model, val, scale, device, inv, chunk=4096):
         x, xo = unpack(torch.from_numpy(np.ascontiguousarray(part["bits"])), device, inv)
         score = torch.from_numpy(part["score"].astype(np.float32)).to(device)
         target = torch.sigmoid(score / scale)
-        pred = torch.sigmoid(model(x, xo) * (CP_SCALE / scale))
+        pred = prediction(model, x, xo, scale)
         _, cp = quantized_cp(q, x.to(qdev), xo.to(qdev))
         cp = cp.to(device).float()
         sums["float"] += ((pred - target) ** 2).sum().item()
@@ -315,6 +334,8 @@ def main():
     ap.add_argument("--init-model", type=Path, help="warm start weights on new data; reset optimizer/schedule")
     ap.add_argument("--king-buckets", type=int, choices=[1, KING_BUCKETS], default=1,
                     help="1=v1, 4=v2 relative king quadrants")
+    ap.add_argument("--architecture", choices=["legacy", "v3"], default="legacy",
+                    help="v3: mirrored 16 banks, 512 FT, pairwise, 8 x 512-16-32-1 heads, QAT")
     ap.add_argument("--block-rows", type=int, default=65536)
     ap.add_argument("--val-chunk", type=int, default=4096)
     ap.add_argument("--stop-after-epochs", type=int, help="stop at this epoch boundary; keep the full --epochs schedule")
@@ -332,6 +353,8 @@ def main():
         ap.error("stop-after-epochs must be within 1..epochs")
     if args.resume and args.init_model:
         ap.error("resume and init-model are mutually exclusive")
+    if args.architecture == "v3" and args.king_buckets != 1:
+        ap.error("v3 fixes its own 16 mirrored banks; omit --king-buckets")
     if args.binpack_config and not 0 < args.epoch_rows < 2**64:
         ap.error("binpack input requires positive --epoch-rows")
     if args.data and (args.epoch_rows or args.binpack_reader):
@@ -343,6 +366,8 @@ def main():
         ap.error("max-train-seconds must be finite and positive")
     if args.threads:
         torch.set_num_threads(args.threads)
+    if args.architecture == "v3":
+        torch.backends.cuda.matmul.allow_tf32 = False
     torch.manual_seed(args.seed)
     rng = np.random.default_rng(args.seed)
     device = torch.device("cuda" if args.device == "auto" and torch.cuda.is_available()
@@ -377,6 +402,8 @@ def main():
         contract.update(input_format="binpack", epoch_rows=args.epoch_rows)
     if args.king_buckets != 1:
         contract["king_buckets"] = args.king_buckets
+    if args.architecture == "v3":
+        contract.update(architecture="v3", king_buckets=16, factorizer=True, quantization="integer-ste-v1")
     if args.out.exists() and any(args.out.iterdir()):
         if not args.resume or args.resume.resolve().parent != args.out.resolve():
             raise ValueError("output run exists; use a fresh directory or resume its checkpoint")
@@ -385,7 +412,7 @@ def main():
           f"steps/epoch={steps_per_epoch:,}", flush=True)
 
     inv = torch.as_tensor(opponent_inverse_permutation(), device=device)
-    model = Net(args.king_buckets).to(device)
+    model = (v3_model.Net() if args.architecture == "v3" else Net(args.king_buckets)).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     epoch0, step, best = 0, 0, float("inf")
     history, best_blob, best_epoch = [], None, None
@@ -433,7 +460,7 @@ def main():
                     group["lr"] = lr_at(step)
                 x, xo = unpack(bits, device, inv)
                 target = torch.sigmoid(score.to(device) / args.sigmoid_scale)
-                pred = torch.sigmoid(model(x, xo) * (CP_SCALE / args.sigmoid_scale))
+                pred = prediction(model, x, xo, args.sigmoid_scale)
                 loss = ((pred - target) ** 2).mean()
                 if not torch.isfinite(loss):
                     raise ValueError("non-finite training loss")
@@ -480,7 +507,8 @@ def main():
         atomic_bytes(args.out / f"{epoch_tag}.pt", checkpoint)
         atomic_bytes(args.out / f"{epoch_tag}.znnue", blob)
         provenance = {
-            "architecture": ("zenith-nnue-v1 768->256x2->1 CReLU" if args.king_buckets == 1
+            "architecture": ("zenith-nnue-v3 mirrored 16x768->512 pairwise, 8x512->16->32->1 QAT" if args.architecture == "v3"
+                             else "zenith-nnue-v1 768->256x2->1 CReLU" if args.king_buckets == 1
                              else "zenith-nnue-v2 4 king quadrants x 768->256x2->1 CReLU"),
             "network_sha256_last": hashlib.sha256(blob).hexdigest(),
             "network_sha256_best": hashlib.sha256(best_blob).hexdigest(),

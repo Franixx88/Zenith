@@ -26,9 +26,12 @@ fn run() -> Result<(), String> {
             let mut enhancements = true;
             let mut modern = zenith::search::DEFAULT_MODERN_SEARCH;
             let mut network = None;
+            let mut context_histories = false;
             let mut arguments = args[1..].iter();
             while let Some(argument) = arguments.next() {
-                if argument == "--eval-file" {
+                if argument == "--context-history" {
+                    context_histories = true;
+                } else if argument == "--eval-file" {
                     let file = arguments
                         .next()
                         .ok_or("--eval-file requires a model path")?;
@@ -60,7 +63,7 @@ fn run() -> Result<(), String> {
                     null_pruning = false;
                 } else {
                     depth = argument.parse::<u8>().map_err(
-                        |_| "usage: zenith bench [DEPTH] [--eval-file PATH] [--no-lmr] [--no-see] [--history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]",
+                        |_| "usage: zenith bench [DEPTH] [--eval-file PATH] [--no-lmr] [--no-see] [--history] [--context-history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]",
                     )?;
                 }
             }
@@ -77,6 +80,7 @@ fn run() -> Result<(), String> {
                 enhancements,
                 modern,
                 network,
+                context_histories,
             );
             Ok(())
         }
@@ -112,7 +116,7 @@ fn run() -> Result<(), String> {
         }
         Some("--help" | "-h") => {
             println!(
-                "Zenith {}\n\nzenith                     Run UCI on stdin/stdout\nzenith perft DEPTH [\"FEN\"]  Count legal move trees\nzenith bench [DEPTH] [--eval-file PATH] [--no-lmr] [--no-see] [--history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]  Run fixed search benchmark\nzenith --version           Print version",
+                "Zenith {}\n\nzenith                     Run UCI on stdin/stdout\nzenith perft DEPTH [\"FEN\"]  Count legal move trees\nzenith bench [DEPTH] [--eval-file PATH] [--no-lmr] [--no-see] [--history] [--context-history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]  Run fixed search benchmark\nzenith --version           Print version",
                 env!("CARGO_PKG_VERSION")
             );
             Ok(())

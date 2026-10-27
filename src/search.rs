@@ -13,7 +13,9 @@ use crate::board::{Board, EMPTY_MOVE, Move, MoveList, Piece};
 use crate::eval::evaluate;
 use crate::movepick::{MovePicker, is_capture};
 use crate::nnue::Network;
+mod context_history;
 mod evaluation;
+use context_history::ContextHistory;
 use evaluation::NnueStack;
 mod multipv;
 #[cfg(test)]
@@ -248,6 +250,7 @@ pub struct Search {
     enhancements: bool,
     modern: bool,
     correction: Vec<i16>,
+    context_history: Option<ContextHistory>,
     continuation: [Vec<i16>; 2],
     counters: [[Option<Move>; PIECE_SQUARES]; 2],
     reductions: Vec<i16>,
@@ -291,6 +294,7 @@ impl Search {
             enhancements: true,
             modern: DEFAULT_MODERN_SEARCH,
             correction: vec![0; 2 * 16384],
+            context_history: None,
             continuation: std::array::from_fn(|_| vec![0; 2 * PIECE_SQUARES * PIECE_SQUARES]),
             counters: [[None; PIECE_SQUARES]; 2],
             reductions,
@@ -321,6 +325,9 @@ impl Search {
         self.control = None;
         self.workers.clear();
         self.correction.fill(0);
+        if let Some(h) = &mut self.context_history {
+            h.clear();
+        }
         self.eval_cache.fill(EvalEntry::default());
         self.table.clear();
         for history in &mut self.continuation {
@@ -369,6 +376,14 @@ impl Search {
         if self.modern != enabled {
             self.clear();
             self.modern = enabled;
+        }
+    }
+
+    /// Independent experimental switch; reset all caches and workers on toggle.
+    pub fn set_context_histories(&mut self, enabled: bool) {
+        if enabled != self.context_history.is_some() {
+            self.clear();
+            self.context_history = enabled.then(ContextHistory::new);
         }
     }
 
@@ -524,6 +539,7 @@ impl Search {
                 worker.pruning = self.pruning;
                 worker.enhancements = self.enhancements;
                 worker.modern = self.modern;
+                worker.set_context_histories(self.context_history.is_some());
                 worker.singular = self.singular;
                 worker.smp_voting = self.smp_voting;
                 if worker.parameters != self.parameters {
@@ -725,6 +741,7 @@ impl Search {
             prior: [None; MAX_PLY],
             excluded: [None; MAX_PLY],
             static_evals: [None; MAX_PLY],
+            threat_cache: std::array::from_fn(|_| std::cell::Cell::new(None)),
         };
         if context.is_draw(&board, root_key) {
             result.score = 0;
@@ -962,6 +979,7 @@ struct Context<'a> {
     pv: Vec<PvLine>,
     prior: [Option<Played>; MAX_PLY],
     static_evals: [Option<i32>; MAX_PLY],
+    threat_cache: [std::cell::Cell<Option<(u64, u64)>>; MAX_PLY],
 }
 
 impl Context<'_> {
@@ -1024,7 +1042,40 @@ impl Context<'_> {
                 }
             }
         }
+        if !self.pruning_suppressed
+            && let Some(h) = &self.search.context_history
+        {
+            value += h.score(board, mv, self.threat_bits(board, ply));
+        }
         value
+    }
+
+    fn threat_bits(&self, board: &Board, ply: usize) -> u64 {
+        let key = board.hash();
+        if let Some((old, attacks)) = self.threat_cache[ply].get()
+            && old == key
+        {
+            return attacks;
+        }
+        let mut attacks = 0;
+        let enemy = board.side_to_move.other();
+        for piece in [
+            Piece::Pawn,
+            Piece::Knight,
+            Piece::Bishop,
+            Piece::Rook,
+            Piece::Queen,
+            Piece::King,
+        ] {
+            let mut bits = board.bitboard(enemy, piece);
+            while bits != 0 {
+                let square = bits.trailing_zeros() as u8;
+                bits &= bits - 1;
+                attacks |= board.piece_attacks(piece, enemy, square);
+            }
+        }
+        self.threat_cache[ply].set(Some((key, attacks)));
+        attacks
     }
 
     fn reward_continuation(
@@ -1086,7 +1137,12 @@ impl Context<'_> {
     }
     fn correction_value(&self, board: &Board) -> i32 {
         if self.search.modern {
-            i32::from(self.search.correction[Self::correction_index(board)]) / 64
+            let pawn = i32::from(self.search.correction[Self::correction_index(board)]);
+            self.search
+                .context_history
+                .as_ref()
+                .map_or(pawn, |h| h.corrected(board, pawn))
+                / 64
         } else {
             0
         }
@@ -1631,10 +1687,26 @@ impl Context<'_> {
                     }
                     self.search
                         .reward_cutoff(board, mv, depth, &quiets_tried, &captures_tried);
+                    if self.search.context_history.is_some()
+                        && !is_capture(board, mv)
+                        && mv.promotion.is_none()
+                    {
+                        let attacks = self.threat_bits(board, ply);
+                        let bonus = (i32::from(depth).pow(2) * 8).min(1024);
+                        if let Some(h) = &mut self.search.context_history {
+                            h.reward(board, mv, attacks, bonus);
+                            for &failed in &quiets_tried {
+                                h.reward(board, failed, attacks, -bonus / 2);
+                            }
+                        }
+                    }
                 }
                 break;
             }
-            if self.search.advanced_history || self.search.enhancements {
+            if self.search.advanced_history
+                || self.search.enhancements
+                || self.search.context_history.is_some()
+            {
                 if is_capture(board, mv) {
                     captures_tried.push(mv);
                 } else if mv.promotion.is_none() {
@@ -1687,6 +1759,9 @@ impl Context<'_> {
             let weight = (i32::from(depth) + 1).clamp(1, 16);
             let entry = &mut self.search.correction[Self::correction_index(board)];
             *entry = ((i32::from(*entry) * (256 - weight) + target * weight) / 256) as i16;
+            if let Some(h) = &mut self.search.context_history {
+                h.learn_correction(board, target, weight);
+            }
             self.stats.correction_updates += 1;
         }
         Some(best_score)
@@ -2022,6 +2097,43 @@ mod tests {
     }
 
     #[test]
+    fn context_correction_preserves_raw_cache_and_toggle_clears_learning_and_workers() {
+        let board = Board::startpos();
+        let raw = evaluate(&board);
+        let mut search = Search::new(1);
+        search.set_context_histories(true);
+        let limits = Limits::default();
+        let mut ctx = null_context(&mut search, &limits, board);
+        let index = Context::correction_index(&board);
+        ctx.search.correction[index] = 640;
+        ctx.search
+            .context_history
+            .as_mut()
+            .unwrap()
+            .learn_correction(&board, 640, 256);
+        assert_eq!(ctx.evaluate(&board, 0), raw + 10);
+        let slot = board.hash() as usize & (ctx.search.eval_cache.len() - 1);
+        assert_eq!(ctx.search.eval_cache[slot].score, raw);
+        let mv = board.parse_uci_move("e2e4").unwrap();
+        let attacks = ctx.threat_bits(&board, 0);
+        ctx.search
+            .context_history
+            .as_mut()
+            .unwrap()
+            .reward(&board, mv, attacks, 1000);
+        assert!(ctx.quiet_history(&board, mv, 0) > 0);
+        ctx.pruning_suppressed = true;
+        assert_eq!(ctx.quiet_history(&board, mv, 0), 0);
+        ctx.pruning_suppressed = false;
+        ctx.search.set_context_histories(false);
+        assert!(ctx.search.context_history.is_none());
+        assert!(ctx.search.eval_cache.iter().all(|v| !v.valid));
+        ctx.search.set_context_histories(true);
+        assert_eq!(ctx.quiet_history(&board, mv, 0), 0);
+        assert_eq!(ctx.evaluate(&board, 0), raw);
+    }
+
+    #[test]
     fn modern_null_cancellation_restores_all_context_and_cannot_publish_scores() {
         let board = Board::startpos();
         let mut search = classic_search(1);
@@ -2174,6 +2286,7 @@ mod tests {
             prior: [None; MAX_PLY],
             excluded: [None; MAX_PLY],
             static_evals: [None; MAX_PLY],
+            threat_cache: std::array::from_fn(|_| std::cell::Cell::new(None)),
         };
         let score = context.quiescence(&board, 0, -INFINITY, INFINITY).unwrap();
         (score, context.nodes, context.pv[0].to_vec())
@@ -2201,6 +2314,7 @@ mod tests {
             prior: [None; MAX_PLY],
             excluded: [None; MAX_PLY],
             static_evals: [None; MAX_PLY],
+            threat_cache: std::array::from_fn(|_| std::cell::Cell::new(None)),
             pruning_suppressed: false,
             repetition_floor: 0,
             null_probes: 0,

@@ -24,16 +24,19 @@ import numpy as np
 import torch
 
 import train_nnue as T
+import v3_model
 from records import sample_records
 
 
 def read_net(path):
     with Path(path).open("rb") as file:
-        data = file.read(T.V2_FILE_BYTES + 1)
+        data = file.read(v3_model.FILE_BYTES + 1)
     if len(data) < 64 or data[:8] != b"ZNNUE\0\0\0":
         raise ValueError("not a Zenith NNUE net")
     fields = struct.unpack_from("<8I", data, 8)
     version = fields[0]
+    if version == 3:
+        return v3_model.read_net(path)
     if version not in (1, 2):
         raise ValueError("unsupported version")
     buckets = 1 if version == 1 else 4
@@ -69,6 +72,8 @@ def record_to_fen(record):
 
 
 def spec_forward(net, board):
+    if isinstance(net, dict):
+        return v3_model.spec_forward(net, board)
     bias, weights, out_w, out_b = net
     raw = out_b
     for half, perspective in enumerate((board.turn, not board.turn)):  # stm first
@@ -93,6 +98,8 @@ def main():
     ap.add_argument("--records", required=True)
     ap.add_argument("--zenith-nnue", required=True)
     ap.add_argument("--count", type=int, default=500)
+    ap.add_argument("--checkpoint", type=Path, help="v3: also verify QAT checkpoint weights against export")
+    ap.add_argument("--device", choices=["cpu", "cuda"], default="cpu", help="QAT checkpoint verification device")
     args = ap.parse_args()
 
     if args.count <= 0:
@@ -103,11 +110,26 @@ def main():
     fens = [b.fen() for b in boards]
 
     # 1. trainer arithmetic, built from the .znnue file the same way a user would reload it
-    q = {"ft_b": net[0], "ft_w": net[1], "out_w": net[2], "out_b": net[3]}
+    q = net if isinstance(net, dict) else {"ft_b": net[0], "ft_w": net[1], "out_w": net[2], "out_b": net[3]}
     inv = torch.as_tensor(T.opponent_inverse_permutation())
     x, xo = T.unpack(torch.from_numpy(np.ascontiguousarray(records["bits"])),
                      torch.device("cpu"), inv)
     raw_t, cp_t = T.quantized_cp(q, x, xo)
+    if args.checkpoint:
+        if q.get("version") != 3:
+            ap.error("checkpoint verification currently requires v3")
+        checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
+        if checkpoint.get("contract", {}).get("architecture") != "v3":
+            raise ValueError("checkpoint is not v3")
+        model = v3_model.Net().to(args.device)
+        model.load_state_dict(checkpoint["model"])
+        if T.to_bytes(T.quantize(model)) != Path(args.net).read_bytes():
+            raise ValueError("checkpoint export differs from the selected network")
+        torch.backends.cuda.matmul.allow_tf32 = False
+        with torch.no_grad():
+            prediction = model.forward_cp(x.to(args.device), xo.to(args.device)).cpu().double()
+        torch.testing.assert_close(prediction, cp_t.cpu(), atol=0, rtol=0)
+        print(f"checkpoint QAT == integer export on {args.device}: {len(x)} records")
     raw_t, cp_t = raw_t.repeat_interleave(2), cp_t.repeat_interleave(2)
 
     # 2. independent spec implementation

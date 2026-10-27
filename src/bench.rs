@@ -38,6 +38,7 @@ pub fn run(
     enhancements: bool,
     modern: bool,
     network: Option<Arc<crate::nnue::Network>>,
+    context_histories: bool,
 ) {
     let mut search = Search::new(16);
     search.set_lmr(lmr);
@@ -47,6 +48,7 @@ pub fn run(
     search.set_pruning(pruning);
     search.set_enhancements(enhancements);
     search.set_modern_search(modern);
+    search.set_context_histories(context_histories);
     let evaluation = network.as_ref().map_or_else(
         || "classical".to_owned(),
         |model| {
@@ -61,7 +63,7 @@ pub fn run(
     let mut total_nodes = 0;
     let mut total_time = std::time::Duration::ZERO;
     println!(
-        "bench version={} depth={depth} hash_mib=16 evaluation={evaluation} lmr={lmr} see_ordering={see_ordering} advanced_history={advanced_history} null_pruning={null_pruning} pruning={pruning} enhancements={enhancements} modern={modern}",
+        "bench version={} depth={depth} hash_mib=16 evaluation={evaluation} lmr={lmr} see_ordering={see_ordering} advanced_history={advanced_history} null_pruning={null_pruning} pruning={pruning} enhancements={enhancements} modern={modern} context_histories={context_histories}",
         env!("CARGO_PKG_VERSION")
     );
     for (name, fen) in POSITIONS {

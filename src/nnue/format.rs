@@ -1,4 +1,4 @@
-//! Portable v1/v2 format. V2 adds four king-quadrant feature banks.
+//! Portable version dispatch: legacy v1/v2 and mirrored layered v3.
 use super::*;
 use std::io::Read;
 use std::path::Path;
@@ -27,7 +27,7 @@ impl Network {
     pub fn load(path: impl AsRef<Path>) -> Result<Self, String> {
         let file = std::fs::File::open(path).map_err(|e| format!("NNUE open: {e}"))?;
         let mut bytes = Vec::with_capacity(FILE_BYTES);
-        file.take(V2_FILE_BYTES as u64 + 1)
+        file.take(super::v3::FILE_BYTES as u64 + 1)
             .read_to_end(&mut bytes)
             .map_err(|e| format!("NNUE read: {e}"))?;
         Self::from_bytes(&bytes)
@@ -38,6 +38,9 @@ impl Network {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
+        if let Some(p) = self.v3_parameters() {
+            return p.to_bytes();
+        }
         let mut bytes = Vec::with_capacity(self.file_bytes());
         bytes.extend_from_slice(MAGIC);
         let mut fields = FIELDS;
@@ -71,6 +74,9 @@ impl Network {
             return Err("NNUE magic mismatch".into());
         }
         let version = u32::from_le_bytes(bytes[8..12].try_into().unwrap());
+        if version == 3 {
+            return Self::new_v3(super::v3::Parameters::from_bytes(bytes)?);
+        }
         let (file_bytes, buckets) = match version {
             FORMAT_VERSION => (FILE_BYTES, 1),
             FORMAT_VERSION_V2 => (V2_FILE_BYTES, KING_BUCKETS),
@@ -119,7 +125,7 @@ impl Network {
 
 // FNV-1a64 over the entire file with checksum bytes treated as zero. Integrity
 // check only, not authentication. Architecture and quantization are covered too.
-fn checksum(bytes: &[u8]) -> u64 {
+pub(super) fn checksum(bytes: &[u8]) -> u64 {
     bytes
         .iter()
         .enumerate()
