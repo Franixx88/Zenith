@@ -1,0 +1,73 @@
+{
+  "format": "zenith-network-manifest-v1",
+  "id": "zenith-v3-layered-control-20261027",
+  "file": "zenith-v3-576258170751.znnue",
+  "bytes": 12725408,
+  "sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+  "architecture": "zenith-nnue-v3 mirrored 16x768->512 pairwise, 8x512->16->32->1 QAT",
+  "selected_epoch": 24,
+  "presentations": 201326592,
+  "corpus_manifest": "../tools/nnue/corpora/first-50gb.json",
+  "dataset_source": "official-stockfish/master-binpacks@1e095a758c630bc58d0b6dac4da44fcd38ac89c2",
+  "dataset_license": "ODbL; preserve original source attribution",
+  "recipe": "../tools/nnue/corpora/first-50gb-training.json",
+  "validation": {
+    "val_float": 0.009441263449843973,
+    "val_quant": 0.009441263449843973,
+    "val_baseline": 0.03845331532647833,
+    "mean_abs_cp_error_capped": 84.36919403076172,
+    "epoch": 24,
+    "step": 24576,
+    "explained": 0.7544746566145137
+  },
+  "holdout": {
+    "games": 128,
+    "wdl": {
+      "draws": 29,
+      "wins": 46,
+      "losses": 53
+    },
+    "pentanomial": [
+      12,
+      13,
+      18,
+      12,
+      9
+    ],
+    "valid": true,
+    "tc": "5+0.05",
+    "threads": 1,
+    "hash_mib": 32,
+    "syzygy": false,
+    "pgn": "../games/zenith-nnue-v3-holdout-20261027.pgn",
+    "pgn_sha256": "2af9e67d9b135c230c56f2041952931233e22bde146cb2af4d0eab4e95697d8c",
+    "binary_sha256": "4111145989f5ee3b208af31f72e59733ca386c4987c1a7608749cff3513bec7d"
+  },
+  "status": "experimental; no confident playing-strength gain; not automatically promoted",
+  "speed": {
+    "network_sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+    "baseline_sha256": "4111145989f5ee3b208af31f72e59733ca386c4987c1a7608749cff3513bec7d",
+    "candidate_sha256": "d9dd70f3d2c7675923cf8f137057dc0e0be946dc141e644a3be29051373ef86d",
+    "medians": {
+      "baseline": {
+        "refresh_ns": 2966.5,
+        "delta_ns": 1602.6,
+        "search_us": 1671648
+      },
+      "candidate": {
+        "refresh_ns": 2420.0,
+        "delta_ns": 952.7,
+        "search_us": 1402909
+      }
+    },
+    "reduction_percent": {
+      "refresh_ns": 18.422383279959554,
+      "delta_ns": 40.552851616123796,
+      "search_us": 16.076291180918467
+    },
+    "nodes": 622292,
+    "repeats": 5,
+    "work_identical": true
+  },
+  "note": "V3 was trained from scratch with a different training history than v1; lower validation loss alone is not a playing-strength result."
+}

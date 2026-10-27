@@ -98,9 +98,9 @@ pub(super) struct NnueStack<'net> {
 
 impl<'net> NnueStack<'net> {
     pub fn new(network: &'net Network, root: &Board) -> Self {
-        let frames = if let Some(p) = network.v3_parameters() {
+        let frames = if network.v3_parameters().is_some() {
             let mut frames = vec![None; MAX_PLY];
-            frames[0] = Some(p.accumulator(root, network.backend()));
+            frames[0] = Some(network.v3_accumulator(root));
             Frames::V3(frames)
         } else {
             let mut frames = vec![None; MAX_PLY];
@@ -143,12 +143,9 @@ impl<'net> NnueStack<'net> {
             Frames::Legacy(f) => {
                 evaluate_frames(f, &self.boards, ply, |b| self.network.legacy_accumulator(b))
             }
-            Frames::V3(f) => evaluate_frames(f, &self.boards, ply, |b| {
-                self.network
-                    .v3_parameters()
-                    .unwrap()
-                    .accumulator(b, self.network.backend())
-            }),
+            Frames::V3(f) => {
+                evaluate_frames(f, &self.boards, ply, |b| self.network.v3_accumulator(b))
+            }
         };
         self.refreshes += refreshes;
         self.updates += updates;

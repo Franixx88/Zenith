@@ -74,6 +74,8 @@ fn incremental_special_moves_mirror_crossing_undo_and_simd_match_refresh() {
         ("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", vec!["e1g1", "e8c8"]),
         ("7k/8/8/3pP3/8/8/8/K7 w - d6 0 1", vec!["e5d6"]),
         ("7k/P7/8/8/8/8/8/K7 w - - 0 1", vec!["a7a8n"]),
+        ("1r5k/P7/8/8/8/8/8/7K w - - 0 1", vec!["a7b8q"]),
+        ("7k/8/8/8/8/8/p7/1R5K b - - 0 1", vec!["a2b1n"]),
     ] {
         let start = Board::from_fen(fen).unwrap();
         let mut a = net.accumulator(&start);

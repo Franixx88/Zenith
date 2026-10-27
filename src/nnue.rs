@@ -161,7 +161,7 @@ pub struct Network {
     parameters: Parameters,
     backend: Backend,
     king_buckets: usize,
-    v3: Option<Box<v3::Parameters>>,
+    v3: Option<Box<v3::Runtime>>,
 }
 
 impl Network {
@@ -258,7 +258,7 @@ impl Network {
     }
 
     pub fn v3_parameters(&self) -> Option<&v3::Parameters> {
-        self.v3.as_deref()
+        self.v3.as_deref().map(|model| &model.parameters)
     }
     pub fn hidden_size(&self) -> usize {
         if self.v3.is_some() {
@@ -282,7 +282,7 @@ impl Network {
                 Backend::Scalar
             },
             king_buckets: v3::BANKS,
-            v3: Some(Box::new(parameters)),
+            v3: Some(Box::new(v3::Runtime::new(parameters))),
         })
     }
 
@@ -309,6 +309,13 @@ impl Network {
         accumulator
     }
 
+    pub(crate) fn v3_accumulator(&self, board: &Board) -> v3::V3Accumulator<'_> {
+        self.v3
+            .as_ref()
+            .expect("v3 model")
+            .accumulator(board, self.backend)
+    }
+
     /// Deliberately separate dense forward pass for cross-checking sparse and
     /// incremental calculations. Rebuilds inputs; never reads an accumulator.
     pub fn evaluate_reference(&self, board: &Board) -> i32 {
@@ -317,7 +324,7 @@ impl Network {
 
     pub fn raw_reference(&self, board: &Board) -> i64 {
         if let Some(p) = &self.v3 {
-            return p.raw_reference(board);
+            return p.parameters.raw_reference(board);
         }
         let mut raw = i64::from(self.parameters.output_bias);
         for (half, perspective) in [board.side_to_move, board.side_to_move.other()]

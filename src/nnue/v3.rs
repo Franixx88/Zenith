@@ -47,6 +47,72 @@ pub struct Parameters {
     pub feature_weights: Vec<i16>,
     pub heads: Vec<Head>,
 }
+
+/// Load-time packing is immutable and shared by all workers. Serialized weights
+/// retain their output-major layout; the scalar reference never reads this cache.
+pub(super) struct Runtime {
+    pub parameters: Parameters,
+    heads: Vec<PackedHead>,
+}
+struct PackedHead {
+    l1: Vec<i16>,
+    l2: Vec<i16>,
+}
+impl Runtime {
+    pub fn new(parameters: Parameters) -> Self {
+        let heads = parameters
+            .heads
+            .iter()
+            .map(|h| PackedHead {
+                l1: kernels::pack_affine::<HIDDEN, L1>(&h.l1_weights),
+                l2: kernels::pack_affine::<L1, L2>(&h.l2_weights),
+            })
+            .collect();
+        Self { parameters, heads }
+    }
+
+    pub(crate) fn accumulator(&self, board: &Board, backend: Backend) -> V3Accumulator<'_> {
+        let mut a = V3Accumulator {
+            model: self,
+            backend,
+            board: *board,
+            sums: [self.parameters.feature_bias; 2],
+            contexts: [0; 2],
+            refreshes: 0,
+        };
+        for p in [Color::White, Color::Black] {
+            a.refresh(board, p, context(board, p));
+        }
+        a
+    }
+
+    fn forward(&self, sums: &[[i16; HIDDEN]; 2], board: &Board, backend: Backend) -> i64 {
+        if backend == Backend::Scalar {
+            return self.parameters.forward(sums, board, backend);
+        }
+        let mut input = [0i16; HIDDEN];
+        for (half, pov) in [board.side_to_move, board.side_to_move.other()]
+            .into_iter()
+            .enumerate()
+        {
+            kernels::pair(
+                backend,
+                &sums[pov.index()],
+                (&mut input[half * 256..(half + 1) * 256])
+                    .try_into()
+                    .unwrap(),
+            );
+        }
+        let bucket = output_bucket(board.occupied().count_ones());
+        let head = &self.parameters.heads[bucket];
+        let packed = &self.heads[bucket];
+        let mut a1 = [0i16; L1];
+        let mut a2 = [0i16; L2];
+        kernels::affine(backend, &input, &packed.l1, &head.l1_bias, &mut a1);
+        kernels::affine(backend, &a1, &packed.l2, &head.l2_bias, &mut a2);
+        i64::from(head.output_bias) + kernels::output(backend, &a2, &head.output_weights)
+    }
+}
 impl Default for Parameters {
     fn default() -> Self {
         Self {
@@ -93,21 +159,6 @@ impl Parameters {
             }
         }
         Ok(())
-    }
-
-    pub(crate) fn accumulator(&self, board: &Board, backend: Backend) -> V3Accumulator<'_> {
-        let mut a = V3Accumulator {
-            parameters: self,
-            backend,
-            board: *board,
-            sums: [self.feature_bias; 2],
-            contexts: [0; 2],
-            refreshes: 0,
-        };
-        for p in [Color::White, Color::Black] {
-            a.refresh(board, p, context(board, p));
-        }
-        a
     }
 
     pub(super) fn raw_reference(&self, board: &Board) -> i64 {
@@ -291,7 +342,7 @@ fn index(ctx: usize, pov: Color, color: Color, piece: Piece, square: u8) -> usiz
 
 #[derive(Clone)]
 pub struct V3Accumulator<'net> {
-    parameters: &'net Parameters,
+    model: &'net Runtime,
     backend: Backend,
     board: Board,
     sums: [[i16; HIDDEN]; 2],
@@ -309,8 +360,7 @@ impl V3Accumulator<'_> {
         self.refreshes
     }
     pub fn raw_score(&self) -> i64 {
-        self.parameters
-            .forward(&self.sums, &self.board, self.backend)
+        self.model.forward(&self.sums, &self.board, self.backend)
     }
     pub fn evaluate(&self) -> i32 {
         score_from_raw(self.raw_score())
@@ -320,13 +370,13 @@ impl V3Accumulator<'_> {
         kernels::update(
             self.backend,
             &mut self.sums[pov.index()],
-            &self.parameters.feature_weights[offset..offset + HIDDEN],
+            &self.model.parameters.feature_weights[offset..offset + HIDDEN],
             adding,
         );
     }
     fn refresh(&mut self, board: &Board, pov: Color, ctx: usize) {
         self.contexts[pov.index()] = ctx;
-        self.sums[pov.index()] = self.parameters.feature_bias;
+        self.sums[pov.index()] = self.model.parameters.feature_bias;
         for color in [Color::White, Color::Black] {
             for piece in PIECES {
                 visit(board.bitboard(color, piece), |square| {
@@ -347,6 +397,73 @@ impl V3Accumulator<'_> {
             }
         }
         let mut changes = FeatureChanges::default();
+        // Legal moves have at most two removals and two additions. Collect once
+        // for both perspectives, then fuse their vector loads/stores. Arbitrary
+        // FEN resets retain the general bounded update below.
+        let empty = (Color::White, Piece::Pawn, 0u8);
+        let mut removed = [empty; 2];
+        let mut added = [empty; 2];
+        for color in [Color::White, Color::Black] {
+            for piece in PIECES {
+                let before = self.board.bitboard(color, piece);
+                let after = next.bitboard(color, piece);
+                visit(before & !after, |square| {
+                    if changes.removed < 2 {
+                        removed[changes.removed as usize] = (color, piece, square);
+                    }
+                    changes.removed += 1;
+                });
+                visit(after & !before, |square| {
+                    if changes.added < 2 {
+                        added[changes.added as usize] = (color, piece, square);
+                    }
+                    changes.added += 1;
+                });
+            }
+        }
+        if changes.removed <= 2 && changes.added <= 2 {
+            for pov in [Color::White, Color::Black] {
+                if refreshed[pov.index()] {
+                    continue;
+                }
+                let row = |(color, piece, square)| {
+                    let offset =
+                        index(self.contexts[pov.index()], pov, color, piece, square) * HIDDEN;
+                    &self.model.parameters.feature_weights[offset..offset + HIDDEN]
+                };
+                let sums = &mut self.sums[pov.index()];
+                match (changes.removed, changes.added) {
+                    (1, 1) => kernels::update_delta(
+                        self.backend,
+                        sums,
+                        [row(removed[0])],
+                        [row(added[0])],
+                    ),
+                    (2, 1) => kernels::update_delta(
+                        self.backend,
+                        sums,
+                        [row(removed[0]), row(removed[1])],
+                        [row(added[0])],
+                    ),
+                    (2, 2) => kernels::update_delta(
+                        self.backend,
+                        sums,
+                        [row(removed[0]), row(removed[1])],
+                        [row(added[0]), row(added[1])],
+                    ),
+                    _ => {
+                        for &(color, piece, square) in &removed[..changes.removed as usize] {
+                            self.change(pov, color, piece, square, false);
+                        }
+                        for &(color, piece, square) in &added[..changes.added as usize] {
+                            self.change(pov, color, piece, square, true);
+                        }
+                    }
+                }
+            }
+            self.board = *next;
+            return changes;
+        }
         for adding in [false, true] {
             for color in [Color::White, Color::Black] {
                 for piece in PIECES {
@@ -357,11 +474,6 @@ impl V3Accumulator<'_> {
                     } else {
                         before & !after
                     };
-                    if adding {
-                        changes.added += changed.count_ones();
-                    } else {
-                        changes.removed += changed.count_ones();
-                    }
                     visit(changed, |square| {
                         for pov in [Color::White, Color::Black] {
                             if !refreshed[pov.index()] {
