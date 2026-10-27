@@ -141,7 +141,8 @@ impl Engine {
     fn evaluation_status(&self) {
         if let Some(network) = self.active_network() {
             emit(&format!(
-                "info string evaluation NNUE v1 backend {:?} EvalFile {}",
+                "info string evaluation NNUE v{} backend {:?} EvalFile {}",
+                network.format_version(),
                 network.backend(),
                 self.eval_file
             ));
@@ -447,11 +448,11 @@ impl Engine {
                             nodes: result.nodes, elapsed, pv: line.pv.clone(), tbhits: result.stats.tb_hits });
                     }
                 }
-                emit(&format!("info string search complete nodes {} tbhits {} tb_errors {} helper_nodes {} helper_failures {} singular_probes {} singular_extensions {} selected_worker {} nnue_refreshes {} nnue_updates {} nnue_evaluations {}",
+                emit(&format!("info string search complete nodes {} tbhits {} tb_errors {} helper_nodes {} helper_failures {} singular_probes {} singular_extensions {} selected_worker {} nnue_refreshes {} nnue_updates {} nnue_evaluations {} nnue_bucket_refreshes {}",
                     result.nodes, result.stats.tb_hits, result.stats.tb_errors,
                     result.stats.helper_nodes, result.stats.helper_failures,
                     result.stats.singular_probes, result.stats.singular_extensions, result.stats.smp_selected_worker,
-                    result.stats.nnue_refreshes, result.stats.nnue_updates, result.stats.nnue_evaluations));
+                    result.stats.nnue_refreshes, result.stats.nnue_updates, result.stats.nnue_evaluations, result.stats.nnue_bucket_refreshes));
                 // UCI infinite searches must wait for stop, including terminal positions.
                 while infinite && !stop.load(Ordering::Relaxed) {
                     thread::park_timeout(Duration::from_millis(10));

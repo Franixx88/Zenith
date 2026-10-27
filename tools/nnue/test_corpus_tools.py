@@ -7,11 +7,14 @@ import struct
 import subprocess
 import sys
 import tempfile
+import time
+import os
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
 import run_first_training as job
+import run_king_bucket_training as bucket_job
 
 SCRIPT = Path(__file__).with_name("extract_binpack_prefix.py")
 
@@ -53,6 +56,29 @@ class PrefixTests(unittest.TestCase):
 
 
 class JobFailureTests(unittest.TestCase):
+    def test_changed_corpus_cannot_reuse_cached_full_verification(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "data/nnue/sf-first-50gb/fixture.binpack"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"verified bytes")
+            entry = dict(name=source.name, bytes=source.stat().st_size,
+                         sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+            manifests = root / "tools/nnue/corpora"
+            manifests.mkdir(parents=True)
+            (manifests / "first-50gb.json").write_text(json.dumps(dict(revision="a" * 40, files=[entry])))
+            recipe, integrity = root / "recipe.json", root / "integrity.json"
+            recipe.write_text(json.dumps(dict(files=[str(source)])))
+            checked_at = time.time()
+            integrity.write_text(json.dumps(dict(ok=True, revision="a" * 40, checked_at_unix=checked_at,
+                                                 files=[dict(entry, ok=True)])))
+            with patch.object(bucket_job, "ROOT", root):
+                _, snapshot = bucket_job.corpus_snapshot(recipe, integrity)
+                self.assertEqual(snapshot[0]["verified_sha256"], entry["sha256"])
+                os.utime(source, (checked_at + 5, checked_at + 5))
+                with self.assertRaisesRegex(ValueError, "changed since full verification"):
+                    bucket_job.corpus_snapshot(recipe, integrity)
+
     def test_failed_download_never_starts_training(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

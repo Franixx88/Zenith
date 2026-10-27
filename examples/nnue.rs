@@ -6,7 +6,7 @@ use std::{
 };
 use zenith::{
     board::Board,
-    nnue::{Backend, FILE_BYTES, Network, parse_training_fen},
+    nnue::{Backend, Network, parse_training_fen},
 };
 
 fn main() -> ExitCode {
@@ -39,7 +39,10 @@ fn run() -> Result<(), String> {
     eprintln!("NNUE backend: {:?}; accumulator lanes: i16", net.backend());
     match command.as_str() {
         "inspect" if args.len() == 2 => println!(
-            "Zenith NNUE v1: 768 -> 256 x 2 -> 1; CReLU; {FILE_BYTES} bytes; QA=255 QB=64 CP=400; validated (training provenance must be supplied separately)"
+            "Zenith NNUE v{}: {} king banks x 768 -> 256 x 2 -> 1; CReLU; {} bytes; QA=255 QB=64 CP=400; validated (training provenance must be supplied separately)",
+            net.format_version(),
+            net.king_buckets(),
+            net.file_bytes()
         ),
         "eval" => {
             let board = match args.get(2) {

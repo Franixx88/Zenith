@@ -11,6 +11,7 @@ pub(super) struct NnueStack<'net> {
     boards: Vec<Board>,
     frames: Vec<Option<Accumulator<'net>>>,
     refreshes: u64,
+    bucket_refreshes: u64,
     updates: u64,
     evaluations: u64,
     #[cfg(test)]
@@ -26,6 +27,7 @@ impl<'net> NnueStack<'net> {
             boards: vec![*root; MAX_PLY],
             frames,
             refreshes: 1,
+            bucket_refreshes: 0,
             updates: 0,
             evaluations: 0,
             #[cfg(test)]
@@ -55,6 +57,7 @@ impl<'net> NnueStack<'net> {
                 for i in ancestor + 1..=ply {
                     let mut frame = self.frames[i - 1].as_ref().unwrap().clone();
                     frame.update(&self.boards[i]);
+                    self.bucket_refreshes += u64::from(frame.bucket_refreshes());
                     self.frames[i] = Some(frame);
                     self.updates += 1;
                 }
@@ -83,6 +86,7 @@ impl<'net> NnueStack<'net> {
 
     pub fn record(&self, stats: &mut SearchStats) {
         stats.nnue_refreshes = self.refreshes;
+        stats.nnue_bucket_refreshes = self.bucket_refreshes;
         stats.nnue_updates = self.updates;
         stats.nnue_evaluations = self.evaluations;
     }

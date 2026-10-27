@@ -49,7 +49,13 @@ pub fn run(
     search.set_modern_search(modern);
     let evaluation = network.as_ref().map_or_else(
         || "classical".to_owned(),
-        |model| format!("nnue-v1 backend={:?}", model.backend()),
+        |model| {
+            format!(
+                "nnue-v{} backend={:?}",
+                model.format_version(),
+                model.backend()
+            )
+        },
     );
     search.set_network(network);
     let mut total_nodes = 0;
@@ -74,8 +80,11 @@ pub fn run(
         );
         let elapsed = start.elapsed();
         println!(
-            "nnue refreshes={} updates={} evaluations={}",
-            result.stats.nnue_refreshes, result.stats.nnue_updates, result.stats.nnue_evaluations,
+            "nnue refreshes={} updates={} bucket_refreshes={} evaluations={}",
+            result.stats.nnue_refreshes,
+            result.stats.nnue_updates,
+            result.stats.nnue_bucket_refreshes,
+            result.stats.nnue_evaluations,
         );
         println!(
             "modern lmp={} futility={} history={} quiet_see={} iir={} corrections={}",

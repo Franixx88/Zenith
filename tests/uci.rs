@@ -18,6 +18,9 @@ struct NeuralFiles {
 }
 impl NeuralFiles {
     fn new() -> Self {
+        Self::with_buckets(1)
+    }
+    fn with_buckets(buckets: usize) -> Self {
         use zenith::{
             board::{Color, Piece},
             nnue::{self, Network, Parameters},
@@ -36,7 +39,12 @@ impl NeuralFiles {
         // rewarded feature. This proves search uses the loaded weights.
         let mut p = Parameters::default();
         p.feature_weights
-            [nnue::feature_index(Color::White, Color::White, Piece::Pawn, 28) * nnue::HIDDEN] = 200;
+            .resize(buckets * nnue::INPUTS * nnue::HIDDEN, 0);
+        for bucket in 0..buckets {
+            p.feature_weights[(bucket * nnue::INPUTS
+                + nnue::feature_index(Color::White, Color::White, Piece::Pawn, 28))
+                * nnue::HIDDEN] = 200;
+        }
         p.output_weights[0] = 64;
         p.output_weights[nnue::HIDDEN] = -64;
         let network = Network::new(p).unwrap();
@@ -571,7 +579,12 @@ fn nnue_file_loading_search_switches_and_hash_resets_are_atomic() {
 
 #[test]
 fn nnue_smp_multipv_and_failed_load_during_search_remain_responsive() {
-    let files = NeuralFiles::new();
+    check_neural_smp(1);
+    check_neural_smp(4);
+}
+
+fn check_neural_smp(buckets: usize) {
+    let files = NeuralFiles::with_buckets(buckets);
     let mut engine = Engine::spawn();
     engine.handshake();
     engine.send("setoption name Threads value 8");
@@ -631,6 +644,19 @@ fn nnue_smp_multipv_and_failed_load_during_search_remain_responsive() {
     let words: Vec<_> = completed.split_whitespace().collect();
     let nodes = words.iter().position(|&word| word == "nodes").unwrap();
     assert!(words[nodes + 1].parse::<u64>().unwrap() <= 1000);
+    let _ = engine.bestmove();
+    engine.send("setoption name Threads value 1");
+    engine.send("position fen r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+    engine.send("go depth 2");
+    let completed = engine.wait_for("king-bank crossing search", |line| {
+        line.starts_with("info string search complete")
+    });
+    let words: Vec<_> = completed.split_whitespace().collect();
+    let count = words
+        .iter()
+        .position(|&word| word == "nnue_bucket_refreshes")
+        .unwrap();
+    assert_eq!(words[count + 1].parse::<u64>().unwrap() > 0, buckets == 4);
     let _ = engine.bestmove();
     engine.quit();
 }

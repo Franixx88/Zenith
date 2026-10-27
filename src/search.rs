@@ -162,6 +162,7 @@ pub struct SearchResult {
 #[derive(Clone, Debug, Default)]
 pub struct SearchStats {
     pub nnue_refreshes: u64,
+    pub nnue_bucket_refreshes: u64,
     pub nnue_updates: u64,
     pub nnue_evaluations: u64,
     pub singular_probes: u64,
@@ -905,6 +906,7 @@ impl SearchStats {
         macro_rules! sum { ($($field:ident),*) => {$(self.$field += other.$field;)*}; }
         sum!(
             nnue_refreshes,
+            nnue_bucket_refreshes,
             nnue_updates,
             nnue_evaluations,
             singular_probes,
