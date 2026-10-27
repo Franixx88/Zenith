@@ -37,6 +37,7 @@ pub fn run(
     pruning: bool,
     enhancements: bool,
     modern: bool,
+    network: Option<Arc<crate::nnue::Network>>,
 ) {
     let mut search = Search::new(16);
     search.set_lmr(lmr);
@@ -46,10 +47,15 @@ pub fn run(
     search.set_pruning(pruning);
     search.set_enhancements(enhancements);
     search.set_modern_search(modern);
+    let evaluation = network.as_ref().map_or_else(
+        || "classical".to_owned(),
+        |model| format!("nnue-v1 backend={:?}", model.backend()),
+    );
+    search.set_network(network);
     let mut total_nodes = 0;
     let mut total_time = std::time::Duration::ZERO;
     println!(
-        "bench version={} depth={depth} hash_mib=16 lmr={lmr} see_ordering={see_ordering} advanced_history={advanced_history} null_pruning={null_pruning} pruning={pruning} enhancements={enhancements} modern={modern}",
+        "bench version={} depth={depth} hash_mib=16 evaluation={evaluation} lmr={lmr} see_ordering={see_ordering} advanced_history={advanced_history} null_pruning={null_pruning} pruning={pruning} enhancements={enhancements} modern={modern}",
         env!("CARGO_PKG_VERSION")
     );
     for (name, fen) in POSITIONS {
@@ -67,6 +73,10 @@ pub fn run(
             |_| {},
         );
         let elapsed = start.elapsed();
+        println!(
+            "nnue refreshes={} updates={} evaluations={}",
+            result.stats.nnue_refreshes, result.stats.nnue_updates, result.stats.nnue_evaluations,
+        );
         println!(
             "modern lmp={} futility={} history={} quiet_see={} iir={} corrections={}",
             result.stats.lmp_pruned,
