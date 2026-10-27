@@ -36,6 +36,7 @@ import numpy as np
 import torch
 from torch import nn
 import v3_model
+from awake_time import awake_seconds
 from records import RECORD, check_records, record_count, sample_records, shuffled_batches, dataset_identity
 
 INPUTS, HIDDEN = 768, 256
@@ -449,9 +450,10 @@ def main():
         t = (s - args.warmup_steps) / max(1, total_steps - args.warmup_steps)
         return args.lr_final + 0.5 * (args.lr - args.lr_final) * (1 + math.cos(math.pi * min(t, 1)))
 
-    training_started = time.monotonic()
+    training_started = awake_seconds()
+    training_wall_started = time.monotonic()
     for epoch in range(epoch0, args.epochs):
-        start, seen, running = time.time(), 0, 0.0
+        start, seen, running = awake_seconds(), 0, 0.0
         logged = 0
         iterator = native.epoch(args.epoch_rows, args.batch_size, args.block_rows, rng) if native else shard_batches(files, args.batch_size, rng, args.block_rows)
         with closing(prefetch(iterator)) as batches:
@@ -474,7 +476,7 @@ def main():
                 logged += 1
                 if step % args.log_every == 0:
                     print(f"epoch {epoch + 1} step {step:,}/{total_steps:,} loss {running / logged:.6f} "
-                          f"lr {lr_at(step):.2e} {seen / (time.time() - start):,.0f} pos/s", flush=True)
+                          f"lr {lr_at(step):.2e} {seen / max(awake_seconds() - start, 1e-9):,.0f} pos/s", flush=True)
                     running = 0.0
                     logged = 0
         if seen != sum(rows):
@@ -514,8 +516,10 @@ def main():
             "network_sha256_best": hashlib.sha256(best_blob).hexdigest(),
             "best_epoch": best_epoch, "checkpoint_sha256": hashlib.sha256(checkpoint).hexdigest(),
             "contract": contract, "runtime_python": platform.python_version(),
-            "epoch_seconds": time.time() - start,
-            "training_seconds": time.monotonic() - training_started,
+            "epoch_seconds": awake_seconds() - start,
+            "training_seconds": awake_seconds() - training_started,
+            "training_wall_seconds": time.monotonic() - training_wall_started,
+            "time_budget_clock": "system-awake; excludes suspend on Windows",
             "args": {k: str(v) for k, v in vars(args).items()},
             "data_manifest": manifest, "history": history,
             "native_reader_stats": native.last_stats if native else None,
@@ -536,7 +540,7 @@ def main():
         atomic_json(args.out / "provenance.json", provenance)
         if args.stop_after_epochs is not None and epoch + 1 >= args.stop_after_epochs:
             break
-        if args.max_train_seconds is not None and time.monotonic() - training_started >= args.max_train_seconds:
+        if args.max_train_seconds is not None and awake_seconds() - training_started >= args.max_train_seconds:
             print("time budget reached; completed epoch checkpoint saved", flush=True)
             break
     print(f"done; best quantized val loss {best:.6f}; nets in {args.out}")

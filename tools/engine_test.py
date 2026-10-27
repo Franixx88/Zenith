@@ -21,6 +21,7 @@ import time
 import chess
 import chess.engine
 import chess.pgn
+from nnue.awake_time import awake_seconds
 
 ROOT = Path(__file__).resolve().parents[1]
 FAULT = re.compile(r"^.*(?:loses on time|disconnect|illegal move|stalls|crash|connection stalls|does not respond).*$", re.M | re.I)
@@ -221,14 +222,15 @@ def run(args):
     (output / "openings-source.txt").write_bytes(book.read_bytes())
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print(f"Running {args.pairs} pairs, Threads={args.threads}, concurrency={args.concurrency}: {output}", flush=True)
-    start = time.monotonic()
+    start = awake_seconds()
+    wall_start = time.monotonic()
     aborted = None
     with (output / "fastchess.log").open("w", encoding="utf-8") as log:
         process = subprocess.Popen(argv, stdout=log, stderr=subprocess.STDOUT, cwd=ROOT)
         try:
             while process.poll() is None:
                 time.sleep(1)
-                elapsed = int(time.monotonic() - start)
+                elapsed = int(awake_seconds() - start)
                 current_log = (output / "fastchess.log").read_text(encoding="utf-8", errors="replace")
                 if FAULT.search(current_log) or elapsed >= args.timeout:
                     aborted = "engine/protocol fault" if FAULT.search(current_log) else "wall-clock limit"
@@ -254,7 +256,8 @@ def run(args):
         valid = False
         validation["errors"].append("match did not finish its requested pairs or accept a hypothesis")
     validation["valid"] = not validation["errors"]
-    summary = {"valid": valid, "exit_code": process.returncode, "aborted": aborted, "seconds": time.monotonic() - start,
+    summary = {"valid": valid, "exit_code": process.returncode, "aborted": aborted, "seconds": awake_seconds() - start,
+               "wall_seconds": time.monotonic() - wall_start, "time_budget_clock": "system-awake",
                "sprt_decision": decision if valid else "invalid", "faults": faults, "pgn": validation}
     (output / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False), flush=True)
