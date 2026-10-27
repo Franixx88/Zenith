@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Zenith NNUE v1 trainer: 768 -> 256 x 2 -> 1, CReLU, side-to-move perspective.
+"""Zenith NNUE v1/v2 trainer: 1/4 king banks -> 256 x 2 -> 1 CReLU.
 
 Contract (docs/nnue-v1.md):
   A[p]   = clamp(bias + sum(W[feature]), 0, 1)           p in {side to move, opponent}
@@ -45,6 +45,9 @@ LIMIT_FT_W, LIMIT_FT_B, LIMIT_OUT_W = 2.0, 16.0, 127.0
 assert RECORD.itemsize == 100
 PAYLOAD = HIDDEN * 2 + INPUTS * HIDDEN * 2 + 2 * HIDDEN * 2 + 4
 FILE_BYTES = 64 + PAYLOAD
+KING_BUCKETS = 4
+V2_PAYLOAD = PAYLOAD + (KING_BUCKETS - 1) * INPUTS * HIDDEN * 2
+V2_FILE_BYTES = 64 + V2_PAYLOAD
 
 
 def opponent_inverse_permutation():
@@ -56,15 +59,48 @@ def opponent_inverse_permutation():
     return inv
 
 
+def king_bucket_indices(x):
+    """Relative own-king plane, four quadrants, no horizontal mirroring."""
+    square = x[:, 5 * 64:6 * 64].argmax(dim=1)
+    return ((square % 8) >= 4).long() + 2 * ((square // 8) >= 4).long()
+
+
+def banked_linear(x, weight, bias, buckets):
+    """One GEMM per populated bank; never materialize per-position tensors.
+
+    weight is [hidden, buckets*768]. Grouping avoids computing all four
+    banks for every position. Activations/gradients remain bounded by batch.
+    """
+    if buckets == 1:
+        return nn.functional.linear(x, weight, bias)
+    indices = king_bucket_indices(x)
+    out = x.new_zeros((len(x), HIDDEN))
+    for bucket in range(buckets):
+        positions = (indices == bucket).nonzero(as_tuple=True)[0]
+        if positions.numel():
+            values = nn.functional.linear(x.index_select(0, positions),
+                weight[:, bucket * INPUTS:(bucket + 1) * INPUTS], bias)
+            out.index_copy_(0, positions, values)
+    return out
+
+
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, king_buckets=1):
         super().__init__()
-        self.ft = nn.Linear(INPUTS, HIDDEN)
+        if king_buckets not in (1, KING_BUCKETS):
+            raise ValueError("only one or four king banks are supported")
+        self.king_buckets = king_buckets
+        self.ft = nn.Linear(INPUTS * king_buckets, HIDDEN)
+        if king_buckets != 1:
+            # Only 768 features feed any position, regardless of bank count.
+            nn.init.uniform_(self.ft.weight, -1 / math.sqrt(INPUTS), 1 / math.sqrt(INPUTS))
+            nn.init.uniform_(self.ft.bias, -1 / math.sqrt(INPUTS), 1 / math.sqrt(INPUTS))
         self.out = nn.Linear(2 * HIDDEN, 1)
 
     def forward(self, x_stm, x_opp):
         n = x_stm.shape[0]
-        h = torch.clamp(self.ft(torch.cat([x_stm, x_opp], 0)), 0.0, 1.0)
+        h = torch.clamp(banked_linear(torch.cat([x_stm, x_opp], 0),
+                       self.ft.weight, self.ft.bias, self.king_buckets), 0.0, 1.0)
         return self.out(torch.cat([h[:n], h[n:]], 1)).squeeze(1)  # units of 400 cp
 
     @torch.no_grad()
@@ -73,6 +109,17 @@ class Net(nn.Module):
         self.ft.bias.clamp_(-LIMIT_FT_B, LIMIT_FT_B)
         self.out.weight.clamp_(-LIMIT_OUT_W, LIMIT_OUT_W)
         self.out.bias.clamp_(-1000.0, 1000.0)
+
+
+def initialize_from_checkpoint(model, initial):
+    """Copy v1 banks exactly into v2; optimizer/schedule intentionally reset."""
+    state = dict(initial["model"])
+    shape = tuple(state["ft.weight"].shape)
+    if shape == (HIDDEN, INPUTS) and model.king_buckets == KING_BUCKETS:
+        state["ft.weight"] = state["ft.weight"].repeat(1, KING_BUCKETS)
+    elif shape != (HIDDEN, INPUTS * model.king_buckets):
+        raise ValueError("incompatible init-model architecture (v2 cannot be collapsed into v1)")
+    model.load_state_dict(state)
 
 
 def unpack(bits_u8, device, inv):
@@ -108,11 +155,14 @@ def quantized_cp(q, x_stm, x_opp):
     """Exact integer arithmetic of the Rust engine (float64 is exact at these magnitudes)."""
     dev = x_stm.device
     ft_w = torch.as_tensor(q["ft_w"], dtype=torch.float64, device=dev)
+    buckets = ft_w.shape[0] // INPUTS
+    if buckets not in (1, KING_BUCKETS) or ft_w.shape != (buckets * INPUTS, HIDDEN):
+        raise ValueError("invalid quantized feature tensor")
     ft_b = torch.as_tensor(q["ft_b"], dtype=torch.float64, device=dev)
     out_w = torch.as_tensor(q["out_w"], dtype=torch.float64, device=dev)
     raw = torch.full((x_stm.shape[0],), float(q["out_b"]), dtype=torch.float64, device=dev)
     for half, x in enumerate((x_stm, x_opp)):
-        a = torch.clamp(x.double() @ ft_w + ft_b, 0, QA)
+        a = torch.clamp(banked_linear(x.double(), ft_w.T, ft_b, buckets), 0, QA)
         raw += a @ out_w[half * HIDDEN:(half + 1) * HIDDEN]
     cp = torch.trunc(raw * CP_SCALE / (QA * QB))
     return raw, torch.clamp(cp, -MAX_SCORE, MAX_SCORE)
@@ -126,16 +176,21 @@ def fnv1a64(data):
 
 
 def to_bytes(q):
+    buckets = q["ft_w"].shape[0] // INPUTS
+    if buckets not in (1, KING_BUCKETS) or q["ft_w"].shape != (buckets * INPUTS, HIDDEN):
+        raise ValueError("unsupported NNUE feature dimensions")
+    version = 1 if buckets == 1 else 2
+    payload = PAYLOAD if buckets == 1 else V2_PAYLOAD
     header = bytearray(64)
     header[0:8] = b"ZNNUE\0\0\0"
-    struct.pack_into("<8I", header, 8, 1, INPUTS, HIDDEN, 1, QA, QB, CP_SCALE, 1)
-    struct.pack_into("<Q", header, 40, PAYLOAD)
+    struct.pack_into("<8I", header, 8, version, INPUTS, HIDDEN, 1, QA, QB, CP_SCALE, buckets)
+    struct.pack_into("<Q", header, 40, payload)
     data = bytearray(header)
     data += q["ft_b"].astype("<i2").tobytes()
     data += np.ascontiguousarray(q["ft_w"]).astype("<i2").tobytes()
     data += q["out_w"].astype("<i2").tobytes()
     data += struct.pack("<i", q["out_b"])
-    assert len(data) == FILE_BYTES
+    assert len(data) == 64 + payload
     struct.pack_into("<Q", data, 48, fnv1a64(bytes(data)))  # field is zero while hashing
     return bytes(data)
 
@@ -258,10 +313,14 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--resume", type=Path)
     ap.add_argument("--init-model", type=Path, help="warm start weights on new data; reset optimizer/schedule")
+    ap.add_argument("--king-buckets", type=int, choices=[1, KING_BUCKETS], default=1,
+                    help="1=v1, 4=v2 relative king quadrants")
     ap.add_argument("--block-rows", type=int, default=65536)
     ap.add_argument("--val-chunk", type=int, default=4096)
     ap.add_argument("--stop-after-epochs", type=int, help="stop at this epoch boundary; keep the full --epochs schedule")
     ap.add_argument("--log-every", type=int, default=200)
+    ap.add_argument("--max-train-seconds", type=float,
+                    help="per invocation time budget; finish and checkpoint the current epoch before stopping")
     args = ap.parse_args()
 
     for name in ["epochs", "batch_size", "val_rows", "val_chunk", "threads", "log_every"]:
@@ -280,6 +339,8 @@ def main():
     if any(not math.isfinite(v) or v <= 0 for v in [args.lr, args.lr_final, args.sigmoid_scale]) or not math.isfinite(args.weight_decay) or args.weight_decay < 0:
         ap.error("learning rates/scale must be finite and positive; weight-decay nonnegative")
 
+    if args.max_train_seconds is not None and (not math.isfinite(args.max_train_seconds) or args.max_train_seconds <= 0):
+        ap.error("max-train-seconds must be finite and positive")
     if args.threads:
         torch.set_num_threads(args.threads)
     torch.manual_seed(args.seed)
@@ -314,6 +375,8 @@ def main():
                     torch=str(torch.__version__), numpy=np.__version__)
     if native is not None:
         contract.update(input_format="binpack", epoch_rows=args.epoch_rows)
+    if args.king_buckets != 1:
+        contract["king_buckets"] = args.king_buckets
     if args.out.exists() and any(args.out.iterdir()):
         if not args.resume or args.resume.resolve().parent != args.out.resolve():
             raise ValueError("output run exists; use a fresh directory or resume its checkpoint")
@@ -322,13 +385,19 @@ def main():
           f"steps/epoch={steps_per_epoch:,}", flush=True)
 
     inv = torch.as_tensor(opponent_inverse_permutation(), device=device)
-    model = Net().to(device)
+    model = Net(args.king_buckets).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     epoch0, step, best = 0, 0, float("inf")
     history, best_blob, best_epoch = [], None, None
+    initialization = None
     if args.init_model:
         initial = torch.load(args.init_model, map_location="cpu", weights_only=True)
-        model.load_state_dict(initial["model"])
+        initialize_from_checkpoint(model, initial)
+        initialization = {"source_sha256": hashlib.sha256(args.init_model.read_bytes()).hexdigest(),
+                          "validation": validate(model, val, args.sigmoid_scale, device, inv, args.val_chunk)}
+        print("INIT " + json.dumps(initialization), flush=True)
+        atomic_bytes(args.out / "initial.znnue", to_bytes(quantize(model)))
+        atomic_json(args.out / "initial-validation.json", initialization)
     if args.resume:
         state = torch.load(args.resume, map_location="cpu", weights_only=True)
         if state.get("checkpoint_version") != 1 or state.get("contract") != contract:
@@ -337,6 +406,7 @@ def main():
         optimizer.load_state_dict(state["optimizer"])
         epoch0, step, best = state["epoch"], state["step"], state["best"]
         history, best_blob, best_epoch = state["history"], state["best_blob"], state["best_epoch"]
+        initialization = state.get("initialization")
         rng.bit_generator.state = state["numpy_rng"]
         torch.set_rng_state(state["torch_rng"])
         if device.type == "cuda":
@@ -352,6 +422,7 @@ def main():
         t = (s - args.warmup_steps) / max(1, total_steps - args.warmup_steps)
         return args.lr_final + 0.5 * (args.lr - args.lr_final) * (1 + math.cos(math.pi * min(t, 1)))
 
+    training_started = time.monotonic()
     for epoch in range(epoch0, args.epochs):
         start, seen, running = time.time(), 0, 0.0
         logged = 0
@@ -399,6 +470,7 @@ def main():
                  "model": model.state_dict(), "optimizer": optimizer.state_dict(),
                  "epoch": epoch + 1, "step": step, "best": best,
                  "best_blob": best_blob, "best_epoch": best_epoch, "history": history,
+                 "initialization": initialization,
                  "numpy_rng": rng.bit_generator.state, "torch_rng": torch.get_rng_state(),
                  "cuda_rng": torch.cuda.get_rng_state_all() if device.type == "cuda" else []}
         packed = io.BytesIO()
@@ -408,14 +480,18 @@ def main():
         atomic_bytes(args.out / f"{epoch_tag}.pt", checkpoint)
         atomic_bytes(args.out / f"{epoch_tag}.znnue", blob)
         provenance = {
-            "architecture": "zenith-nnue-v1 768->256x2->1 CReLU",
+            "architecture": ("zenith-nnue-v1 768->256x2->1 CReLU" if args.king_buckets == 1
+                             else "zenith-nnue-v2 4 king quadrants x 768->256x2->1 CReLU"),
             "network_sha256_last": hashlib.sha256(blob).hexdigest(),
             "network_sha256_best": hashlib.sha256(best_blob).hexdigest(),
             "best_epoch": best_epoch, "checkpoint_sha256": hashlib.sha256(checkpoint).hexdigest(),
             "contract": contract, "runtime_python": platform.python_version(),
+            "epoch_seconds": time.time() - start,
+            "training_seconds": time.monotonic() - training_started,
             "args": {k: str(v) for k, v in vars(args).items()},
             "data_manifest": manifest, "history": history,
             "native_reader_stats": native.last_stats if native else None,
+            "initialization": initialization,
             "note": "Keep source and license from data_manifest with released nets; do not infer licensing from the file format.",
         }
         atomic_json(args.out / f"{epoch_tag}.json", provenance)
@@ -431,6 +507,9 @@ def main():
             atomic_bytes(args.out / "best.pt", checkpoint)
         atomic_json(args.out / "provenance.json", provenance)
         if args.stop_after_epochs is not None and epoch + 1 >= args.stop_after_epochs:
+            break
+        if args.max_train_seconds is not None and time.monotonic() - training_started >= args.max_train_seconds:
+            print("time budget reached; completed epoch checkpoint saved", flush=True)
             break
     print(f"done; best quantized val loss {best:.6f}; nets in {args.out}")
 

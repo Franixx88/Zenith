@@ -3,6 +3,7 @@
 /syzygy/
 *.log
 /.venv-nnue/
+/.venv-nnue-cuda/
 /runs/
 /data/nnue/
 __pycache__/

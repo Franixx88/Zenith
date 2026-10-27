@@ -1,0 +1,48 @@
+{
+  "format": "zenith-network-manifest-v1",
+  "id": "zenith-v1-first-control-20261027",
+  "file": "zenith-v1-1c7c79756c6e.znnue",
+  "bytes": 394820,
+  "sha256": "1c7c79756c6e8bf431c718866439f90fa9bcb8654c7eee7067768d1ffea85e7b",
+  "architecture": "zenith-nnue-v1 768->256x2->1 CReLU",
+  "training_commit": "7a4a816088ab16c066740145b6b4370d7160493b",
+  "training_seconds": 2632.0160000000033,
+  "presentations": 402653184,
+  "selected_epoch": 45,
+  "corpus_manifest": "../tools/nnue/corpora/first-50gb.json",
+  "dataset_source": "official-stockfish/master-binpacks@1e095a758c630bc58d0b6dac4da44fcd38ac89c2",
+  "dataset_license": "ODbL; preserve original source attribution",
+  "recipe": "../tools/nnue/corpora/first-50gb-training.json",
+  "validation": {
+    "val_float": 0.010799519455758855,
+    "val_quant": 0.010840870760148391,
+    "val_baseline": 0.03845331532647833,
+    "mean_abs_cp_error_capped": 93.25499725341797,
+    "epoch": 45,
+    "step": 46080,
+    "explained": 0.7180770846907043
+  },
+  "holdout": {
+    "games": 128,
+    "wdl": {
+      "wins": 107,
+      "draws": 15,
+      "losses": 6
+    },
+    "pentanomial": [
+      0,
+      0,
+      6,
+      15,
+      43
+    ],
+    "tc": "5+0.05",
+    "threads": 1,
+    "hash_mib": 32,
+    "syzygy": false,
+    "pgn": "../games/zenith-nnue-v1-holdout-20261027.pgn",
+    "pgn_sha256": "35f95bd274e41bf478832665803c4a00f731522e40a1db560883341d94811012",
+    "binary_sha256": "cbcd7f5f797005d39e523178ae5d387d26106311778e542dcaf951cb910ba6d4"
+  },
+  "note": "Local weights are excluded from Git. This paired match measures relative performance at this control, not absolute Elo."
+}

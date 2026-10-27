@@ -1,0 +1,120 @@
+{
+  "depth": 10,
+  "threads": 1,
+  "hash_mib": 16,
+  "identical_search_trees": true,
+  "binary_sha256": "5a761e1b85a1b33034287bce7e98ecd467b79ad4eacfbfd851bf019c5e005cbc",
+  "models_sha256": {
+    "v1": "1c7c79756c6e8bf431c718866439f90fa9bcb8654c7eee7067768d1ffea85e7b",
+    "v2-clone": "e34454e2d0fa7af5fe5526f136bbb849c8177c9971fa8f12aa250f438d7295d8"
+  },
+  "positions": [
+    {
+      "position": "start",
+      "depth": "10",
+      "score": "30",
+      "bestmove": "e2e4",
+      "nodes": "436366"
+    },
+    {
+      "position": "kiwipete",
+      "depth": "10",
+      "score": "-105",
+      "bestmove": "e2a6",
+      "nodes": "914595"
+    },
+    {
+      "position": "endgame",
+      "depth": "10",
+      "score": "138",
+      "bestmove": "b4f4",
+      "nodes": "235470"
+    },
+    {
+      "position": "tactical",
+      "depth": "10",
+      "score": "526",
+      "bestmove": "d7c8q",
+      "nodes": "145988"
+    },
+    {
+      "position": "middlegame",
+      "depth": "10",
+      "score": "165",
+      "bestmove": "c3d5",
+      "nodes": "628946"
+    }
+  ],
+  "trials": [
+    {
+      "trial": 1,
+      "model": "v1",
+      "order": 1,
+      "nodes": 2361365,
+      "time_us": 3954097,
+      "nps": 597194
+    },
+    {
+      "trial": 1,
+      "model": "v2-clone",
+      "order": 2,
+      "nodes": 2361365,
+      "time_us": 4335417,
+      "nps": 544668
+    },
+    {
+      "trial": 2,
+      "model": "v2-clone",
+      "order": 1,
+      "nodes": 2361365,
+      "time_us": 4521463,
+      "nps": 522256
+    },
+    {
+      "trial": 2,
+      "model": "v1",
+      "order": 2,
+      "nodes": 2361365,
+      "time_us": 4670469,
+      "nps": 505594
+    },
+    {
+      "trial": 3,
+      "model": "v1",
+      "order": 1,
+      "nodes": 2361365,
+      "time_us": 5054610,
+      "nps": 467170
+    },
+    {
+      "trial": 3,
+      "model": "v2-clone",
+      "order": 2,
+      "nodes": 2361365,
+      "time_us": 4442713,
+      "nps": 531514
+    },
+    {
+      "trial": 4,
+      "model": "v2-clone",
+      "order": 1,
+      "nodes": 2361365,
+      "time_us": 4308734,
+      "nps": 548041
+    },
+    {
+      "trial": 4,
+      "model": "v1",
+      "order": 2,
+      "nodes": 2361365,
+      "time_us": 4852216,
+      "nps": 486656
+    }
+  ],
+  "median_nps": {
+    "v1": 496125.0,
+    "v2_clone": 538091.0
+  },
+  "ratio_v2_over_v1": 1.0845875535399345,
+  "note": "Same integer outputs and search tree; four paired trials with alternating order after warmup. Local timings are noisy and do not measure playing strength."
+}

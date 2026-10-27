@@ -1,13 +1,16 @@
-//! Portable v1 format, documented in docs/nnue-v1.md. No native memory dumps.
+//! Portable v1/v2 format. V2 adds four king-quadrant feature banks.
 use super::*;
 use std::io::Read;
 use std::path::Path;
 
 pub const FORMAT_VERSION: u32 = 1;
+pub const FORMAT_VERSION_V2: u32 = 2;
 const MAGIC: &[u8; 8] = b"ZNNUE\0\0\0";
 const HEADER: usize = 64;
 const PAYLOAD: usize = HIDDEN * 2 + INPUTS * HIDDEN * 2 + 2 * HIDDEN * 2 + 4;
 pub const FILE_BYTES: usize = HEADER + PAYLOAD;
+const V2_PAYLOAD: usize = PAYLOAD + (KING_BUCKETS - 1) * INPUTS * HIDDEN * 2;
+pub const V2_FILE_BYTES: usize = HEADER + V2_PAYLOAD;
 const FIELDS: [u32; 8] = [
     FORMAT_VERSION,
     INPUTS as u32,
@@ -24,7 +27,7 @@ impl Network {
     pub fn load(path: impl AsRef<Path>) -> Result<Self, String> {
         let file = std::fs::File::open(path).map_err(|e| format!("NNUE open: {e}"))?;
         let mut bytes = Vec::with_capacity(FILE_BYTES);
-        file.take(FILE_BYTES as u64 + 1)
+        file.take(V2_FILE_BYTES as u64 + 1)
             .read_to_end(&mut bytes)
             .map_err(|e| format!("NNUE read: {e}"))?;
         Self::from_bytes(&bytes)
@@ -35,12 +38,15 @@ impl Network {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut bytes = Vec::with_capacity(FILE_BYTES);
+        let mut bytes = Vec::with_capacity(self.file_bytes());
         bytes.extend_from_slice(MAGIC);
-        for field in FIELDS {
+        let mut fields = FIELDS;
+        fields[0] = self.format_version();
+        fields[7] = self.king_buckets() as u32;
+        for field in fields {
             bytes.extend_from_slice(&field.to_le_bytes());
         }
-        bytes.extend_from_slice(&(PAYLOAD as u64).to_le_bytes());
+        bytes.extend_from_slice(&((self.file_bytes() - HEADER) as u64).to_le_bytes());
         bytes.extend_from_slice(&[0; 16]); // checksum placeholder, reserved
         for values in [
             self.parameters.feature_bias.as_slice(),
@@ -58,20 +64,34 @@ impl Network {
     }
 
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.len() != FILE_BYTES {
-            return Err(format!("NNUE v1 requires exactly {FILE_BYTES} bytes"));
+        if bytes.len() < HEADER {
+            return Err("NNUE truncated header".into());
         }
         if &bytes[..8] != MAGIC {
             return Err("NNUE magic mismatch".into());
         }
-        for (index, expected) in FIELDS.iter().enumerate() {
+        let version = u32::from_le_bytes(bytes[8..12].try_into().unwrap());
+        let (file_bytes, buckets) = match version {
+            FORMAT_VERSION => (FILE_BYTES, 1),
+            FORMAT_VERSION_V2 => (V2_FILE_BYTES, KING_BUCKETS),
+            _ => return Err("NNUE unsupported format version".into()),
+        };
+        if bytes.len() != file_bytes {
+            return Err(format!(
+                "NNUE v{version} requires exactly {file_bytes} bytes"
+            ));
+        }
+        let mut fields = FIELDS;
+        fields[0] = version;
+        fields[7] = buckets as u32;
+        for (index, expected) in fields.iter().enumerate() {
             let offset = 8 + 4 * index;
             if u32::from_le_bytes(bytes[offset..offset + 4].try_into().unwrap()) != *expected {
                 return Err(format!("NNUE unsupported header field {index}"));
             }
         }
         let read_u64 = |offset| u64::from_le_bytes(bytes[offset..offset + 8].try_into().unwrap());
-        if read_u64(40) != PAYLOAD as u64 || read_u64(56) != 0 {
+        if read_u64(40) != (file_bytes - HEADER) as u64 || read_u64(56) != 0 {
             return Err("NNUE invalid payload size or reserved header".into());
         }
         if read_u64(48) != checksum(bytes) {
@@ -79,6 +99,9 @@ impl Network {
         }
         let mut offset = HEADER;
         let mut parameters = Parameters::default();
+        parameters
+            .feature_weights
+            .resize(buckets * INPUTS * HIDDEN, 0);
         for values in [
             parameters.feature_bias.as_mut_slice(),
             parameters.feature_weights.as_mut_slice(),

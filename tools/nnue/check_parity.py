@@ -28,19 +28,29 @@ from records import sample_records
 
 
 def read_net(path):
-    data = Path(path).read_bytes()
-    if len(data) != T.FILE_BYTES or data[:8] != b"ZNNUE\0\0\0":
-        raise ValueError("not a v1 net")
-    if struct.unpack_from("<8I", data, 8) != (1, 768, 256, 1, 255, 64, 400, 1):
+    with Path(path).open("rb") as file:
+        data = file.read(T.V2_FILE_BYTES + 1)
+    if len(data) < 64 or data[:8] != b"ZNNUE\0\0\0":
+        raise ValueError("not a Zenith NNUE net")
+    fields = struct.unpack_from("<8I", data, 8)
+    version = fields[0]
+    if version not in (1, 2):
+        raise ValueError("unsupported version")
+    buckets = 1 if version == 1 else 4
+    payload = T.PAYLOAD if version == 1 else T.V2_PAYLOAD
+    if len(data) != 64 + payload:
+        raise ValueError("invalid file size")
+    if fields != (version, 768, 256, 1, 255, 64, 400, buckets):
         raise ValueError("unsupported architecture")
-    if struct.unpack_from("<Q", data, 40)[0] != T.PAYLOAD or struct.unpack_from("<Q", data, 56)[0] != 0:
+    if struct.unpack_from("<Q", data, 40)[0] != payload or struct.unpack_from("<Q", data, 56)[0] != 0:
         raise ValueError("invalid payload size/reserved header")
     if struct.unpack_from("<Q", data, 48)[0] != T.fnv1a64(data[:48] + bytes(8) + data[56:]):
         raise ValueError("checksum")
-    body = np.frombuffer(data, dtype="<i2", offset=64, count=(T.PAYLOAD - 4) // 2)
+    body = np.frombuffer(data, dtype="<i2", offset=64, count=(payload - 4) // 2)
     bias, rest = body[:256].astype(np.int64), body[256:]
-    weights = rest[:768 * 256].reshape(768, 256).astype(np.int64)
-    out_w = rest[768 * 256:].astype(np.int64)
+    features = buckets * 768
+    weights = rest[:features * 256].reshape(features, 256).astype(np.int64)
+    out_w = rest[features * 256:].astype(np.int64)
     out_b = struct.unpack_from("<i", data, len(data) - 4)[0]
     return bias, weights, out_w, out_b
 
@@ -62,12 +72,16 @@ def spec_forward(net, board):
     bias, weights, out_w, out_b = net
     raw = out_b
     for half, perspective in enumerate((board.turn, not board.turn)):  # stm first
+        bucket = 0
+        if len(weights) == 4 * 768:
+            king = board.king(perspective) ^ (56 if perspective == chess.BLACK else 0)
+            bucket = int(chess.square_file(king) >= 4) + 2 * int(chess.square_rank(king) >= 4)
         total = bias.copy()
         for square, piece in board.piece_map().items():
             relative = square ^ (56 if perspective == chess.BLACK else 0)
             feature = ((0 if piece.color == perspective else 1) * 6
                        + piece.piece_type - 1) * 64 + relative
-            total += weights[feature]
+            total += weights[bucket * 768 + feature]
         raw += int(np.clip(total, 0, 255) @ out_w[half * 256:(half + 1) * 256])
     cp = int(np.trunc(raw * 400 / (255 * 64)))
     return raw, max(-28000, min(28000, cp))

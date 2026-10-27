@@ -1,4 +1,4 @@
-//! Zenith NNUE v1: shared 768 -> 256 feature transformer, two perspectives,
+//! Zenith NNUE v1/v2: shared 768 -> 256 feature transformer, two perspectives,
 //! clipped ReLU and a 512 -> 1 output. Scalar reference and runtime AVX2 backend.
 //! Search can load a validated v1 model; no trained network is bundled.
 //! Without an EvalFile the playing evaluator remains classical.
@@ -9,10 +9,11 @@ mod format;
 // Audited pointer intrinsics are confined to this private implementation module.
 #[allow(unsafe_code)]
 mod kernels;
-pub use format::{FILE_BYTES, FORMAT_VERSION};
+pub use format::{FILE_BYTES, FORMAT_VERSION, FORMAT_VERSION_V2, V2_FILE_BYTES};
 
 pub const INPUTS: usize = 768;
 pub const HIDDEN: usize = 256;
+pub const KING_BUCKETS: usize = 4;
 pub const QA: i32 = 255;
 pub const QB: i32 = 64;
 pub const CP_SCALE: i32 = 400;
@@ -73,6 +74,15 @@ pub fn feature_index(perspective: Color, color: Color, piece: Piece, square: u8)
     (usize::from(color != perspective) * 6 + piece.index()) * 64 + relative as usize
 }
 
+/// V2 uses four 4x4 quadrants in the perspective's rank-relative coordinates.
+/// Files are not mirrored: changing the activation/feature symmetry is a
+/// separate experiment. Both colors use their own king to select their bank.
+pub fn king_bucket(board: &Board, perspective: Color) -> usize {
+    let square = board.bitboard(perspective, Piece::King).trailing_zeros() as usize
+        ^ if perspective == Color::Black { 56 } else { 0 };
+    usize::from(square % 8 >= 4) + 2 * usize::from(square / 8 >= 4)
+}
+
 /// Quantized, feature-major tensors. Each feature owns HIDDEN contiguous weights.
 pub struct Parameters {
     pub feature_bias: [i16; HIDDEN],
@@ -107,7 +117,8 @@ impl FloatParameters {
     /// outside v1 bounds rather than silently clipping a trained model.
     pub fn quantize(&self) -> Result<Network, String> {
         if self.feature_bias.len() != HIDDEN
-            || self.feature_weights.len() != INPUTS * HIDDEN
+            || ![INPUTS * HIDDEN, KING_BUCKETS * INPUTS * HIDDEN]
+                .contains(&self.feature_weights.len())
             || self.output_weights.len() != 2 * HIDDEN
         {
             return Err("NNUE floating tensor dimensions do not match v1".into());
@@ -148,12 +159,16 @@ fn quantize(value: f32, scale: i32, bound: i32) -> Result<i32, String> {
 pub struct Network {
     parameters: Parameters,
     backend: Backend,
+    king_buckets: usize,
 }
 
 impl Network {
     pub fn new(parameters: Parameters) -> Result<Self, String> {
-        if parameters.feature_weights.len() != INPUTS * HIDDEN {
-            return Err("NNUE feature tensor dimensions do not match v1".into());
+        let king_buckets = parameters.feature_weights.len() / (INPUTS * HIDDEN);
+        if ![1, KING_BUCKETS].contains(&king_buckets)
+            || parameters.feature_weights.len() != king_buckets * INPUTS * HIDDEN
+        {
+            return Err("NNUE feature tensor requires one or four king banks".into());
         }
         for (name, values, bound) in [
             (
@@ -184,6 +199,7 @@ impl Network {
         }
         Ok(Self {
             parameters,
+            king_buckets,
             backend: if Backend::Avx2.available() {
                 Backend::Avx2
             } else {
@@ -194,6 +210,30 @@ impl Network {
 
     pub fn backend(&self) -> Backend {
         self.backend
+    }
+    pub fn king_buckets(&self) -> usize {
+        self.king_buckets
+    }
+    pub fn format_version(&self) -> u32 {
+        if self.king_buckets == 1 {
+            FORMAT_VERSION
+        } else {
+            FORMAT_VERSION_V2
+        }
+    }
+    pub fn file_bytes(&self) -> usize {
+        if self.king_buckets == 1 {
+            FILE_BYTES
+        } else {
+            V2_FILE_BYTES
+        }
+    }
+    fn bucket(&self, board: &Board, perspective: Color) -> usize {
+        if self.king_buckets == 1 {
+            0
+        } else {
+            king_bucket(board, perspective)
+        }
     }
     pub fn with_backend(mut self, backend: Backend) -> Result<Self, String> {
         if !backend.available() {
@@ -214,13 +254,11 @@ impl Network {
             network: self,
             board: *board,
             sums: [self.parameters.feature_bias; 2],
+            buckets: [0; 2],
+            bucket_refreshes: 0,
         };
-        for color in [Color::White, Color::Black] {
-            for piece in PIECES {
-                visit(board.bitboard(color, piece), |square| {
-                    accumulator.change(color, piece, square, 1);
-                });
-            }
+        for perspective in [Color::White, Color::Black] {
+            accumulator.refresh_half(board, perspective, self.bucket(board, perspective));
         }
         accumulator
     }
@@ -237,6 +275,7 @@ impl Network {
             .into_iter()
             .enumerate()
         {
+            let bank_offset = self.bucket(board, perspective) * INPUTS;
             let mut active = [false; INPUTS];
             for square in 0..64 {
                 if let Some((color, piece)) = board.piece_at(square) {
@@ -247,8 +286,10 @@ impl Network {
                 let mut sum = i64::from(self.parameters.feature_bias[neuron]);
                 for (feature, &on) in active.iter().enumerate() {
                     if on {
-                        sum +=
-                            i64::from(self.parameters.feature_weights[feature * HIDDEN + neuron]);
+                        sum += i64::from(
+                            self.parameters.feature_weights
+                                [(bank_offset + feature) * HIDDEN + neuron],
+                        );
                     }
                 }
                 raw += sum.clamp(0, i64::from(QA))
@@ -279,6 +320,8 @@ pub struct Accumulator<'net> {
     network: &'net Network,
     board: Board,
     sums: [[i16; HIDDEN]; 2],
+    buckets: [usize; 2],
+    bucket_refreshes: u32,
 }
 
 impl Accumulator<'_> {
@@ -290,12 +333,28 @@ impl Accumulator<'_> {
         &self.sums[perspective.index()]
     }
 
+    /// Number of perspective halves rebuilt by the most recent update.
+    /// Construction is counted separately by the search's full-frame counter.
+    pub fn bucket_refreshes(&self) -> u32 {
+        self.bucket_refreshes
+    }
+
     /// Delta from piece bitboards: handles captures, EP, all promotions, king
     /// moves and both castlings without duplicating move rules. Remove before
-    /// adding. Rank/color-relative features do not require king-move refreshes.
+    /// adding. V2 refreshes only the half whose king crossed a bank boundary.
     /// Also accepts FEN resets, undo, and null moves (zero feature changes).
     pub fn update(&mut self, next: &Board) -> FeatureChanges {
         let mut changes = FeatureChanges::default();
+        self.bucket_refreshes = 0;
+        let mut refreshed = [false; 2];
+        for perspective in [Color::White, Color::Black] {
+            let bucket = self.network.bucket(next, perspective);
+            if bucket != self.buckets[perspective.index()] {
+                self.refresh_half(next, perspective, bucket);
+                refreshed[perspective.index()] = true;
+                self.bucket_refreshes += 1;
+            }
+        }
         for adding in [false, true] {
             for color in [Color::White, Color::Black] {
                 for piece in PIECES {
@@ -312,7 +371,11 @@ impl Accumulator<'_> {
                         changes.removed += changed.count_ones();
                     }
                     visit(changed, |square| {
-                        self.change(color, piece, square, if adding { 1 } else { -1 })
+                        for perspective in [Color::White, Color::Black] {
+                            if !refreshed[perspective.index()] {
+                                self.change_half(perspective, color, piece, square, adding);
+                            }
+                        }
                     });
                 }
             }
@@ -321,16 +384,35 @@ impl Accumulator<'_> {
         changes
     }
 
-    fn change(&mut self, color: Color, piece: Piece, square: u8, sign: i32) {
-        for perspective in [Color::White, Color::Black] {
-            let offset = feature_index(perspective, color, piece, square) * HIDDEN;
-            kernels::update(
-                self.network.backend,
-                &mut self.sums[perspective.index()],
-                &self.network.parameters.feature_weights[offset..offset + HIDDEN],
-                sign > 0,
-            );
+    fn refresh_half(&mut self, board: &Board, perspective: Color, bucket: usize) {
+        self.buckets[perspective.index()] = bucket;
+        self.sums[perspective.index()] = self.network.parameters.feature_bias;
+        for color in [Color::White, Color::Black] {
+            for piece in PIECES {
+                visit(board.bitboard(color, piece), |square| {
+                    self.change_half(perspective, color, piece, square, true);
+                });
+            }
         }
+    }
+
+    fn change_half(
+        &mut self,
+        perspective: Color,
+        color: Color,
+        piece: Piece,
+        square: u8,
+        adding: bool,
+    ) {
+        let feature = self.buckets[perspective.index()] * INPUTS
+            + feature_index(perspective, color, piece, square);
+        let offset = feature * HIDDEN;
+        kernels::update(
+            self.network.backend,
+            &mut self.sums[perspective.index()],
+            &self.network.parameters.feature_weights[offset..offset + HIDDEN],
+            adding,
+        );
     }
 
     pub fn raw_score(&self) -> i64 {
@@ -366,6 +448,29 @@ fn visit(mut bits: u64, mut action: impl FnMut(u8)) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bucketed_null_move_changes_only_output_perspective() {
+        let board = Board::from_fen("7k/8/8/3pP3/8/8/8/K7 w - d6 0 1").unwrap();
+        let mut p = Parameters {
+            feature_weights: vec![17; KING_BUCKETS * INPUTS * HIDDEN],
+            ..Parameters::default()
+        };
+        p.output_weights[..HIDDEN].fill(7);
+        p.output_weights[HIDDEN..].fill(-3);
+        let network = Network::new(p).unwrap();
+        let mut a = network.accumulator(&board);
+        let before = a.clone();
+        let null = board.null_move().unwrap();
+        assert_eq!(a.update(&null), FeatureChanges::default());
+        assert_eq!(a.bucket_refreshes(), 0);
+        for color in [Color::White, Color::Black] {
+            assert_eq!(a.lanes(color), before.lanes(color));
+        }
+        assert_eq!(a.raw_score(), network.raw_reference(&null));
+        a.update(&board);
+        assert_eq!(a.raw_score(), before.raw_score());
+    }
 
     #[test]
     fn actual_null_move_clears_ep_and_swaps_output_without_feature_updates() {

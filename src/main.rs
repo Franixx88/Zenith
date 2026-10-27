@@ -25,8 +25,18 @@ fn run() -> Result<(), String> {
             let mut pruning = true;
             let mut enhancements = true;
             let mut modern = zenith::search::DEFAULT_MODERN_SEARCH;
-            for argument in &args[1..] {
-                if argument == "--no-lmr" {
+            let mut network = None;
+            let mut arguments = args[1..].iter();
+            while let Some(argument) = arguments.next() {
+                if argument == "--eval-file" {
+                    let file = arguments
+                        .next()
+                        .ok_or("--eval-file requires a model path")?;
+                    if network.is_some() {
+                        return Err("--eval-file may only be specified once".into());
+                    }
+                    network = Some(std::sync::Arc::new(zenith::nnue::Network::load(file)?));
+                } else if argument == "--no-lmr" {
                     lmr = false;
                 } else if argument == "--no-see" {
                     see_ordering = false;
@@ -50,7 +60,7 @@ fn run() -> Result<(), String> {
                     null_pruning = false;
                 } else {
                     depth = argument.parse::<u8>().map_err(
-                        |_| "usage: zenith bench [DEPTH] [--no-lmr] [--no-see] [--history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]",
+                        |_| "usage: zenith bench [DEPTH] [--eval-file PATH] [--no-lmr] [--no-see] [--history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]",
                     )?;
                 }
             }
@@ -66,6 +76,7 @@ fn run() -> Result<(), String> {
                 pruning,
                 enhancements,
                 modern,
+                network,
             );
             Ok(())
         }
@@ -101,7 +112,7 @@ fn run() -> Result<(), String> {
         }
         Some("--help" | "-h") => {
             println!(
-                "Zenith {}\n\nzenith                     Run UCI on stdin/stdout\nzenith perft DEPTH [\"FEN\"]  Count legal move trees\nzenith bench [DEPTH] [--no-lmr] [--no-see] [--history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]  Run fixed search benchmark\nzenith --version           Print version",
+                "Zenith {}\n\nzenith                     Run UCI on stdin/stdout\nzenith perft DEPTH [\"FEN\"]  Count legal move trees\nzenith bench [DEPTH] [--eval-file PATH] [--no-lmr] [--no-see] [--history] [--nmp|--no-nmp] [--no-pruning] [--no-enhancements] [--modern|--classic]  Run fixed search benchmark\nzenith --version           Print version",
                 env!("CARGO_PKG_VERSION")
             );
             Ok(())
