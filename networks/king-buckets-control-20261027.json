@@ -1,0 +1,139 @@
+{
+  "format": "zenith-nnue-experiment-v1",
+  "id": "king-buckets-control-20261027",
+  "implementation_commit": "864414a",
+  "additional_presentations_per_model": 201326592,
+  "epochs_per_model": 24,
+  "dataset_recipe": "../tools/nnue/corpora/first-50gb-training.json",
+  "models": {
+    "v2": {
+      "architecture": "zenith-nnue-v2 4 king quadrants x 768->256x2->1 CReLU",
+      "network_sha256": "9c55a099a25a7e2d09bfc047405a9f990ef09fc266cee550cbc4b21f8d71e688",
+      "bytes": 1574468,
+      "best_epoch": 20,
+      "training_seconds": 1746.8120000000054,
+      "validation": {
+        "val_float": 0.010480857541551813,
+        "val_quant": 0.0105585690762382,
+        "val_baseline": 0.03845331532647833,
+        "mean_abs_cp_error_capped": 92.07978057861328,
+        "epoch": 20,
+        "step": 20480,
+        "explained": 0.7254184980776485
+      },
+      "initial_checkpoint_sha256": "a800130d5dd9b6ea702b3ea858d802480a189c2770fedccdc5c05b4c2ef85ae0",
+      "local_file": "../runs/king-buckets-control-20261027/v2/best.znnue"
+    },
+    "v1_control": {
+      "architecture": "zenith-nnue-v1 768->256x2->1 CReLU",
+      "network_sha256": "0aaecde4bb2d7145a890af70afbb7db912fd60b7820756e981ad0847f3947683",
+      "bytes": 394820,
+      "best_epoch": 21,
+      "training_seconds": 1654.7350000000151,
+      "validation": {
+        "val_float": 0.01067980969673954,
+        "val_quant": 0.010760526492958888,
+        "val_baseline": 0.03845331532647833,
+        "mean_abs_cp_error_capped": 92.95542907714844,
+        "epoch": 21,
+        "step": 21504,
+        "explained": 0.7201664823540102
+      },
+      "initial_checkpoint_sha256": "a800130d5dd9b6ea702b3ea858d802480a189c2770fedccdc5c05b4c2ef85ae0",
+      "local_file": "../runs/king-buckets-control-20261027/v1-control/best.znnue"
+    }
+  },
+  "matches": {
+    "matched": {
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 561.625,
+        "sprt_decision": "fixed_length",
+        "faults": [],
+        "pgn": {
+          "games": 128,
+          "pairs": 64,
+          "wdl": {
+            "losses": 39,
+            "wins": 58,
+            "draws": 31
+          },
+          "paired_wdl": {
+            "losses": 39,
+            "wins": 58,
+            "draws": 31
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            2,
+            14,
+            24,
+            11,
+            13
+          ],
+          "terminations": {
+            "normal": 128
+          },
+          "errors": [],
+          "valid": true
+        }
+      },
+      "tc": "5+0.05",
+      "threads": 1,
+      "hash_mib": 32,
+      "syzygy": false,
+      "split": "holdout",
+      "pgn": "../games/zenith-nnue-v2-vs-v1-control-20261027.pgn",
+      "pgn_sha256": "4ac0530b152ac6687d136ad1886e6d82636920bb286a1fcd02c6745b9e0f40b4",
+      "binary_sha256": "5a761e1b85a1b33034287bce7e98ecd467b79ad4eacfbfd851bf019c5e005cbc"
+    },
+    "original": {
+      "summary": {
+        "valid": true,
+        "exit_code": 0,
+        "aborted": null,
+        "seconds": 551.6719999999914,
+        "sprt_decision": "fixed_length",
+        "faults": [],
+        "pgn": {
+          "games": 128,
+          "pairs": 64,
+          "wdl": {
+            "draws": 38,
+            "losses": 43,
+            "wins": 47
+          },
+          "paired_wdl": {
+            "draws": 38,
+            "losses": 43,
+            "wins": 47
+          },
+          "unpaired_games": [],
+          "pentanomial": [
+            3,
+            17,
+            27,
+            7,
+            10
+          ],
+          "terminations": {
+            "normal": 128
+          },
+          "errors": [],
+          "valid": true
+        }
+      },
+      "tc": "5+0.05",
+      "threads": 1,
+      "hash_mib": 32,
+      "syzygy": false,
+      "split": "holdout",
+      "pgn": "../games/zenith-nnue-v2-vs-original-20261027.pgn",
+      "pgn_sha256": "7edeb32a917a523fdc8f4b69f35c67cdac61e40b342ebcafb2cbcd4e83e38ceb",
+      "binary_sha256": "5a761e1b85a1b33034287bce7e98ecd467b79ad4eacfbfd851bf019c5e005cbc"
+    }
+  },
+  "note": "Weights and datasets remain local and ignored by Git. These fixed-length paired matches do not establish absolute Elo or conclusively establish a gain over original v1. Longer matches are separate experiments."
+}
