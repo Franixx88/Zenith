@@ -62,11 +62,19 @@ def options(items):
     return result
 
 
-def preflight(binary, settings):
+def preflight(binary, settings, external=False):
     with chess.engine.SimpleEngine.popen_uci(str(binary), timeout=15) as engine:
-        parsed = {}
+        parsed, omitted = {}, {}
         for key, value in settings.items():
             if key not in engine.options:
+                # Older single-thread engines often advertise only Hash.
+                # Opt-in portability never hides typos or a memory mismatch.
+                allowed = ((key == "Threads" and value == 1)
+                           or key == "Move Overhead"
+                           or (key == "SyzygyPath" and value == "<empty>"))
+                if external and allowed:
+                    omitted[key] = value
+                    continue
                 raise ValueError(f"{binary.name}: unknown option {key}")
             option = engine.options[key]
             # python-chess Option.parse treats a nonempty string 'false' as true.
@@ -77,7 +85,7 @@ def preflight(binary, settings):
             parsed[key] = option.parse(value)
         engine.configure(parsed)
         engine.ping()
-        return {"id": engine.id, "options": parsed}
+        return {"id": engine.id, "options": parsed, "omitted_options": omitted}
 
 
 def opening_book(source, output, split):
@@ -190,11 +198,14 @@ def run(args):
     common = {"Threads": args.threads, "Hash": args.hash, "Move Overhead": args.overhead,
               "SyzygyPath": "<empty>"}
     settings = [common | options(args.candidate_option), common | options(args.baseline_option)]
-    preflights = [preflight(binary, setting) for binary, setting in zip(binaries, settings)]
+    preflights = [preflight(binary, setting, getattr(args, "external_engines", False)) for binary, setting in zip(binaries, settings)]
     count = opening_book(book, output / "openings.pgn", args.split)
     argv = [str(binaries[2])]
-    for name, binary, setting in zip(("candidate", "baseline"), binaries, settings):
+    for name, binary, prechecked in zip(("candidate", "baseline"), binaries, preflights):
         argv += ["-engine", f"cmd={binary}", f"name={name}"]
+        setting = prechecked["options"]
+        # Fastchess expects literal true/false, not Python's title-case spelling.
+        setting = {k: str(v).lower() if isinstance(v, bool) else v for k,v in setting.items()}
         argv += [f"option.{key}={value}" for key, value in setting.items()]
     argv += ["-each", f"tc={args.tc}", "timemargin=100", "proto=uci",
              "-rounds", str(args.pairs), "-repeat", "-concurrency", str(args.concurrency),
@@ -278,7 +289,9 @@ def main():
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument("--hash", type=int, choices=range(1, 1025), default=16)
     parser.add_argument("--overhead", type=int, choices=range(0, 5001), default=30)
-    parser.add_argument("--timeout", type=int, default=3600, help="hard wall-clock cap in seconds; interrupted runs are invalid")
+    parser.add_argument("--timeout", type=int, default=3600, help="hard system-awake cap in seconds; interrupted runs are invalid")
+    parser.add_argument("--external-engines", action="store_true",
+                        help="allow missing Threads=1, Move Overhead and disabled SyzygyPath; Hash and explicit engine options remain required")
     parser.add_argument("--seed", type=int, default=20261026)
     parser.add_argument("--split", choices=["all", "calibration", "holdout"], default="all")
     parser.add_argument("--candidate-option", action="append", default=[])

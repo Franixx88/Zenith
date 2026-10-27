@@ -2,9 +2,10 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 import chess.pgn
-from engine_test import opening_book, options, validate_pgn, sprt_decision
+from engine_test import opening_book, options, validate_pgn, sprt_decision, preflight
 
 
 def mate_game(white, round_id="1", opening=None):
@@ -21,6 +22,23 @@ def mate_game(white, round_id="1", opening=None):
 
 
 class EvidenceGate(unittest.TestCase):
+    def test_external_engines_only_omit_safe_optional_shared_options(self):
+        import chess.engine
+        fake = MagicMock()
+        fake.options = {"Hash": chess.engine.Option("Hash", "spin", 16, 1, 128, None)}
+        fake.id = {"name": "single-thread-fixture"}
+        with patch("chess.engine.SimpleEngine.popen_uci") as launch:
+            launch.return_value.__enter__.return_value = fake
+            settings = {"Hash":128,"Threads":1,"Move Overhead":50,"SyzygyPath":"<empty>"}
+            result = preflight(Path("fixture.exe"),settings,external=True)
+            self.assertEqual(result["options"],{"Hash":128})
+            self.assertEqual(result["omitted_options"]["Threads"],1)
+            fake.configure.assert_called_with({"Hash":128})
+            for bad in [settings|{"Threads":2}, settings|{"EvalFiel":"typo"},settings|{"Hash":256},
+                        settings|{"SyzygyPath":"tables"}]:
+                with self.assertRaises((ValueError, chess.engine.EngineError)): preflight(Path("fixture.exe"),bad,external=True)
+            with self.assertRaises(ValueError): preflight(Path("fixture.exe"),settings)
+
     def validate(self, games):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "games.pgn"

@@ -1,0 +1,147 @@
+{
+  "format": "zenith-rating-pool-v1",
+  "reference_url": "https://computerchess.org.uk/404/rating_list_all.html",
+  "reference_date": "2026-10-27",
+  "reference_sha256": "c247144dc9879240c9e7fe93d7d8f5358470ada86fe1b18337444c065e0bc7ca",
+  "reference_control": "2 minutes + 1 second equivalent on Intel i7-4770K; up to 6-piece EGTB",
+  "experiment_control": "10+0.10 on local Ryzen 5 2400G; no tablebases",
+  "note": "Approximate reference-linked local pool rating, not an official CCRL or human rating. Different time/hardware/TB conditions cause systematic uncertainty.",
+  "ordo": {
+    "binary": "target/rating-opponents/ordo-1.2.6-win/ordo-1.2.6-win/ordo-win64.exe",
+    "sha256": "219be7081e63653c403ac4a0d8c0eecbab31116f4f67028d9d817b8290c9c6eb",
+    "source_url": "https://github.com/michiguel/Ordo/releases/tag/v1.2.6"
+  },
+  "opponents": [
+    {
+      "id": "bbc-1.2",
+      "name": "BBC 1.2 64-bit",
+      "binary": "target/rating-opponents/bin/bbc-1.2.exe",
+      "sha256": "d6ad24961380052da4d578dd0dd6b9c6bc841ba645144a4cf0367c298e212dfd",
+      "source_url": "https://github.com/maksimKorzh/bbc/releases/tag/1.2",
+      "ccrl_blitz_rating": 1946,
+      "ccrl_error95": 21,
+      "ccrl_games": 734,
+      "options": {},
+      "preflight": {
+        "id": {
+          "name": "BBC 1.2",
+          "author": "Code Monkey King"
+        },
+        "options": {
+          "Hash": 128
+        },
+        "omitted_options": {
+          "Threads": 1,
+          "Move Overhead": 50,
+          "SyzygyPath": "<empty>"
+        }
+      }
+    },
+    {
+      "id": "minimalchess-0.6",
+      "name": "MinimalChess 0.6 64-bit",
+      "binary": "target/rating-opponents/bin/minimalchess-0.6.exe",
+      "sha256": "99623e8fbf07fe91586cd612b3dc3041dabf1652e8954a6dcf68eaa6ee58d4e2",
+      "source_url": "https://github.com/lithander/MinimalChessEngine/releases/tag/v0.6",
+      "ccrl_blitz_rating": 2439,
+      "ccrl_error95": 13,
+      "ccrl_games": 1989,
+      "options": {},
+      "preflight": {
+        "id": {
+          "name": "MinimalChess 0.6",
+          "author": "Thomas Jahn"
+        },
+        "options": {
+          "Hash": 128
+        },
+        "omitted_options": {
+          "Threads": 1,
+          "Move Overhead": 50,
+          "SyzygyPath": "<empty>"
+        }
+      }
+    },
+    {
+      "id": "zahak-4.0",
+      "name": "Zahak 4.0 64-bit",
+      "binary": "target/rating-opponents/bin/zahak-4.0.exe",
+      "sha256": "b3202963aa16fe21c6f9103d8caa20a5b54421cfc9e86b9723dde0f667830fa2",
+      "source_url": "https://github.com/amanjpro/zahak/releases/tag/4.0",
+      "ccrl_blitz_rating": 2552,
+      "ccrl_error95": 19,
+      "ccrl_games": 831,
+      "options": {
+        "Book": "false"
+      },
+      "preflight": {
+        "id": {
+          "name": "Zahak 4.0",
+          "author": "Amanj"
+        },
+        "options": {
+          "Hash": 128,
+          "Book": false
+        },
+        "omitted_options": {
+          "Threads": 1,
+          "Move Overhead": 50,
+          "SyzygyPath": "<empty>"
+        }
+      }
+    },
+    {
+      "id": "weiss-1.0",
+      "name": "Weiss 1.0 64-bit",
+      "binary": "target/rating-opponents/bin/weiss-1.0.exe",
+      "sha256": "a3f1b8562f50438d9d14cb35c322e90347baf37781992c6724ada058a80e7c85",
+      "source_url": "https://github.com/TerjeKir/weiss/releases/tag/v1.0",
+      "ccrl_blitz_rating": 2896,
+      "ccrl_error95": 17,
+      "ccrl_games": 895,
+      "options": {
+        "NoobBook": "false"
+      },
+      "preflight": {
+        "id": {
+          "name": "Weiss 1.0",
+          "author": "Terje Kirstihagen"
+        },
+        "options": {
+          "Hash": 128,
+          "Threads": 1,
+          "SyzygyPath": "<empty>",
+          "NoobBook": false
+        },
+        "omitted_options": {
+          "Move Overhead": 50
+        }
+      }
+    },
+    {
+      "id": "topple-0.8.1",
+      "name": "Topple 0.8.1 64-bit",
+      "binary": "target/rating-opponents/bin/topple-0.8.1.exe",
+      "sha256": "53e0ebd55ea7194849de18b9e0253725b4281caf8a80f172c3839cfc96bcbb3f",
+      "source_url": "https://github.com/konsolas/ToppleChess/releases/tag/v0.8.1",
+      "ccrl_blitz_rating": 3036,
+      "ccrl_error95": 9,
+      "ccrl_games": 4230,
+      "options": {},
+      "preflight": {
+        "id": {
+          "name": "Topple 0.8.1",
+          "author": "Vincent Tang"
+        },
+        "options": {
+          "Hash": 128,
+          "Threads": 1,
+          "SyzygyPath": "<empty>"
+        },
+        "omitted_options": {
+          "Move Overhead": 50
+        }
+      }
+    }
+  ]
+}
