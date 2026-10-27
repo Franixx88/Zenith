@@ -25,12 +25,38 @@ from nnue.awake_time import awake_seconds
 
 ROOT = Path(__file__).resolve().parents[1]
 ZENITH = "Zenith v3 12ce81e"
+COMPATIBLE_PRE_ADAPTER_RUNNER = "423b4cd4c8ca60fd951221916f1cc7b17450c54ed4c3ae8ea1c2f3cf5f929bd7"
+MINIMALCHESS_06_SHA = "99623e8fbf07fe91586cd612b3dc3041dabf1652e8954a6dcf68eaa6ee58d4e2"
 
 
 def save(path, obj):
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def install_minimalchess_adapter(folder, plan, adapter_source):
+    """Wrap the original binary without changing its bytes or search options."""
+    original = "binaries/minimalchess-0.6.exe"
+    if E.sha256(folder / original) != MINIMALCHESS_06_SHA:
+        raise ValueError("promotion normalization is audited for the pinned MinimalChess 0.6 only")
+    files = {"binaries/minimalchess-0.6-uci.exe": adapter_source.read_bytes(),
+             "binaries/minimalchess-0.6-uci.engine": b"minimalchess-0.6.exe\n"}
+    for name, data in files.items():
+        path = folder / name
+        if path.exists() and path.read_bytes() != data:
+            raise ValueError(f"refusing to overwrite an existing adapter: {name}")
+        path.write_bytes(data)
+        plan["frozen_sha256"][name] = hashlib.sha256(data).hexdigest()
+    plan.setdefault("protocol_adapters", {})["minimalchess-0.6"] = dict(
+        binary="binaries/minimalchess-0.6-uci.exe", original=original,
+        original_sha256=MINIMALCHESS_06_SHA,
+        scope="Only uppercase QRBN suffixes on UCI bestmove/info coordinate tokens become lowercase; search unchanged.")
+
+
+def opponent_binary(folder, plan, opponent):
+    adapted = plan.get("protocol_adapters", {}).get(opponent["id"])
+    return folder / (adapted["binary"] if adapted else f'binaries/{opponent["id"]}.exe')
 
 
 def read_ratings(path):
@@ -135,6 +161,8 @@ def main():
     ap.add_argument("--seconds", type=int, default=10800)
     ap.add_argument("--bootstrap", type=int, default=1000)
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--normalize-minimalchess-promotions", action="store_true",
+                    help="wrap the pinned MinimalChess 0.6 binary to normalize uppercase UCI promotion suffixes")
     args = ap.parse_args()
     if min(args.scout_pairs,args.main_pairs,args.cross_pairs,args.select,args.seconds,args.bootstrap) <= 0:
         ap.error("counts and budget must be positive")
@@ -144,7 +172,7 @@ def main():
     if not 2 <= args.select <= len(pool["opponents"]):
         ap.error("select must be 2..pool size")
     args.out = args.out.resolve()
-    contract = {k:v for k,v in vars(args).items() if k not in ["out","pool","resume","seconds"]}
+    contract = {k:v for k,v in vars(args).items() if k not in ["out","pool","resume","seconds","normalize_minimalchess_promotions"]}
     if args.resume:
         plan = json.loads((args.out / "plan.json").read_text())
         if plan["contract"] != contract:
@@ -154,7 +182,10 @@ def main():
                 raise ValueError(f"frozen file changed: {file}")
         pool = plan["pool"]
         if E.sha256(Path(__file__)) != plan["runner_sha256"]:
-            raise ValueError("orchestrator source changed; review resume compatibility")
+            if not (args.normalize_minimalchess_promotions
+                    and plan["runner_sha256"] == COMPATIBLE_PRE_ADAPTER_RUNNER
+                    and E.sha256(Path(E.__file__)) == plan["engine_test_sha256"]):
+                raise ValueError("orchestrator source changed; review resume compatibility")
     else:
         args.out.mkdir(parents=True, exist_ok=False)
         (args.out / "binaries").mkdir()
@@ -180,6 +211,17 @@ def main():
                     created_utc=datetime.now(timezone.utc).isoformat(),
                     policy="Local estimate linked to CCRL Blitz references. Scout excluded. No automatic network promotion.")
         save(args.out / "plan.json", plan)
+    if args.normalize_minimalchess_promotions:
+        backup = args.out / "plan-before-promotion-normalization.json"
+        if not backup.exists():
+            backup.write_bytes((args.out / "plan.json").read_bytes())
+        old_runner = plan["runner_sha256"]
+        install_minimalchess_adapter(args.out,plan,ROOT / "target/release/examples/uci_normalize.exe")
+        plan["runner_sha256"] = E.sha256(Path(__file__))
+        plan.setdefault("compatibility_amendments", []).append(dict(
+            utc=datetime.now(timezone.utc).isoformat(), previous_runner_sha256=old_runner,
+            runner_sha256=plan["runner_sha256"], reason="Resume after MinimalChess uppercase promotion notation fault; valid completed matches retained, failed attempt excluded."))
+        save(args.out / "plan.json",plan)
     state = dict(pid=os.getpid(),stage="starting",started_utc=datetime.now(timezone.utc).isoformat())
     started = awake_seconds()
     def update(stage, **extra):
@@ -228,7 +270,7 @@ def main():
     try:
         scouts=[]
         for p in pool["opponents"]:
-            _,summary=match("scout-"+p["id"],zenith,args.out / f'binaries/{p["id"]}.exe',settings,
+            _,summary=match("scout-"+p["id"],zenith,opponent_binary(args.out,plan,p),settings,
                             [f"{k}={v}" for k,v in p["options"].items()],args.scout_pairs,"calibration","0:05+0.05")
             wdl=summary["pgn"]["wdl"]
             score=(wdl.get("wins",0)+wdl.get("draws",0)/2)/summary["pgn"]["games"]
@@ -241,12 +283,12 @@ def main():
         completed=[]
         for s in selected:
             p=s["opponent"]
-            directory,_=match("main-"+p["id"],zenith,args.out / f'binaries/{p["id"]}.exe',settings,
+            directory,_=match("main-"+p["id"],zenith,opponent_binary(args.out,plan,p),settings,
                               [f"{k}={v}" for k,v in p["options"].items()],args.main_pairs,"holdout","0:10+0.10")
             completed.append((directory,ZENITH,p["name"]))
         for left,right in itertools.combinations(selected,2):
             a,b=left["opponent"],right["opponent"]
-            directory,_=match(f'cross-{a["id"]}-{b["id"]}',args.out / f'binaries/{a["id"]}.exe',args.out / f'binaries/{b["id"]}.exe',
+            directory,_=match(f'cross-{a["id"]}-{b["id"]}',opponent_binary(args.out,plan,a),opponent_binary(args.out,plan,b),
                 [f"{k}={v}" for k,v in a["options"].items()],[f"{k}={v}" for k,v in b["options"].items()],args.cross_pairs,"holdout","0:10+0.10")
             completed.append((directory,a["name"],b["name"]))
         update("rating")

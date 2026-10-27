@@ -2,6 +2,7 @@
 from pathlib import Path
 import tempfile
 import unittest
+import hashlib
 from unittest.mock import patch
 
 import chess.pgn
@@ -10,6 +11,36 @@ from test_engine_test import mate_game
 
 
 class RatingEvidenceTests(unittest.TestCase):
+    def test_adapter_preserves_original_and_pins_both_launcher_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);(folder/"binaries").mkdir()
+            original=folder/"binaries/minimalchess-0.6.exe"
+            original.write_bytes(b"original engine fixture")
+            proxy=folder/"proxy.exe";proxy.write_bytes(b"adapter fixture")
+            digest=hashlib.sha256(original.read_bytes()).hexdigest()
+            plan={"frozen_sha256":{"binaries/minimalchess-0.6.exe":digest}}
+            with patch.object(R,"MINIMALCHESS_06_SHA",digest):
+                R.install_minimalchess_adapter(folder,plan,proxy)
+                R.install_minimalchess_adapter(folder,plan,proxy)
+                self.assertEqual(original.read_bytes(),b"original engine fixture")
+                for name,sha in plan["frozen_sha256"].items():
+                    self.assertEqual(hashlib.sha256((folder/name).read_bytes()).hexdigest(),sha)
+                self.assertEqual(R.opponent_binary(folder,plan,{"id":"minimalchess-0.6"}),
+                                 folder/"binaries/minimalchess-0.6-uci.exe")
+                self.assertEqual(R.opponent_binary(folder,plan,{"id":"weiss-1.0"}),
+                                 folder/"binaries/weiss-1.0.exe")
+                proxy.write_bytes(b"changed adapter")
+                with self.assertRaisesRegex(ValueError,"refusing to overwrite"):
+                    R.install_minimalchess_adapter(folder,plan,proxy)
+
+    def test_adapter_rejects_unreviewed_engine_binary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);(folder/"binaries").mkdir()
+            (folder/"binaries/minimalchess-0.6.exe").write_bytes(b"different engine")
+            with self.assertRaisesRegex(ValueError,"pinned MinimalChess"):
+                R.install_minimalchess_adapter(folder,{"frozen_sha256":{}},folder/"missing.exe")
+            self.assertFalse((folder/"binaries/minimalchess-0.6-uci.exe").exists())
+
     def test_combine_relabels_players_and_preserves_pair_cluster(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);match=root/"main-fixture";match.mkdir()

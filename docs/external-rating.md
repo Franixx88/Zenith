@@ -70,3 +70,23 @@ Move Overhead и выключенного SyzygyPath только с --external-
 Итог — rating.json, ratings.txt / ratings.csv, bootstrap.json и rated-games.pgn.
 Исходные партии и манифест каждого матча сохраняются отдельно. Ни текущие
 веса, ни новый рейтинг не устанавливаются автоматически в доску анализа.
+
+## Возобновление после ошибки формата MinimalChess
+
+Первая основная серия с MinimalChess 0.6 остановилась на `bestmove b7b8Q`:
+Fastchess требует строчный суффикс превращения. По сохранённому PGN ход
+`b7b8q` легален в позиции `5k2/1P6/6P1/5K2/8/8/8/8 w - - 3 88`.
+Все партии незавершённой серии исключены; готовые серии Topple и Weiss
+сохраняются, новая попытка MinimalChess проходит полные 96 цветовых пар.
+
+`examples/uci_normalize.rs` запускает исходный бинарник и переводит только
+суффиксы QRBN координатных ходов в `bestmove` и `info` в нижний регистр.
+Команды, поиск, выбор хода, оценки и параметры соперника не меняются.
+Исходный бинарник остаётся побайтно прежним; обе части запуска адаптера
+добавляются в замороженные SHA-256. Исходный план сохраняется отдельно,
+поправка протокола записывается в `compatibility_amendments`.
+
+```powershell
+cargo build --locked --release --example uci_normalize
+.venv-nnue/Scripts/python.exe -u tools/run_rating_gauntlet.py --out runs/zenith-rating-20261027 --resume --normalize-minimalchess-promotions --seconds 6600
+```
