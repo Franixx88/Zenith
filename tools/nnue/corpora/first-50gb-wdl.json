@@ -1,0 +1,17 @@
+{
+  "format": "zenith-binpack-stream-v2",
+  "files": [
+    "../../../data/nnue/sf-first-50gb/test80-2022-08-aug-16tb7p.v6-dd.min.binpack",
+    "../../../data/nnue/sf-first-50gb/T60T70wIsRightFarseer.binpack",
+    "../../../data/nnue/sf-first-50gb/farseerT76.binpack"
+  ],
+  "source": "official-stockfish/master-binpacks@1e095a758c630bc58d0b6dac4da44fcd38ac89c2; T80 August 2022 + historical T60/T70/Farseer + T76",
+  "license": "ODbL; preserve original source attribution and corpus manifest",
+  "score_num": 100,
+  "score_den": 208,
+  "score_unit": "legacy Stockfish internal teacher values converted with historical PawnValueEg=208 to 100cp/pawn; game result is side-to-move loss/draw/win, independent of score scaling",
+  "val_mod": 20,
+  "max_cp": 3000,
+  "quiet": true,
+  "validation_seed": 1
+}

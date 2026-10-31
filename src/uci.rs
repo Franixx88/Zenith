@@ -15,6 +15,32 @@ use crate::search::{
 const DEFAULT_HASH_MB: usize = 16;
 const DEFAULT_THREADS: usize = 8;
 
+#[derive(Default)]
+struct InfoThrottle {
+    last: Option<(std::time::Instant, u8)>,
+}
+impl InfoThrottle {
+    fn allow(&mut self, depth: u8, rank: usize, timed: bool, now: std::time::Instant) -> bool {
+        if !timed {
+            return true;
+        }
+        if rank != 1 {
+            // MultiPV reports are a coherent completed-depth batch. Admit all
+            // its ranks together, or suppress the entire intermediate batch.
+            return self.last.is_some_and(|(_, accepted)| accepted == depth);
+        }
+        if self
+            .last
+            .is_none_or(|(last, _)| now.duration_since(last) >= Duration::from_millis(50))
+        {
+            self.last = Some((now, depth));
+            true
+        } else {
+            false
+        }
+    }
+}
+
 fn emit(message: &str) {
     let mut output = io::stdout().lock();
     let _ = writeln!(output, "{message}");
@@ -439,7 +465,9 @@ impl Engine {
     }
 
     fn go(&mut self, tokens: &[&str]) -> Result<(), String> {
-        let limits = parse_go(tokens, &self.board, self.overhead_ms)?;
+        let received = std::time::Instant::now();
+        let mut limits = parse_go(tokens, &self.board, self.overhead_ms)?;
+        limits.started_at = Some(received);
         self.stop_search();
         self.evaluation_status();
         self.stop = Arc::new(AtomicBool::new(false));
@@ -452,8 +480,16 @@ impl Engine {
             .stack_size(16 * 1024 * 1024)
             .spawn(move || {
                 let infinite = limits.infinite;
+                let timed = limits.movetime.is_some();
+                let mut throttle = InfoThrottle::default();
                 let start = std::time::Instant::now();
-                let result = search.search(board, &history, limits, Arc::clone(&stop), info);
+                let result = search.search(board, &history, limits, Arc::clone(&stop), |message| {
+                    // Keep analysis unrestricted, but avoid flooding the GUI
+                    // pipe on clocked moves that finish many shallow depths.
+                    if throttle.allow(message.depth, message.multipv, timed, std::time::Instant::now()) {
+                        info(message);
+                    }
+                });
                 if result.variations.is_empty() { info(SearchInfo { multipv: 1, depth: result.depth, score: result.score,
                     nodes: result.nodes, elapsed: start.elapsed(), pv: result.pv.clone(),
                     tbhits: result.stats.tb_hits }); } else {
@@ -727,6 +763,23 @@ pub fn run() -> io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn clocked_info_throttle_keeps_multipv_batches_together() {
+        let mut throttle = InfoThrottle::default();
+        let start = std::time::Instant::now();
+        for rank in 1..=3 {
+            assert!(throttle.allow(1, rank, true, start));
+        }
+        for rank in 1..=3 {
+            assert!(!throttle.allow(2, rank, true, start + Duration::from_millis(10)));
+        }
+        for rank in 1..=3 {
+            assert!(throttle.allow(3, rank, true, start + Duration::from_millis(60)));
+        }
+        assert!(throttle.allow(4, 1, false, start + Duration::from_millis(61)));
+        assert!(throttle.allow(4, 2, false, start + Duration::from_millis(61)));
+    }
 
     #[test]
     fn null_option_survives_hash_resize_and_new_game() {

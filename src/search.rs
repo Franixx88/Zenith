@@ -121,6 +121,9 @@ pub struct Limits {
     pub depth: Option<u8>,
     pub nodes: Option<u64>,
     pub movetime: Option<Duration>,
+    /// UCI receipt time, so worker creation and search preparation consume the
+    /// same budget as searching. Library callers can leave this unset.
+    pub started_at: Option<Instant>,
     /// Clock allocation: stop between iterations; movetime remains the hard cap.
     pub soft_time: Option<Duration>,
     pub infinite: bool,
@@ -167,6 +170,8 @@ pub struct SearchStats {
     pub nnue_bucket_refreshes: u64,
     pub nnue_updates: u64,
     pub nnue_evaluations: u64,
+    pub nnue_cache_hits: u64,
+    pub nnue_cache_misses: u64,
     pub singular_probes: u64,
     pub singular_extensions: u64,
     pub smp_selected_worker: usize,
@@ -195,6 +200,8 @@ pub struct SearchStats {
     pub quiet_see_pruned: u64,
     pub iir: u64,
     pub correction_updates: u64,
+    pub probcut_probes: u64,
+    pub probcut_cutoffs: u64,
     pub max_main_ply: usize,
 }
 
@@ -251,7 +258,7 @@ pub struct Search {
     modern: bool,
     correction: Vec<i16>,
     context_history: Option<ContextHistory>,
-    continuation: [Vec<i16>; 2],
+    continuation: [Vec<i16>; 3],
     counters: [[Option<Move>; PIECE_SQUARES]; 2],
     reductions: Vec<i16>,
     eval_cache: Vec<EvalEntry>,
@@ -503,7 +510,16 @@ impl Search {
         if self.threads == 1 {
             return self.search_single(board, history, limits, stop, on_info);
         }
-        let start = Instant::now();
+        let start = limits.started_at.unwrap_or_else(Instant::now);
+        // Creating helpers or converting a cold TT can cost more than a tiny
+        // clock allocation. Keep the legal fallback path cheap in time trouble.
+        if stop.load(Ordering::Relaxed)
+            || limits.movetime.is_some_and(|budget| {
+                budget.saturating_sub(start.elapsed()) <= Duration::from_millis(100)
+            })
+        {
+            return self.search_single(board, history, limits, stop, on_info);
+        }
         let control = Arc::new(Control {
             done: AtomicBool::new(false),
             nodes: AtomicU64::new(0),
@@ -635,7 +651,10 @@ impl Search {
         stop: Arc<AtomicBool>,
         mut on_info: impl FnMut(SearchInfo),
     ) -> SearchResult {
-        let start = self.control.as_ref().map_or_else(Instant::now, |c| c.start);
+        let start = self.control.as_ref().map_or_else(
+            || limits.started_at.unwrap_or_else(Instant::now),
+            |c| c.start,
+        );
         let deadline = self.control.as_ref().map_or_else(
             || limits.movetime.and_then(|time| start.checked_add(time)),
             |c| c.deadline,
@@ -926,6 +945,8 @@ impl SearchStats {
             nnue_bucket_refreshes,
             nnue_updates,
             nnue_evaluations,
+            nnue_cache_hits,
+            nnue_cache_misses,
             singular_probes,
             singular_extensions,
             tb_probes,
@@ -950,7 +971,9 @@ impl SearchStats {
             history_pruned,
             quiet_see_pruned,
             iir,
-            correction_updates
+            correction_updates,
+            probcut_probes,
+            probcut_cutoffs
         );
         self.max_main_ply = self.max_main_ply.max(other.max_main_ply);
     }
@@ -1035,10 +1058,14 @@ impl Context<'_> {
         if self.search.enhancements && !self.pruning_suppressed {
             let current = Played::new(board, mv).index();
             let base = board.side_to_move.index() * PIECE_SQUARES * PIECE_SQUARES;
-            for back in 1..=2 {
+            for (table, back) in [1, 2, 4].into_iter().enumerate() {
+                if back == 4 && !self.search.modern {
+                    continue;
+                }
                 if let Some(previous) = ply.checked_sub(back).and_then(|i| self.prior[i]) {
                     let index = base + previous.index() * PIECE_SQUARES + current;
-                    value += i32::from(self.search.continuation[back - 1][index]);
+                    value += i32::from(self.search.continuation[table][index])
+                        / if back == 4 { 2 } else { 1 };
                 }
             }
         }
@@ -1093,9 +1120,12 @@ impl Context<'_> {
         for (candidate, change) in
             std::iter::once((mv, bonus)).chain(quiets.iter().map(|&m| (m, -bonus / 2)))
         {
-            for back in 1..=2 {
+            for (table, back) in [1, 2, 4].into_iter().enumerate() {
+                if back == 4 && !self.search.modern {
+                    continue;
+                }
                 if let Some(index) = self.continuation_index(board, candidate, ply, back) {
-                    let entry = &mut self.search.continuation[back - 1][index];
+                    let entry = &mut self.search.continuation[table][index];
                     let mut value = i32::from(*entry);
                     update_history(&mut value, change);
                     *entry = value as i16;
@@ -1191,7 +1221,18 @@ impl Context<'_> {
     }
 
     fn visit(&mut self, ply: usize) -> Option<()> {
-        if self.should_stop(self.nodes & 63 == 0) {
+        // Under tiny clocks an expensive handful of nodes must not postpone
+        // the hard stop for a full 64-node batch.
+        let time_mask = if self
+            .limits
+            .movetime
+            .is_some_and(|t| t <= Duration::from_millis(100))
+        {
+            7
+        } else {
+            63
+        };
+        if self.should_stop(self.nodes & time_mask == 0) {
             return None;
         }
         if let Some(control) = &self.search.control {
@@ -1285,11 +1326,25 @@ impl Context<'_> {
     fn node(
         &mut self,
         board: &Board,
+        depth: i16,
+        ply: usize,
+        alpha: i32,
+        beta: i32,
+        state: NodeState,
+    ) -> Option<i32> {
+        self.node_typed(board, depth, ply, alpha, beta, state, false)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn node_typed(
+        &mut self,
+        board: &Board,
         mut depth: i16,
         ply: usize,
         mut alpha: i32,
         mut beta: i32,
         mut state: NodeState,
+        cut_node: bool,
     ) -> Option<i32> {
         if depth <= 0 {
             return self.quiescence(board, ply, alpha, beta);
@@ -1486,6 +1541,88 @@ impl Context<'_> {
                 self.pv[ply].clear();
             }
         }
+        // A high-margin reduced capture search can establish an expected
+        // fail-high cheaply. Never publish it as a full-depth TT result.
+        if self.search.modern
+            && self.search.pruning
+            && !self.pruning_suppressed
+            && !self.null_active
+            && cut_node
+            && ply > 0
+            && depth >= 5
+            && beta - alpha == 1
+            && !in_check
+            && alpha.abs() < crate::syzygy::TB_WIN_SCORE - 512
+            && beta.abs() < crate::syzygy::TB_WIN_SCORE - 512
+            && board.halfmove_clock < 80
+            && board.occupied().count_ones() > 8
+            && self.static_evals[ply].is_some_and(|eval| eval >= beta - 200)
+        {
+            let threshold = beta + 180 - 50 * i32::from(improving);
+            // Respect an adequate, contradictory TT bound rather than doing
+            // speculative work that the existing search already refuted.
+            let contradicted = probe.entry.is_some_and(|entry| {
+                entry.depth >= depth - 3
+                    && entry.bound != Bound::Lower
+                    && score_from_tt(entry.score, ply) < threshold
+            });
+            if !contradicted {
+                let mut tactical = MovePicker::new(board, None, true, true);
+                let see_threshold = (threshold - self.static_evals[ply].unwrap()).max(0);
+                let mut tried = 0;
+                while let Some((mv, next)) = self.next_move(&mut tactical, board, ply) {
+                    if !is_capture(board, mv)
+                        || mv.promotion.is_some()
+                        || !board.see_ge(mv, see_threshold)
+                    {
+                        continue;
+                    }
+                    tried += 1;
+                    self.stats.probcut_probes += 1;
+                    let old_prior = self.prior[ply];
+                    self.prior[ply] = Some(Played::new(board, mv));
+                    let next_key = next.hash();
+                    self.path.push(next_key);
+                    let mut score = self
+                        .quiescence(&next, ply + 1, -threshold, -threshold + 1)
+                        .map(|v| -v);
+                    if score.is_some_and(|v| v >= threshold) {
+                        let next_state = NodeState {
+                            history: if next.halfmove_clock == 0 {
+                                context_component(next_key)
+                            } else {
+                                state.history.wrapping_add(context_component(next_key))
+                            },
+                            extensions_left: state.extensions_left,
+                        };
+                        score = self
+                            .node_typed(
+                                &next,
+                                depth - 4,
+                                ply + 1,
+                                -threshold,
+                                -threshold + 1,
+                                next_state,
+                                false,
+                            )
+                            .map(|v| -v);
+                    }
+                    self.path.pop();
+                    self.prior[ply] = old_prior;
+                    let score = score?;
+                    if score >= threshold
+                        && score.abs() < crate::syzygy::TB_WIN_SCORE - MAX_PLY as i32
+                    {
+                        self.stats.probcut_cutoffs += 1;
+                        self.pv[ply].clear();
+                        return Some(beta + score - threshold);
+                    }
+                    if tried == 4 {
+                        break;
+                    }
+                }
+            }
+        }
         let mut singular_move = None;
         if self.search.singular
             && !self.null_active
@@ -1586,8 +1723,16 @@ impl Context<'_> {
             self.prior[ply] = Some(Played::new(board, mv));
             self.path.push(next_key);
             let child = if number == 0 {
-                self.node(&next, child_depth, ply + 1, -beta, -alpha, next_state)
-                    .map(|score| -score)
+                self.node_typed(
+                    &next,
+                    child_depth,
+                    ply + 1,
+                    -beta,
+                    -alpha,
+                    next_state,
+                    beta - alpha == 1 && !cut_node,
+                )
+                .map(|score| -score)
             } else {
                 // The modern group also reduces ordinary pawn moves and late
                 // PV moves. Checks, evasions, advanced/passed pawns, killers
@@ -1618,6 +1763,7 @@ impl Context<'_> {
                 {
                     if self.search.modern {
                         (self.search.reductions[(depth as usize).min(127) * 256 + number.min(255)]
+                            + i16::from(cut_node)
                             - i16::from(improving)
                             - i16::from(beta - alpha > 1)
                             - (history / 4000) as i16)
@@ -1640,19 +1786,28 @@ impl Context<'_> {
                 };
                 self.stats.reductions += u64::from(reduction > 0);
                 let mut scout = self
-                    .node(
+                    .node_typed(
                         &next,
                         child_depth - reduction,
                         ply + 1,
                         -alpha - 1,
                         -alpha,
                         next_state,
+                        true,
                     )
                     .map(|score| -score);
                 if reduction > 0 && scout.is_some_and(|score| score > alpha) {
                     self.stats.reduction_researches += 1;
                     scout = self
-                        .node(&next, child_depth, ply + 1, -alpha - 1, -alpha, next_state)
+                        .node_typed(
+                            &next,
+                            child_depth,
+                            ply + 1,
+                            -alpha - 1,
+                            -alpha,
+                            next_state,
+                            !cut_node,
+                        )
                         .map(|score| -score);
                 }
                 match scout {

@@ -22,6 +22,7 @@ use zenith::board::{Board, Color, Piece};
 mod encoding;
 
 const MAGIC: &[u8; 8] = b"ZBSTRM1\0";
+const MAGIC_RESULTS: &[u8; 8] = b"ZBSTRM2\0";
 const MAX_CHUNK: u32 = 100 * 1024 * 1024;
 const MAX_INDEX: usize = 1_000_000;
 
@@ -38,6 +39,7 @@ struct Config {
     shuffle: bool,
     quiet: bool,
     inspect: bool,
+    with_results: bool,
 }
 impl Default for Config {
     fn default() -> Self {
@@ -54,6 +56,7 @@ impl Default for Config {
             shuffle: true,
             quiet: true,
             inspect: false,
+            with_results: false,
         }
     }
 }
@@ -146,6 +149,10 @@ fn parse() -> Result<Config, String> {
         }
         if flag == "--keep-tactical" {
             cfg.quiet = false;
+            continue;
+        }
+        if flag == "--with-results" {
+            cfg.with_results = true;
             continue;
         }
         let value = args.next().ok_or_else(|| format!("missing {flag} value"))?;
@@ -269,7 +276,16 @@ fn candidate(entry: &TrainingDataEntry, cfg: &Config, stats: &mut Stats) -> Opti
         return None;
     }
     // Depth is absent in binpack. Zero means unknown, not game ply or a fake depth.
-    let record = encoding::encode(&board, score as i16, 0);
+    let mut record = encoding::encode(&board, score as i16, 0);
+    if cfg.with_results {
+        if !(-1..=1).contains(&entry.result) {
+            stats.reject("invalid_result");
+            return None;
+        }
+        // Preserve 100-byte records. High bit means a known side-to-move
+        // outcome; low bits encode loss=0, draw=1, win=2. Zero stays unknown.
+        record[99] = 0x80 | (entry.result + 1) as u8;
+    }
     debug_assert_eq!(&record[..96], &fast[..96]);
     Some(record)
 }
@@ -295,7 +311,12 @@ fn run(cfg: &Config, out: &mut impl Write) -> Result<Stats, String> {
         }
     }
     if !cfg.inspect {
-        out.write_all(MAGIC).map_err(|e| e.to_string())?;
+        out.write_all(if cfg.with_results {
+            MAGIC_RESULTS
+        } else {
+            MAGIC
+        })
+        .map_err(|e| e.to_string())?;
     }
     let mut stats = Stats::default();
     let mut records = Vec::with_capacity(cfg.batch);

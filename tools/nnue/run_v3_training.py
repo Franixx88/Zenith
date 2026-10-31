@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Finite v3 experiment: verified existing corpus, scratch CUDA training, parity and matches.
+"""Finite v3 continuation: verified existing corpus, CUDA training, parity and matches.
 
 No downloads or automatic promotion. Run in the CUDA venv with a fresh output directory.
-The stable v1 opponent has a different training history: this is a deployment check,
-not an equal-exposure experiment proving that architecture alone is better.
+The previous v3 network is the rollback reference; this is a deployment check,
+not an architecture comparison or a promise of an Elo gain.
 """
 import argparse
 import json
@@ -26,20 +26,30 @@ def main():
     ap.add_argument("--epoch-rows", type=int, default=8_388_608)
     ap.add_argument("--seconds", type=float, default=5400)
     ap.add_argument("--pairs", type=int, default=64)
-    ap.add_argument("--recipe", type=Path, default=ROOT / "tools/nnue/corpora/first-50gb-training.json")
+    ap.add_argument("--wdl-weight", type=float, default=0.25)
+    ap.add_argument("--init-model", type=Path, help="warm start v3 weights on a new training schedule")
+    ap.add_argument("--recipe", type=Path, default=ROOT / "tools/nnue/corpora/first-50gb-wdl.json")
     ap.add_argument("--integrity", type=Path, default=ROOT / "runs/first-50gb-control-20261026/post-outage-integrity.json")
-    ap.add_argument("--baseline", type=Path, default=ROOT / "networks/zenith-v1-1c7c79756c6e.znnue")
+    ap.add_argument("--baseline", type=Path, default=ROOT / "networks/zenith-v3-576258170751.znnue")
     ap.add_argument("--resume-run", type=Path, help="fork a completed checkpoint into the fresh --out directory")
     args = ap.parse_args()
+    if not math.isfinite(args.wdl_weight) or not 0 <= args.wdl_weight <= 1:
+        ap.error("wdl-weight must be in [0,1]")
+    if args.init_model and args.resume_run:
+        ap.error("choose init-model for a new schedule or resume-run for an existing schedule")
+    if not args.init_model and not args.resume_run:
+        args.init_model = ROOT / "runs/layered-v3-resume-20261027/network/best.pt"
     if min(args.epochs, args.epoch_rows, args.pairs) <= 0 or not math.isfinite(args.seconds) or not 0 < args.seconds <= 7200:
         ap.error("positive counts and at most two hours of training required")
     engine = ROOT / "target/release/zenith.exe"
     harness = ROOT / "target/release/examples/nnue.exe"
     reader = ROOT / "target/binpack/release/zenith-binpack.exe"
-    for path in [engine, harness, reader, args.baseline]:
+    for path in [engine, harness, reader, args.baseline, *([args.init_model] if args.init_model else [])]:
         if not path.is_file():
             ap.error(f"missing required file: {path}")
     recipe, snapshot = corpus_snapshot(args.recipe, args.integrity)
+    if args.wdl_weight and recipe["format"] != "zenith-binpack-stream-v2":
+        ap.error("wdl-weight requires a v2 recipe")
     recovery = None
     if args.resume_run:
         previous = args.resume_run.resolve()
@@ -54,7 +64,8 @@ def main():
                 raise ValueError(f"resume source hash mismatch: {name}")
         contract = provenance["contract"]
         if (contract.get("architecture") != "v3" or contract["epochs"] != args.epochs
-                or contract["epoch_rows"] != args.epoch_rows or latest["epoch"] >= args.epochs):
+                or contract["epoch_rows"] != args.epoch_rows or latest["epoch"] >= args.epochs
+                or contract.get("wdl_weight",0.0) != args.wdl_weight):
             ap.error("resume requires an unfinished v3 schedule with identical epochs/epoch-rows")
         for name in ["v3_model.py", "records.py", "binpack_data.py"]:
             if digest(previous / "scripts" / name) != digest(ROOT / "tools/nnue" / name):
@@ -65,14 +76,20 @@ def main():
     args.out.mkdir(parents=True, exist_ok=False)
     recipe_path = args.out / "recipe.json"
     atomic_json(recipe_path, recipe)
+    initial_options = []
+    if args.init_model:
+        initial = args.out / "initial.pt"
+        initial.write_bytes(args.init_model.read_bytes())
+        initial_options = ["--init-model", initial]
     # Freeze native binaries and the opponent before a long unattended run.
-    for source, name in [(engine, "zenith.exe"), (harness, "nnue.exe"), (args.baseline, "baseline.znnue")]:
+    for source, name in [(engine, "zenith.exe"), (harness, "nnue.exe"), (args.baseline, "baseline.znnue"),
+                         (reader, "zenith-binpack.exe")]:
         (args.out / name).write_bytes(source.read_bytes())
-    engine, harness, baseline = [args.out / name for name in ["zenith.exe", "nnue.exe", "baseline.znnue"]]
+    engine, harness, baseline, reader = [args.out / name for name in ["zenith.exe", "nnue.exe", "baseline.znnue", "zenith-binpack.exe"]]
     source_files = sorted((ROOT / "src").rglob("*.rs")) + [ROOT / "Cargo.toml", ROOT / "Cargo.lock"]
     source_files += sorted((ROOT / "tools/nnue").glob("*.py"))
     plan = dict(args={k: str(v) for k,v in vars(args).items()}, corpus_snapshot=snapshot,
-        architecture="v3", initialization=recovery or "scratch; separate pilot excluded",
+        architecture="v3", initialization=recovery or ({"checkpoint":str(initial), "sha256":digest(initial)} if initial_options else "scratch"),
         source_sha256={str(p.relative_to(ROOT)): digest(p) for p in source_files},
         binaries_sha256={p.name: digest(p) for p in [engine,harness,reader,baseline]})
     atomic_json(args.out / "plan.json", plan)
@@ -122,6 +139,7 @@ def main():
             "--epochs", args.epochs, "--epoch-rows", args.epoch_rows, "--batch-size", 8192,
             "--block-rows", 65536, "--val-rows", 131072, "--val-chunk", 4096, "--threads", 2,
             "--device", "cuda", "--seed", 3, "--sigmoid-scale", 200, "--lr", 1e-3,
+            "--wdl-weight", args.wdl_weight, *initial_options,
             "--lr-final", 1e-5, "--warmup-steps", 128, "--log-every", 128,
             "--max-train-seconds", args.seconds, *resume_options], args.seconds + 1200)
         provenance = json.loads((netdir / "provenance.json").read_text())
@@ -140,7 +158,7 @@ def main():
             run(f"parity-{device}", [sys.executable, scripts / "check_parity.py", "--net", netdir / "best.znnue",
                 "--checkpoint", netdir / "best.pt", "--device", device, "--records", parity_records,
                 "--zenith-nnue", harness, "--count", 512], 300)
-        match = args.out / "stable-v1-match"
+        match = args.out / "baseline-match"
         run("match", [sys.executable, ROOT / "tools/engine_test.py", engine, engine, match,
             "--pairs", args.pairs, "--split", "holdout", "--threads", 1, "--concurrency", 2,
             "--hash", 32, "--tc", "0:05+0.05", "--timeout", 2400,

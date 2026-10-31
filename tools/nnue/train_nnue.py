@@ -37,7 +37,7 @@ import torch
 from torch import nn
 import v3_model
 from awake_time import awake_seconds
-from records import RECORD, check_records, record_count, sample_records, shuffled_batches, dataset_identity
+from records import RECORD, check_records, record_count, sample_records, shuffled_batches, dataset_identity, outcomes
 
 INPUTS, HIDDEN = 768, 256
 QA, QB, CP_SCALE, MAX_SCORE = 255, 64, 400, 28_000
@@ -265,8 +265,19 @@ def prediction(model, x, xo, scale):
     return torch.sigmoid(logits)
 
 
+def training_target(score, scale, result=None, wdl_weight=0.0):
+    teacher = torch.sigmoid(score / scale)
+    if wdl_weight == 0:
+        return teacher
+    if not 0 < wdl_weight <= 1 or result is None:
+        raise ValueError("WDL mixture needs weight in (0,1] and known game outcomes")
+    if not torch.isfinite(result).all() or not ((result == 0) | (result == 0.5) | (result == 1)).all():
+        raise ValueError("invalid side-to-move game outcome")
+    return (1 - wdl_weight) * teacher + wdl_weight * result
+
+
 @torch.no_grad()
-def validate(model, val, scale, device, inv, chunk=4096):
+def validate(model, val, scale, device, inv, chunk=4096, wdl_weight=0.0):
     if len(val) == 0:
         raise ValueError("validation must contain records")
     model.eval()
@@ -277,7 +288,8 @@ def validate(model, val, scale, device, inv, chunk=4096):
         part = val[i:i + chunk]
         x, xo = unpack(torch.from_numpy(np.ascontiguousarray(part["bits"])), device, inv)
         score = torch.from_numpy(part["score"].astype(np.float32)).to(device)
-        target = torch.sigmoid(score / scale)
+        result = torch.from_numpy(outcomes(part)).to(device) if wdl_weight else None
+        target = training_target(score, scale, result, wdl_weight)
         pred = prediction(model, x, xo, scale)
         _, cp = quantized_cp(q, x.to(qdev), xo.to(qdev))
         cp = cp.to(device).float()
@@ -326,6 +338,8 @@ def main():
     ap.add_argument("--weight-decay", type=float, default=0.0)
     ap.add_argument("--sigmoid-scale", type=float, default=400.0,
                     help="S in sigmoid(cp/S) for loss; the file's cp unit stays 400")
+    ap.add_argument("--wdl-weight", type=float, default=0.0,
+                    help="mix game outcome with teacher sigmoid; requires a v2 binpack recipe")
     ap.add_argument("--val-rows", type=int, default=500_000)
     ap.add_argument("--train-shards", type=int, default=0, help="use only the first N shards (0=all); shards are uniform random subsets")
     ap.add_argument("--device", default="auto")
@@ -344,6 +358,10 @@ def main():
     ap.add_argument("--max-train-seconds", type=float,
                     help="per invocation time budget; finish and checkpoint the current epoch before stopping")
     args = ap.parse_args()
+    if not math.isfinite(args.wdl_weight) or not 0 <= args.wdl_weight <= 1:
+        ap.error("wdl-weight must be in [0,1]")
+    if args.wdl_weight and not args.binpack_config:
+        ap.error("WDL training requires a v2 binpack recipe with known results")
 
     for name in ["epochs", "batch_size", "val_rows", "val_chunk", "threads", "log_every"]:
         if getattr(args, name) <= 0:
@@ -381,6 +399,8 @@ def main():
         native = BinpackSource(args.binpack_config, args.binpack_reader)
         rows = [args.epoch_rows]
         manifest, data_fingerprint = native.manifest, native.fingerprint
+        if args.wdl_weight and not native.with_results:
+            raise ValueError("WDL training requires binpack-stream-v2; v1 outcomes are unknown")
         val = native.validation(args.val_rows)
     else:
         files = sorted(args.data.glob("train-*.bin"))
@@ -401,6 +421,8 @@ def main():
                     torch=str(torch.__version__), numpy=np.__version__)
     if native is not None:
         contract.update(input_format="binpack", epoch_rows=args.epoch_rows)
+    if args.wdl_weight:
+        contract.update(wdl_weight=args.wdl_weight, target="teacher-sigmoid/game-outcome-mixture-v1")
     if args.king_buckets != 1:
         contract["king_buckets"] = args.king_buckets
     if args.architecture == "v3":
@@ -422,7 +444,7 @@ def main():
         initial = torch.load(args.init_model, map_location="cpu", weights_only=True)
         initialize_from_checkpoint(model, initial)
         initialization = {"source_sha256": hashlib.sha256(args.init_model.read_bytes()).hexdigest(),
-                          "validation": validate(model, val, args.sigmoid_scale, device, inv, args.val_chunk)}
+                          "validation": validate(model, val, args.sigmoid_scale, device, inv, args.val_chunk, args.wdl_weight)}
         print("INIT " + json.dumps(initialization), flush=True)
         atomic_bytes(args.out / "initial.znnue", to_bytes(quantize(model)))
         atomic_json(args.out / "initial-validation.json", initialization)
@@ -457,11 +479,13 @@ def main():
         logged = 0
         iterator = native.epoch(args.epoch_rows, args.batch_size, args.block_rows, rng) if native else shard_batches(files, args.batch_size, rng, args.block_rows)
         with closing(prefetch(iterator)) as batches:
-            for bits, score in batches:
+            for batch in batches:
+                bits, score = batch[:2]
+                result = batch[2].to(device) if len(batch) == 3 else None
                 for group in optimizer.param_groups:
                     group["lr"] = lr_at(step)
                 x, xo = unpack(bits, device, inv)
-                target = torch.sigmoid(score.to(device) / args.sigmoid_scale)
+                target = training_target(score.to(device), args.sigmoid_scale, result, args.wdl_weight)
                 pred = prediction(model, x, xo, args.sigmoid_scale)
                 loss = ((pred - target) ** 2).mean()
                 if not torch.isfinite(loss):
@@ -481,7 +505,7 @@ def main():
                     logged = 0
         if seen != sum(rows):
             raise ValueError("epoch did not visit every training record")
-        metrics = validate(model, val, args.sigmoid_scale, device, inv, args.val_chunk)
+        metrics = validate(model, val, args.sigmoid_scale, device, inv, args.val_chunk, args.wdl_weight)
         if not all(math.isfinite(value) for value in metrics.values()):
             raise ValueError("non-finite validation metrics")
         metrics.update(epoch=epoch + 1, step=step,

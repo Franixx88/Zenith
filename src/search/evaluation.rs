@@ -3,16 +3,18 @@
 use super::{MAX_PLY, SearchStats};
 use crate::{
     board::Board,
-    nnue::{LegacyAccumulator, Network, v3::V3Accumulator},
+    nnue::{
+        LegacyAccumulator, Network,
+        v3::{AccumulatorCache, V3Accumulator},
+    },
 };
 
 enum Frames<'net> {
     Legacy(Vec<Option<LegacyAccumulator<'net>>>),
-    V3(Vec<Option<V3Accumulator<'net>>>),
+    V3(Vec<Option<V3Accumulator<'net>>>, AccumulatorCache),
 }
 
 trait Frame: Clone {
-    fn update_board(&mut self, board: &Board);
     fn refreshes(&self) -> u32;
     fn score(&self) -> i32;
     #[cfg(test)]
@@ -23,9 +25,6 @@ trait Frame: Clone {
 macro_rules! frame_impl {
     ($ty:ident) => {
         impl Frame for $ty<'_> {
-            fn update_board(&mut self, board: &Board) {
-                self.update(board);
-            }
             fn refreshes(&self) -> u32 {
                 self.bucket_refreshes()
             }
@@ -51,13 +50,14 @@ fn evaluate_frames<F: Frame>(
     boards: &[Board],
     ply: usize,
     create: impl Fn(&Board) -> F,
+    mut update: impl FnMut(&mut F, &Board),
 ) -> (i32, u64, u64, u64) {
     let (mut refreshes, mut updates, mut buckets) = (0, 0, 0);
     if frames[ply].is_none() {
         if let Some(ancestor) = (0..ply).rev().find(|&i| frames[i].is_some()) {
             for i in ancestor + 1..=ply {
                 let mut frame = frames[i - 1].as_ref().unwrap().clone();
-                frame.update_board(&boards[i]);
+                update(&mut frame, &boards[i]);
                 buckets += u64::from(frame.refreshes());
                 frames[i] = Some(frame);
                 updates += 1;
@@ -101,7 +101,7 @@ impl<'net> NnueStack<'net> {
         let frames = if network.v3_parameters().is_some() {
             let mut frames = vec![None; MAX_PLY];
             frames[0] = Some(network.v3_accumulator(root));
-            Frames::V3(frames)
+            Frames::V3(frames, AccumulatorCache::new())
         } else {
             let mut frames = vec![None; MAX_PLY];
             frames[0] = Some(network.legacy_accumulator(root));
@@ -126,7 +126,7 @@ impl<'net> NnueStack<'net> {
         if self.boards[ply] != *board {
             match &mut self.frames {
                 Frames::Legacy(f) => f[ply] = None,
-                Frames::V3(f) => f[ply] = None,
+                Frames::V3(f, _) => f[ply] = None,
             };
             self.boards[ply] = *board;
         }
@@ -140,12 +140,24 @@ impl<'net> NnueStack<'net> {
             return self.network.accumulator(&self.boards[ply]).evaluate();
         }
         let (score, refreshes, updates, buckets) = match &mut self.frames {
-            Frames::Legacy(f) => {
-                evaluate_frames(f, &self.boards, ply, |b| self.network.legacy_accumulator(b))
-            }
-            Frames::V3(f) => {
-                evaluate_frames(f, &self.boards, ply, |b| self.network.v3_accumulator(b))
-            }
+            Frames::Legacy(f) => evaluate_frames(
+                f,
+                &self.boards,
+                ply,
+                |b| self.network.legacy_accumulator(b),
+                |f, b| {
+                    f.update(b);
+                },
+            ),
+            Frames::V3(f, cache) => evaluate_frames(
+                f,
+                &self.boards,
+                ply,
+                |b| self.network.v3_accumulator(b),
+                |f, b| {
+                    f.update_cached(b, cache);
+                },
+            ),
         };
         self.refreshes += refreshes;
         self.updates += updates;
@@ -158,5 +170,9 @@ impl<'net> NnueStack<'net> {
         stats.nnue_bucket_refreshes = self.bucket_refreshes;
         stats.nnue_updates = self.updates;
         stats.nnue_evaluations = self.evaluations;
+        if let Frames::V3(_, cache) = &self.frames {
+            stats.nnue_cache_hits = cache.hits;
+            stats.nnue_cache_misses = cache.misses;
+        }
     }
 }

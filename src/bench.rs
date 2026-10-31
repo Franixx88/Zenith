@@ -89,6 +89,13 @@ pub fn run(
             result.stats.nnue_evaluations,
         );
         println!(
+            "cache hits={} misses={} probcut probes={} cutoffs={}",
+            result.stats.nnue_cache_hits,
+            result.stats.nnue_cache_misses,
+            result.stats.probcut_probes,
+            result.stats.probcut_cutoffs
+        );
+        println!(
             "modern lmp={} futility={} history={} quiet_see={} iir={} corrections={}",
             result.stats.lmp_pruned,
             result.stats.futility_pruned,

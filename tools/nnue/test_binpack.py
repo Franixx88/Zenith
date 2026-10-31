@@ -11,6 +11,9 @@ from pathlib import Path
 
 import chess
 import numpy as np
+import torch
+import records as R
+import train_nnue as T
 
 from binpack_data import BinpackSource, NativeEpoch
 from test_pipeline import ROOT, TOOLS, NNUE, command
@@ -133,6 +136,50 @@ class BinpackTests(unittest.TestCase):
         process = stream.process
         stream.close()
         self.assertIsNotNone(process.poll())
+
+    def test_results_survive_stream_v2_for_both_colors_and_missing_is_not_draw(self):
+        recipe=self.base/"results.json"
+        recipe.write_text(json.dumps({**self.config,"format":"zenith-binpack-stream-v2"}))
+        source=BinpackSource(recipe)
+        stream=NativeEpoch(source,"all",2,10000,32,64,None,False)
+        try:
+            records=np.concatenate(list(stream))
+        finally:
+            stream.close()
+        labels={native_record(board,score)[:98]:(result+1)/2
+                for (board,mv,score),result in zip(self.entries,self.results)
+                if abs(score)<=3000 and not board.is_check() and not board.is_game_over()}
+        actual=R.outcomes(records)
+        for row,result in zip(records,actual):
+            self.assertEqual(result,labels[row.tobytes()[:98]])
+        self.assertEqual(set(actual),{0,0.5,1})
+        with self.assertRaisesRegex(ValueError,"known game results"):
+            R.outcomes(BinpackSource(self.recipe).validation(8))
+        score=torch.tensor([-100.,0.,100.]);wdl=torch.tensor([1.,.5,0.])
+        torch.testing.assert_close(T.training_target(score,200,wdl,.25),
+                                   .75*torch.sigmoid(score/200)+.25*wdl)
+        torch.testing.assert_close(T.training_target(score,200),torch.sigmoid(score/200),rtol=0,atol=0)
+        with self.assertRaises(ValueError):T.training_target(score,200,None,.25)
+        with self.assertRaises(ValueError):T.training_target(score,200,torch.tensor([0.,.2,1.]),.25)
+
+    def test_wdl_mixture_training_resumes_exactly_and_keeps_native_export(self):
+        recipe=self.base/"wdl-training.json"
+        recipe.write_text(json.dumps({**self.config,"format":"zenith-binpack-stream-v2"}))
+        full,split=self.base/"wdl-full",self.base/"wdl-split"
+        common=[sys.executable,TOOLS/"train_nnue.py","--binpack-config",recipe,
+                "--epoch-rows",64,"--epochs",2,"--batch-size",16,"--block-rows",32,
+                "--threads",1,"--val-rows",16,"--val-chunk",16,"--warmup-steps",0,"--wdl-weight",.25]
+        command([*common,"--out",full])
+        command([*common,"--out",split,"--stop-after-epochs",1])
+        command([*common,"--out",split,"--resume",split/"last.pt"])
+        self.assertEqual((full/"last.znnue").read_bytes(),(split/"last.znnue").read_bytes())
+        meta=json.loads((full/"provenance.json").read_text())
+        self.assertEqual(meta["contract"]["wdl_weight"],.25)
+        sample=self.base/"wdl-validation.bin"
+        BinpackSource(recipe).validation(16).tofile(sample)
+        run=command([sys.executable,TOOLS/"check_parity.py","--net",full/"best.znnue",
+                     "--records",sample,"--zenith-nnue",NNUE,"--count",16])
+        self.assertIn("mismatches 0",run.stdout)
 
     def test_stream_training_resume_export_and_validation_parity(self):
         full, split = self.base / "full", self.base / "split"

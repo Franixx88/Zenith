@@ -325,3 +325,136 @@ fn v3_lazy_frames_match_refresh_tree_with_context_histories_and_mirror_changes()
     assert_eq!(stack.evaluate(1), network.evaluate_reference(&child));
     assert_eq!(stack.evaluate(0), network.evaluate_reference(&root));
 }
+
+#[test]
+fn v3_cache_revisits_banks_on_siblings_and_unrelated_boards_without_stale_sums() {
+    let mut p = nnue::v3::Parameters::default();
+    p.feature_bias.fill(nnue::MAX_FEATURE_BIAS);
+    for (i, w) in p.feature_weights.iter_mut().enumerate() {
+        *w = if (i / nnue::v3::HIDDEN).is_multiple_of(2) {
+            nnue::MAX_FEATURE_WEIGHT
+        } else {
+            -nnue::MAX_FEATURE_WEIGHT
+        };
+    }
+    let network = Network::new_v3(p).unwrap();
+    let root = Board::from_fen("7k/8/8/8/8/8/8/3K4 w - - 0 1").unwrap();
+    // Castling, promotion, captures and mirror/bank changes; both perspectives
+    // revisit cached contexts with entirely different piece placements.
+    let boards: Vec<_> = [
+        "7k/8/8/8/8/8/8/4K3 w - - 0 1",
+        "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
+        "4k3/8/8/8/8/8/8/R4RK1 b - - 1 1",
+        "7k/P7/8/8/8/8/8/3K4 w - - 0 1",
+        "N6k/8/8/8/8/8/8/4K3 b - - 0 1",
+        crate::bench::POSITIONS[1].1,
+    ]
+    .iter()
+    .map(|fen| Board::from_fen(fen).unwrap())
+    .collect();
+    for backend in [Backend::Scalar, Backend::Avx2]
+        .into_iter()
+        .filter(|b| b.available())
+    {
+        let selected = Network::from_bytes(&network.to_bytes())
+            .unwrap()
+            .with_backend(backend)
+            .unwrap();
+        let mut acc = selected.v3_accumulator(&root);
+        let mut cache = nnue::v3::AccumulatorCache::new();
+        for board in boards.iter().chain(boards.iter().rev()).cycle().take(36) {
+            acc.update_cached(board, &mut cache);
+            let fresh = selected.v3_accumulator(board);
+            for c in [Color::White, Color::Black] {
+                assert_eq!(acc.lanes(c), fresh.lanes(c));
+            }
+            assert_eq!(acc.raw_score(), fresh.raw_score());
+        }
+        assert!(cache.hits > 0 && cache.misses > 0);
+    }
+}
+
+#[test]
+fn expired_uci_receipt_budget_never_starts_an_iteration() {
+    let board = Board::startpos();
+    for threads in [1, 4] {
+        let mut search = Search::new(1);
+        search.set_threads(threads);
+        let result = search.search(
+            board,
+            &[board.hash()],
+            Limits {
+                movetime: Some(Duration::from_millis(1)),
+                started_at: Some(Instant::now() - Duration::from_secs(1)),
+                ..Limits::default()
+            },
+            Arc::new(AtomicBool::new(false)),
+            |_| panic!("expired move searched an iteration"),
+        );
+        assert_eq!(result.depth, 0);
+        assert_eq!(result.nodes, 0);
+        assert!(board.legal_moves().contains(&result.best_move.unwrap()));
+    }
+}
+
+#[test]
+fn tiny_clock_avoids_cold_smp_helper_allocation() {
+    let board = Board::startpos();
+    let mut search = Search::new(1);
+    search.set_threads(8);
+    let result = search.search(
+        board,
+        &[board.hash()],
+        Limits {
+            movetime: Some(Duration::from_millis(1)),
+            ..Limits::default()
+        },
+        Arc::new(AtomicBool::new(false)),
+        |_| {},
+    );
+    assert!(search.workers.is_empty());
+    assert_eq!(result.stats.helper_nodes, 0);
+    assert!(board.legal_moves().contains(&result.best_move.unwrap()));
+}
+
+#[test]
+fn probcut_requires_cut_node_and_restores_cancelled_capture_state() {
+    let board =
+        Board::from_fen("rnb1kbnr/pppp1ppp/8/3q4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3").unwrap();
+    let threshold = evaluate(&board);
+    for (cut_node, nodes) in [(false, None), (true, None), (true, Some(1))] {
+        let mut search = Search::new(1);
+        let limits = Limits {
+            nodes,
+            ..Limits::default()
+        };
+        let mut ctx = super::tests::null_context(&mut search, &limits, board);
+        ctx.search.set_null_pruning(false);
+        let path = ctx.path.clone();
+        let state = NodeState {
+            history: 0,
+            extensions_left: 0,
+        };
+        let score = ctx.node_typed(&board, 6, 1, threshold - 1, threshold, state, cut_node);
+        assert_eq!(ctx.path, path);
+        if cut_node {
+            assert!(ctx.prior[1].is_none());
+        }
+        if nodes.is_some() {
+            assert!(score.is_none());
+            assert!(ctx.stats.probcut_probes > 0);
+        } else if cut_node {
+            assert!(ctx.stats.probcut_cutoffs > 0);
+            assert!(score.unwrap() >= threshold);
+            // No full-depth entry for the speculative parent cutoff.
+            assert!(
+                !ctx.search
+                    .table
+                    .iter()
+                    .any(|e| e.valid && e.key == board.hash() && e.depth >= 6)
+            );
+        } else {
+            assert_eq!(ctx.stats.probcut_probes, 0);
+        }
+    }
+}

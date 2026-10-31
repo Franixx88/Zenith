@@ -10,9 +10,10 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from records import RECORD, check_records
+from records import RECORD, check_records, outcomes
 
 MAGIC = b"ZBSTRM1\0"
+MAGIC_RESULTS = b"ZBSTRM2\0"
 
 
 def read_exact(stream, size):
@@ -35,8 +36,9 @@ class BinpackSource:
         cfg = self.config
         allowed = {"format", "files", "source", "license", "score_num", "score_den", "score_unit",
                    "val_mod", "max_cp", "quiet", "validation_seed"}
-        if set(cfg) - allowed or cfg.get("format") != "zenith-binpack-stream-v1":
+        if set(cfg) - allowed or cfg.get("format") not in ["zenith-binpack-stream-v1", "zenith-binpack-stream-v2"]:
             raise ValueError("unsupported binpack recipe/fields")
+        self.with_results = cfg["format"] == "zenith-binpack-stream-v2"
         if not isinstance(cfg.get("files"), list) or not cfg["files"]:
             raise ValueError("binpack recipe needs files")
         for key in ["source", "license", "score_unit"]:
@@ -128,7 +130,8 @@ class NativeEpoch:
         order = self.rng.permutation(len(records))
         for i in range(0, len(order), self.batch):
             sample = records[np.sort(order[i:i + self.batch])]
-            yield torch.from_numpy(np.ascontiguousarray(sample["bits"])), torch.from_numpy(sample["score"].astype(np.float32))
+            tensors = (torch.from_numpy(np.ascontiguousarray(sample["bits"])), torch.from_numpy(sample["score"].astype(np.float32)))
+            yield (*tensors, torch.from_numpy(outcomes(sample))) if self.source.with_results else tensors
 
     def _generate(self):
         cfg = self.source.config
@@ -139,6 +142,8 @@ class NativeEpoch:
             command.extend(["--input", str(file)])
         if not cfg["quiet"]:
             command.append("--keep-tactical")
+        if self.source.with_results:
+            command.append("--with-results")
         with tempfile.TemporaryFile() as diagnostics:
             process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=diagnostics)
             with self.lock:
@@ -146,7 +151,7 @@ class NativeEpoch:
                 if self.cancelled.is_set():
                     process.kill()
             try:
-                if read_exact(process.stdout, 8) != MAGIC:
+                if read_exact(process.stdout, 8) != (MAGIC_RESULTS if self.source.with_results else MAGIC):
                     raise ValueError("unsupported binpack stream protocol")
                 parts, count, received = [], 0, 0
                 while True:

@@ -340,6 +340,32 @@ fn index(ctx: usize, pov: Color, color: Color, piece: Piece, square: u8) -> usiz
         + (feature_index(pov, color, piece, square) ^ if ctx >= BANKS { 7 } else { 0 })
 }
 
+/// Last-seen PSQ sums per perspective, bank and mirror. Lives outside ply frames:
+/// cloning a frame must never copy the whole cache or roll back its contents.
+pub(crate) struct AccumulatorCache {
+    entries: Box<[CacheEntry]>,
+    pub hits: u64,
+    pub misses: u64,
+}
+struct CacheEntry {
+    board: Option<Board>,
+    sums: [i16; HIDDEN],
+}
+impl AccumulatorCache {
+    pub fn new() -> Self {
+        Self {
+            entries: (0..2 * BANKS * 2)
+                .map(|_| CacheEntry {
+                    board: None,
+                    sums: [0; HIDDEN],
+                })
+                .collect(),
+            hits: 0,
+            misses: 0,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct V3Accumulator<'net> {
     model: &'net Runtime,
@@ -385,13 +411,68 @@ impl V3Accumulator<'_> {
             }
         }
     }
+    fn refresh_cached(
+        &mut self,
+        board: &Board,
+        pov: Color,
+        ctx: usize,
+        cache: &mut AccumulatorCache,
+    ) {
+        let entry = &mut cache.entries[pov.index() * BANKS * 2 + ctx];
+        if entry.board.is_some() {
+            cache.hits += 1;
+        } else {
+            cache.misses += 1;
+            entry.sums = self.model.parameters.feature_bias;
+        }
+        // Remove every old row before adding new rows. Even unrelated legal
+        // boards then stay inside the validated i16 accumulation bounds.
+        for adding in [false, true] {
+            for color in [Color::White, Color::Black] {
+                for piece in PIECES {
+                    let old = entry.board.as_ref().map_or(0, |b| b.bitboard(color, piece));
+                    let new = board.bitboard(color, piece);
+                    visit(if adding { new & !old } else { old & !new }, |square| {
+                        let offset = index(ctx, pov, color, piece, square) * HIDDEN;
+                        kernels::update(
+                            self.backend,
+                            &mut entry.sums,
+                            &self.model.parameters.feature_weights[offset..offset + HIDDEN],
+                            adding,
+                        );
+                    });
+                }
+            }
+        }
+        entry.board = Some(*board);
+        self.contexts[pov.index()] = ctx;
+        self.sums[pov.index()] = entry.sums;
+    }
     pub fn update(&mut self, next: &Board) -> FeatureChanges {
+        self.update_inner(next, None)
+    }
+    pub(crate) fn update_cached(
+        &mut self,
+        next: &Board,
+        cache: &mut AccumulatorCache,
+    ) -> FeatureChanges {
+        self.update_inner(next, Some(cache))
+    }
+    fn update_inner(
+        &mut self,
+        next: &Board,
+        mut cache: Option<&mut AccumulatorCache>,
+    ) -> FeatureChanges {
         let mut refreshed = [false; 2];
         self.refreshes = 0;
         for pov in [Color::White, Color::Black] {
             let ctx = context(next, pov);
             if ctx != self.contexts[pov.index()] {
-                self.refresh(next, pov, ctx);
+                if let Some(cache) = cache.as_deref_mut() {
+                    self.refresh_cached(next, pov, ctx, cache);
+                } else {
+                    self.refresh(next, pov, ctx);
+                }
                 refreshed[pov.index()] = true;
                 self.refreshes += 1;
             }

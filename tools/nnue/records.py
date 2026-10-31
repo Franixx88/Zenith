@@ -31,10 +31,19 @@ def mapped_records(path):
 
 
 def check_records(records):
-    if np.any(records["flags"] != 0):
+    flags = records["flags"]
+    if np.any((flags != 0) & ((flags < 128) | (flags > 130))):
         raise ValueError("unsupported record flags")
     if np.any(np.abs(records["score"].astype(np.int32)) > 30000):
         raise ValueError("record score outside supported range; VALUE_NONE/mates must be filtered")
+
+
+def outcomes(records):
+    """Known side-to-move results as probabilities. Never invent missing draws."""
+    check_records(records)
+    if np.any(records["flags"] == 0):
+        raise ValueError("WDL training requires known game results for every record")
+    return (records["flags"] & 3).astype(np.float32) / 2
 
 
 def sample_records(path, rows, seed=1):

@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-31",
+  "network_unchanged": true,
+  "architecture": "v3 512 FT, 16 mirrored banks, 8 output heads",
+  "final_binary_sha256": "664f0f50dbb3278a74770535ffd5aa228e6e5cb3d9596f02eabae72a5c3fcacb",
+  "search_match_binary_sha256": "e515074732da59c0dbce1c8ce242b78c79e377c2228ca314e69456bf0cbc5d78",
+  "post_match_change": "Coherent MultiPV info throttling only; search unchanged; rechecked UCI and clocks.",
+  "clock_checks": [
+    {
+      "engine_sha256": "664f0f50dbb3278a74770535ffd5aa228e6e5cb3d9596f02eabae72a5c3fcacb",
+      "network_sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+      "threads": 1,
+      "concurrency": 4,
+      "count": 96,
+      "late_to_clock": 0,
+      "over_hard_plus_25ms": 0,
+      "max_elapsed_ms": 152.56050000061805,
+      "max_over_hard_budget_ms": 0.8359000005148118
+    },
+    {
+      "engine_sha256": "664f0f50dbb3278a74770535ffd5aa228e6e5cb3d9596f02eabae72a5c3fcacb",
+      "network_sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+      "threads": 8,
+      "concurrency": 1,
+      "count": 16,
+      "late_to_clock": 0,
+      "over_hard_plus_25ms": 0,
+      "max_elapsed_ms": 119.55999999918276,
+      "max_over_hard_budget_ms": 0.29489999926590826
+    }
+  ],
+  "match": {
+    "valid": true,
+    "games": 64,
+    "wdl": {
+      "losses": 23,
+      "wins": 25,
+      "draws": 16
+    },
+    "pentanomial": [
+      3,
+      8,
+      10,
+      6,
+      5
+    ],
+    "faults": [],
+    "tc": "3+0.03",
+    "threads": 1,
+    "concurrency": 4,
+    "hash_mib": 32,
+    "pgn_sha256": "6a8694250b296339e815f751a7830a5ff9f8509cee6d221fdcd754385af0072b"
+  },
+  "validation": {
+    "full_rust_suite_passed": 170,
+    "full_rust_suite_ignored": 7,
+    "targeted_after_timing_guard": 11,
+    "uci_unit_after_throttle_fix": 8,
+    "uci_process_after_throttle_fix": 16,
+    "model_python_tests": 6,
+    "pipeline_python_tests": 7,
+    "binpack_python_tests": 8,
+    "evidence_python_tests": 14,
+    "clippy": "clean with -D warnings"
+  },
+  "limitation": "64 games screen gross regressions, not an Elo improvement claim. Historical Zahak stall root cause is not fully established. No full NNUE retraining performed."
+}
