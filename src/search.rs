@@ -24,12 +24,13 @@ mod params;
 mod smp;
 mod tt;
 pub use params::SearchParameters;
+use params::Selectivity;
 use tt::Table;
 
 pub const MATE_SCORE: i32 = 30_000;
 pub const DEFAULT_NULL_PRUNING: bool = true;
 pub const DEFAULT_MODERN_SEARCH: bool = true;
-pub const DEFAULT_SINGULAR: bool = false;
+pub const DEFAULT_SINGULAR: bool = true;
 pub const DEFAULT_SMP_VOTING: bool = false;
 pub const MAX_MULTI_PV: usize = 32;
 const INFINITY: i32 = 32_000;
@@ -174,6 +175,8 @@ pub struct SearchStats {
     pub nnue_cache_misses: u64,
     pub singular_probes: u64,
     pub singular_extensions: u64,
+    pub singular_double_extensions: u64,
+    pub singular_verification_nodes: u64,
     pub smp_selected_worker: usize,
     pub tb_probes: u64,
     pub tb_hits: u64,
@@ -232,6 +235,7 @@ struct Entry {
     generation: u8,
     valid: bool,
     extensions_left: u8,
+    pv: bool,
 }
 
 pub struct Search {
@@ -743,6 +747,7 @@ impl Search {
             nnue,
             null_active: false,
             pruning_suppressed: false,
+            verification_root: None,
             repetition_floor: 0,
             null_probes: 0,
             null_cutoffs: 0,
@@ -949,6 +954,8 @@ impl SearchStats {
             nnue_cache_misses,
             singular_probes,
             singular_extensions,
+            singular_double_extensions,
+            singular_verification_nodes,
             tb_probes,
             tb_hits,
             tb_errors,
@@ -986,6 +993,9 @@ struct Context<'a> {
     // Null probes and verification must not recursively prune or publish
     // artificial scores/history into the normal search caches.
     pruning_suppressed: bool,
+    /// Selective descendants are permitted; this root still examines every
+    /// legal alternative. No TT writes or history learning in the whole probe.
+    verification_root: Option<usize>,
     repetition_floor: usize,
     null_probes: u64,
     null_cutoffs: u64,
@@ -1006,6 +1016,9 @@ struct Context<'a> {
 }
 
 impl Context<'_> {
+    fn pruning_allowed(&self, ply: usize) -> bool {
+        !self.pruning_suppressed && self.verification_root != Some(ply)
+    }
     fn snapshot_stats(&self) -> SearchStats {
         let mut stats = self.stats.clone();
         if let Some(nnue) = &self.nnue {
@@ -1380,6 +1393,7 @@ impl Context<'_> {
         self.stats.tt_key_hits += u64::from(probe.key_hit);
         self.stats.tt_context_hits += u64::from(probe.entry.is_some());
         self.stats.tt_collisions += u64::from(probe.collision);
+        let tt_pv = beta - alpha > 1 || probe.entry.is_some_and(|entry| entry.pv);
         let hash_move = if ply == 0 && self.search.worker_id % 2 == 1 {
             None
         } else {
@@ -1387,6 +1401,7 @@ impl Context<'_> {
         };
         if ply != 0
             && !self.pruning_suppressed
+            && self.verification_root.is_none()
             && !self.null_active
             && let Some(entry) = probe.entry
             && entry.depth >= requested_depth
@@ -1415,7 +1430,7 @@ impl Context<'_> {
             && board.halfmove_clock == 0
             && depth >= self.search.probe_depth
             && !self.null_active
-            && !self.pruning_suppressed
+            && self.pruning_allowed(ply)
             && let Some(tb) = self.search.syzygy.clone()
             && tb.eligible(board, self.search.probe_limit)
         {
@@ -1450,12 +1465,13 @@ impl Context<'_> {
         let mut stored_depth = requested_depth;
         if self.search.modern
             && self.search.pruning
-            && !self.pruning_suppressed
+            && self.pruning_allowed(ply)
             && !self.null_active
             && ply > 0
             && depth >= 5
             && hash.is_none()
             && !in_check
+            && !tt_pv
         {
             depth -= 1;
             stored_depth -= 1;
@@ -1466,26 +1482,43 @@ impl Context<'_> {
         if ply >= MAX_PLY - 1 {
             return Some(self.evaluate(board, ply));
         }
+        let policy = Selectivity {
+            depth,
+            tt_pv,
+            cut_node,
+            improving,
+            correction: self.correction_value(board).abs(),
+        };
         // A conservative static fail-high in middlegames. Never skip terminal
         // detection, checks, PV nodes, mate windows, or null verification.
         if self.search.pruning
-            && !self.pruning_suppressed
+            && self.pruning_allowed(ply)
             && ply > 0
-            && depth <= 3
+            && depth <= if self.search.modern { 6 } else { 3 }
             && beta - alpha == 1
+            && !(self.search.modern && tt_pv)
             && !in_check
             && !is_mate_score(alpha)
             && !is_mate_score(beta)
             && board.halfmove_clock < 80
             && self.has_pruning_material(board)
             && self.static_evals[ply].is_some_and(|eval| {
-                eval - (self.search.parameters.rfp_margin * i32::from(depth) + 70) >= beta
+                let margin = if self.search.modern {
+                    policy.rfp_margin(self.search.parameters.rfp_margin)
+                } else {
+                    self.search.parameters.rfp_margin * i32::from(depth) + 70
+                };
+                eval - margin >= beta
             })
         {
             self.stats.reverse_cutoffs += 1;
             return Some(beta);
         }
-        if self.can_try_null(board, depth, ply, alpha, beta) {
+        if self.can_try_null(board, depth, ply, alpha, beta)
+            && !(self.search.modern
+                && tt_pv
+                && self.static_evals[ply].is_some_and(|v| v < beta + 80 + policy.correction))
+        {
             self.null_probes += 1;
             let passed = board.null_move().expect("guard excludes check");
             let saved_floor = self.repetition_floor;
@@ -1493,7 +1526,15 @@ impl Context<'_> {
             self.path.push(passed.hash());
             self.pruning_suppressed = !self.search.modern;
             self.null_active = true;
-            let reduced = (depth - self.search.parameters.nmp_base_reduction - depth / 6).max(1);
+            let reduction = if self.search.modern {
+                policy.null_reduction(
+                    self.search.parameters.nmp_base_reduction,
+                    self.static_evals[ply].unwrap_or(beta) - beta,
+                )
+            } else {
+                self.search.parameters.nmp_base_reduction + depth / 6
+            };
+            let reduced = (depth - reduction).max(1);
             let saved_prior = self.prior[ply];
             self.prior[ply] = None;
             let probe = self.node(
@@ -1525,7 +1566,11 @@ impl Context<'_> {
                 self.pruning_suppressed = true;
                 let verified = self.node(
                     board,
-                    (depth - self.search.parameters.nmp_base_reduction).max(1),
+                    if self.search.modern {
+                        reduced
+                    } else {
+                        (depth - self.search.parameters.nmp_base_reduction).max(1)
+                    },
                     ply,
                     beta - 1,
                     beta,
@@ -1546,8 +1591,10 @@ impl Context<'_> {
         if self.search.modern
             && self.search.pruning
             && !self.pruning_suppressed
+            && self.verification_root.is_none()
             && !self.null_active
             && cut_node
+            && !tt_pv
             && ply > 0
             && depth >= 5
             && beta - alpha == 1
@@ -1624,9 +1671,12 @@ impl Context<'_> {
             }
         }
         let mut singular_move = None;
+        let mut singular_extension = 0;
         if self.search.singular
+            && self.search.modern
             && !self.null_active
             && !self.pruning_suppressed
+            && self.verification_root.is_none()
             && ply > 0
             && depth >= 6
             && state.extensions_left > 0
@@ -1639,12 +1689,22 @@ impl Context<'_> {
         {
             let score = score_from_tt(entry.score, ply);
             if score.abs() < crate::syzygy::TB_WIN_SCORE - MAX_PLY as i32 {
-                let threshold = score - 2 * i32::from(depth);
+                let threshold = score - 2 * i32::from(depth) - policy.correction / 4;
                 self.stats.singular_probes += 1;
+                let before = self.nodes;
                 let alternative =
-                    self.verify_excluding(board, (depth - 1) / 2, ply, threshold, state, mv)?;
+                    self.verify_excluding(board, (depth - 1) / 2, ply, threshold, state, mv);
+                self.stats.singular_verification_nodes += self.nodes - before;
+                let alternative = alternative?;
                 if alternative < threshold {
                     singular_move = Some(mv);
+                    singular_extension = 1 + i16::from(
+                        depth >= 8
+                            && !tt_pv
+                            && state.extensions_left >= 2
+                            && alternative
+                                < threshold - 20 - 4 * i32::from(depth) - policy.correction / 2,
+                    );
                 }
             }
         }
@@ -1662,13 +1722,21 @@ impl Context<'_> {
             let quiet = !is_capture(board, mv) && mv.promotion.is_none();
             quiet_count += usize::from(quiet);
             let history = self.quiet_history(board, mv, ply);
+            let base_reduction =
+                self.search.reductions[(depth as usize).min(127) * 256 + number.min(255)];
+            let expected_reduction = if self.search.lmr && depth >= 3 && number >= 3 {
+                policy.lmr(base_reduction, history)
+            } else {
+                0
+            };
+            let lmr_depth = (depth - 1 - expected_reduction).max(0);
             if self.search.modern
                 && self.search.pruning
-                && !self.pruning_suppressed
+                && self.pruning_allowed(ply)
                 && ply > 0
                 && number > 0
                 && beta - alpha == 1
-                && depth <= 4
+                && depth <= 8
                 && !in_check
                 && !is_mate_score(alpha)
                 && !is_mate_score(beta)
@@ -1681,27 +1749,40 @@ impl Context<'_> {
                 && !self.search.killers[ply].contains(&Some(mv))
                 && !self.is_countermove(board, mv, ply)
             {
-                if history <= 0
-                    && quiet_count > usize::from(improving) * 2 + 2 + (depth * depth) as usize
+                if !tt_pv
+                    && lmr_depth <= 4
+                    && history <= 0
+                    && quiet_count > policy.quiet_limit(lmr_depth)
                 {
                     self.stats.lmp_pruned += 1;
                     continue;
                 }
-                if depth <= 3
+                if lmr_depth <= 5
                     && history < 2000
                     && self.static_evals[ply].is_some_and(|value| {
-                        value + 100 + self.search.parameters.futility_margin * i32::from(depth)
+                        value
+                            + policy
+                                .futility_margin(self.search.parameters.futility_margin, lmr_depth)
                             <= alpha
                     })
                 {
                     self.stats.futility_pruned += 1;
                     continue;
                 }
-                if depth <= 2 && history < -1200 * i32::from(depth) {
+                if !tt_pv
+                    && lmr_depth <= 3
+                    && history < -1500 * i32::from(lmr_depth + 1) - 8 * policy.correction
+                {
                     self.stats.history_pruned += 1;
                     continue;
                 }
-                if history < 1000 && !board.see_ge(mv, -30 * i32::from(depth).pow(2)) {
+                if !tt_pv
+                    && history < 1000
+                    && !board.see_ge(
+                        mv,
+                        -30 * i32::from(lmr_depth + 1).pow(2) - 2 * policy.correction,
+                    )
+                {
                     self.stats.quiet_see_pruned += 1;
                     continue;
                 }
@@ -1712,8 +1793,13 @@ impl Context<'_> {
             } else {
                 state.history.wrapping_add(context_component(next_key))
             };
-            let extension = i16::from(singular_move == Some(mv));
+            let extension = if singular_move == Some(mv) {
+                singular_extension
+            } else {
+                0
+            };
             self.stats.singular_extensions += u64::from(extension != 0);
+            self.stats.singular_double_extensions += u64::from(extension == 2);
             self.stats.extensions += u64::from(extension != 0);
             let child_depth = depth - 1 + extension;
             let next_state = NodeState {
@@ -1739,7 +1825,7 @@ impl Context<'_> {
                 // and promising history remain protected. Alpha improvements
                 // ALWAYS receive a full-depth scout before PVS re-search.
                 let reduction = if self.search.lmr
-                    && !self.pruning_suppressed
+                    && self.pruning_allowed(ply)
                     && ply > 0
                     && (beta - alpha == 1 || (self.search.modern && depth >= 4 && number >= 5))
                     && !is_mate_score(alpha)
@@ -1762,12 +1848,7 @@ impl Context<'_> {
                     && self.quiet_history(board, mv, ply) < 4000
                 {
                     if self.search.modern {
-                        (self.search.reductions[(depth as usize).min(127) * 256 + number.min(255)]
-                            + i16::from(cut_node)
-                            - i16::from(improving)
-                            - i16::from(beta - alpha > 1)
-                            - (history / 4000) as i16)
-                            .clamp(1, depth - 2)
+                        policy.lmr(base_reduction, history)
                     } else if self.search.enhancements {
                         let base = self.search.reductions
                             [(depth as usize).min(127) * 256 + number.min(255)];
@@ -1829,7 +1910,8 @@ impl Context<'_> {
                 self.update_pv(ply, mv);
             }
             if alpha >= beta {
-                if !self.pruning_suppressed && !self.null_active {
+                if !self.pruning_suppressed && !self.null_active && self.verification_root.is_none()
+                {
                     if !is_capture(board, mv)
                         && mv.promotion.is_none()
                         && self.search.killers[ply][0] != Some(mv)
@@ -1879,6 +1961,7 @@ impl Context<'_> {
         // A root restricted by searchmoves does not describe the whole position.
         if !self.pruning_suppressed
             && !self.null_active
+            && self.verification_root.is_none()
             && !(ply == 0 && (self.limits.searchmoves.is_some() || self.search.multi_pv > 1))
         {
             self.stats.tt_replacements += u64::from(self.search.table.write(Entry {
@@ -1892,11 +1975,13 @@ impl Context<'_> {
                 bound,
                 generation: self.search.generation,
                 valid: true,
+                pv: tt_pv,
             }));
         }
         if self.search.modern
             && !self.pruning_suppressed
             && !self.null_active
+            && self.verification_root.is_none()
             && !in_check
             && !(ply == 0 && (self.limits.searchmoves.is_some() || self.search.multi_pv > 1))
             && !is_mate_score(best_score)
@@ -1922,9 +2007,9 @@ impl Context<'_> {
         Some(best_score)
     }
 
-    /// Same-position excluded-move search. No TT scores/writes, pruning or
-    /// learning can turn a reduced alternatives search into a cached full-node
-    /// result. Restore state before propagating cancellation.
+    /// Same-position excluded-move search. The root examines all alternatives;
+    /// modern descendants may prune. TT score reuse/writes, NMP and learning
+    /// stay isolated throughout the probe. Restore state before cancellation.
     #[allow(clippy::too_many_arguments)]
     fn verify_excluding(
         &mut self,
@@ -1940,8 +2025,10 @@ impl Context<'_> {
         let old_prior = self.prior[ply];
         let old_eval = self.static_evals[ply];
         let old_pv = self.pv[ply].clone();
+        let old_verification = self.verification_root;
         self.excluded[ply] = Some(mv);
-        self.pruning_suppressed = true;
+        self.verification_root = Some(ply);
+        self.pruning_suppressed = old_suppressed || !self.search.modern;
         let score = self.node(
             board,
             depth,
@@ -1955,6 +2042,7 @@ impl Context<'_> {
         );
         self.excluded[ply] = old_excluded;
         self.pruning_suppressed = old_suppressed;
+        self.verification_root = old_verification;
         self.prior[ply] = old_prior;
         self.static_evals[ply] = old_eval;
         self.pv[ply] = old_pv;
@@ -1971,6 +2059,7 @@ impl Context<'_> {
     ) -> bool {
         if !self.search.null_pruning
             || self.pruning_suppressed
+            || self.verification_root.is_some()
             || self.null_active
             || ply == 0
             || depth < 4
@@ -2036,7 +2125,7 @@ impl Context<'_> {
         let mut moves = MovePicker::new(board, None, !in_check, self.search.see_ordering);
         while let Some((mv, next)) = self.next_move(&mut moves, board, ply) {
             if self.search.pruning
-                && !self.pruning_suppressed
+                && self.pruning_allowed(ply)
                 && !in_check
                 && mv.promotion.is_none()
                 && !is_mate_score(alpha)
@@ -2201,34 +2290,40 @@ mod tests {
     #[test]
     fn iir_records_only_the_depth_actually_searched() {
         let board = Board::startpos();
-        let mut search = classic_search(1);
-        search.set_modern_search(true);
-        let limits = Limits::default();
-        let mut ctx = null_context(&mut search, &limits, board);
-        ctx.search.set_null_pruning(false);
-        ctx.node(
-            &board,
-            5,
-            1,
-            -INFINITY,
-            INFINITY,
-            NodeState {
-                history: 0,
-                extensions_left: 0,
-            },
-        )
-        .unwrap();
-        assert!(ctx.stats.iir > 0);
-        let entry = ctx
-            .search
-            .table
-            .probe(board.hash(), 0, board.halfmove_clock, 0)
-            .entry
+        for pv in [false, true] {
+            let mut search = classic_search(1);
+            search.set_modern_search(true);
+            let limits = Limits::default();
+            let mut ctx = null_context(&mut search, &limits, board);
+            ctx.search.set_null_pruning(false);
+            ctx.node(
+                &board,
+                5,
+                1,
+                if pv { -INFINITY } else { 999 },
+                if pv { INFINITY } else { 1000 },
+                NodeState {
+                    history: 0,
+                    extensions_left: 0,
+                },
+            )
             .unwrap();
-        assert_eq!(
-            entry.depth, 4,
-            "IIR must not publish an unsearched extra ply"
-        );
+            if !pv {
+                assert!(ctx.stats.iir > 0);
+            }
+            let entry = ctx
+                .search
+                .table
+                .probe(board.hash(), 0, board.halfmove_clock, 0)
+                .entry
+                .unwrap();
+            assert_eq!(
+                entry.depth,
+                if pv { 5 } else { 4 },
+                "IIR must not publish an unsearched extra ply"
+            );
+            assert_eq!(entry.pv, pv);
+        }
     }
 
     #[test]
@@ -2423,6 +2518,7 @@ mod tests {
         let mut context = Context {
             nnue: None,
             pruning_suppressed: false,
+            verification_root: None,
             null_active: false,
             repetition_floor: 0,
             null_probes: 0,
@@ -2471,6 +2567,7 @@ mod tests {
             static_evals: [None; MAX_PLY],
             threat_cache: std::array::from_fn(|_| std::cell::Cell::new(None)),
             pruning_suppressed: false,
+            verification_root: None,
             repetition_floor: 0,
             null_probes: 0,
             null_cutoffs: 0,
@@ -2551,6 +2648,7 @@ mod tests {
                 bound: Bound::Lower,
                 generation: 0,
                 valid: true,
+                pv: false,
             });
             ctx.node(
                 &board,
@@ -2594,6 +2692,7 @@ mod tests {
                 bound: Bound::Lower,
                 generation: 0,
                 valid: true,
+                pv: false,
             };
             match case {
                 0 => entry.context = 1,

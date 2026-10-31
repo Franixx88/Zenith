@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-31",
+  "baseline_commit": "5ae239e",
+  "baseline_binary_sha256": "664f0f50dbb3278a74770535ffd5aa228e6e5cb3d9596f02eabae72a5c3fcacb",
+  "candidate_binary_sha256": "93b43f0e608b5c575663a5dd902a45d46618a78718decdad91a1642957580e27",
+  "network_sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+  "tt_entry_bytes": 32,
+  "shared_bucket_bytes": 128,
+  "validation": {
+    "all_targets_passed": 177,
+    "ignored": 7,
+    "final_search_tests_passed": 61,
+    "clippy": "clean -D warnings"
+  },
+  "clock_checks": [
+    {
+      "engine_sha256": "93b43f0e608b5c575663a5dd902a45d46618a78718decdad91a1642957580e27",
+      "network_sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+      "threads": 1,
+      "concurrency": 4,
+      "count": 96,
+      "late_to_clock": 0,
+      "over_hard_plus_25ms": 0,
+      "max_over_hard_budget_ms": 1.0494999989750795
+    },
+    {
+      "engine_sha256": "93b43f0e608b5c575663a5dd902a45d46618a78718decdad91a1642957580e27",
+      "network_sha256": "576258170751e54bbf6c0e7729cbe432168fdbc474a27a4f67e1214a7f4891d9",
+      "threads": 8,
+      "concurrency": 1,
+      "count": 16,
+      "late_to_clock": 0,
+      "over_hard_plus_25ms": 0,
+      "max_over_hard_budget_ms": 0.2648000010813121
+    }
+  ],
+  "match": {
+    "valid": true,
+    "games": 128,
+    "wdl": {
+      "wins": 50,
+      "losses": 54,
+      "draws": 24
+    },
+    "pentanomial": [
+      7,
+      11,
+      32,
+      7,
+      7
+    ],
+    "faults": [],
+    "tc": "3+0.03",
+    "threads": 1,
+    "concurrency": 4,
+    "hash_mib": 32,
+    "overhead_ms": 50,
+    "split": "holdout",
+    "pgn_sha256": "46347e4fc43c1708c29df959af87748b3502b1a341c54b4e7cbdbc32308ea560"
+  },
+  "bench8": {
+    "candidate_nodes": 562737,
+    "singular_probes": 271,
+    "singular_extensions": 34,
+    "singular_double_extensions": 0,
+    "verification_nodes": 22374
+  },
+  "interpretation": "Near-even small sample; no demonstrated Elo gain or regression. Same 512-wide v3 weights. Previous binary preserved for rollback."
+}

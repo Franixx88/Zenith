@@ -458,3 +458,119 @@ fn probcut_requires_cut_node_and_restores_cancelled_capture_state() {
         }
     }
 }
+
+#[test]
+fn tt_pv_protects_a_nonpv_node_from_static_fail_high() {
+    let board = Board::startpos();
+    for pv in [false, true] {
+        let mut search = Search::new(1);
+        search.set_singular_extensions(false);
+        let limits = Limits::default();
+        let mut ctx = super::tests::null_context(&mut search, &limits, board);
+        ctx.search.set_null_pruning(false);
+        ctx.search.table.write(Entry {
+            key: board.hash(),
+            context: 0,
+            halfmove: 0,
+            pv,
+            depth: 0,
+            valid: true,
+            bound: Bound::Upper,
+            ..Entry::default()
+        });
+        let score = ctx.node(
+            &board,
+            4,
+            1,
+            -1001,
+            -1000,
+            NodeState {
+                history: 0,
+                extensions_left: 0,
+            },
+        );
+        assert!(score.unwrap() >= -1000);
+        assert_eq!(ctx.nodes > 1, pv);
+    }
+}
+
+#[test]
+fn modern_exclusion_prunes_descendants_without_learning_or_publishing_tt_scores() {
+    let board = Board::startpos();
+    let mut search = Search::new(1);
+    let limits = Limits::default();
+    let mut ctx = super::tests::null_context(&mut search, &limits, board);
+    let excluded = board.parse_uci_move("e2e4").unwrap();
+    let score = ctx
+        .verify_excluding(
+            &board,
+            5,
+            1,
+            1000,
+            NodeState {
+                history: 0,
+                extensions_left: 2,
+            },
+            excluded,
+        )
+        .unwrap();
+    assert!(score < 1000);
+    assert!(ctx.stats.reverse_cutoffs > 0);
+    assert!(ctx.search.table.iter().all(|e| !e.valid));
+    assert!(
+        ctx.search
+            .history
+            .iter()
+            .flatten()
+            .flatten()
+            .all(|&v| v == 0)
+    );
+    assert!(ctx.search.continuation.iter().flatten().all(|&v| v == 0));
+    assert!(ctx.search.correction.iter().all(|&v| v == 0));
+    assert!(ctx.search.killers.iter().flatten().all(Option::is_none));
+    assert_eq!(ctx.null_probes, 0);
+    assert!(ctx.excluded[1].is_none() && ctx.verification_root.is_none());
+    assert!(!ctx.pruning_suppressed);
+    assert_eq!(ctx.path, vec![board.hash()]);
+}
+
+#[test]
+fn clear_singularity_can_use_two_plies_but_never_exceeds_the_line_budget() {
+    let board = Board::from_fen("4k3/8/8/3q4/8/8/8/3QK3 w - - 0 1").unwrap();
+    let mv = board.parse_uci_move("d1d5").unwrap();
+    let mut search = Search::new(1);
+    search.set_pruning(false);
+    let limits = Limits {
+        nodes: Some(50_000),
+        ..Limits::default()
+    };
+    let mut ctx = super::tests::null_context(&mut search, &limits, board);
+    ctx.search.set_null_pruning(false);
+    ctx.search.table.write(Entry {
+        key: board.hash(),
+        score: 500,
+        depth: 5,
+        best: Some(mv),
+        bound: Bound::Lower,
+        extensions_left: 2,
+        valid: true,
+        ..Entry::default()
+    });
+    let _ = ctx.node_typed(
+        &board,
+        8,
+        1,
+        -1,
+        0,
+        NodeState {
+            history: 0,
+            extensions_left: 2,
+        },
+        true,
+    );
+    assert!(ctx.stats.singular_verification_nodes > 0);
+    assert!(ctx.stats.singular_double_extensions > 0);
+    assert!(ctx.stats.max_main_ply <= 10);
+    assert!(ctx.verification_root.is_none() && ctx.excluded[1].is_none());
+    assert_eq!(ctx.path, vec![board.hash()]);
+}

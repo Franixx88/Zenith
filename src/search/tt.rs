@@ -51,12 +51,8 @@ impl Bucket {
             std::array::from_fn(|i| unpack(self.words[i].each_ref().map(|word| word.load(SeqCst))));
         let (index, replaced) = replacement(&mut entries, new);
         if let Some(index) = index {
-            // replacement may preserve an old best move.
-            let final_words = if entries[index].best == new.best {
-                packed
-            } else {
-                pack(entries[index]).unwrap_or(packed)
-            };
+            // Replacement may preserve a deeper payload, a move or a PV tag.
+            let final_words = pack(entries[index]).unwrap_or(packed);
             for (word, value) in self.words[index].iter().zip(final_words) {
                 word.store(value, SeqCst);
             }
@@ -210,8 +206,13 @@ fn replacement(bucket: &mut [Entry], mut new: Entry) -> (Option<usize>, bool) {
             && old.depth > new.depth + 3
             && new.bound != Bound::Exact
         {
+            if new.pv && !old.pv {
+                bucket[index].pv = true;
+                return (Some(index), false);
+            }
             return (None, false);
         }
+        new.pv |= old.pv;
         bucket[index] = new;
         return (Some(index), false);
     }
@@ -272,11 +273,12 @@ fn pack(entry: Entry) -> Option<[u64; 3]> {
         | (u64::from(entry.generation) << 46)
         | (bound << 54)
         | (u64::from(entry.extensions_left) << 56)
-        | (1 << 58);
+        | (1 << 58)
+        | (u64::from(entry.pv) << 59);
     Some([entry.key, entry.context, meta])
 }
 fn unpack([key, context, meta]: [u64; 3]) -> Entry {
-    if meta & (1 << 58) == 0 || meta >> 59 != 0 {
+    if meta & (1 << 58) == 0 || meta >> 60 != 0 || (meta >> 56) & 3 == 3 {
         return Entry::default();
     }
     let bound = match (meta >> 54) & 3 {
@@ -314,6 +316,7 @@ fn unpack([key, context, meta]: [u64; 3]) -> Entry {
         extensions_left: ((meta >> 56) & 3) as u8,
         best,
         valid: true,
+        pv: meta & (1 << 59) != 0,
     }
 }
 
@@ -373,6 +376,51 @@ mod tests {
         assert!(table.iter().all(|e| !e.valid));
     }
     #[test]
+    fn pv_survives_replacement_without_widening_score_context_or_losing_depth() {
+        for shared in [false, true] {
+            let mut table = Table::new(128);
+            if shared {
+                let _ = table.shared_clone();
+            }
+            let original = Entry {
+                score: 123,
+                bound: Bound::Lower,
+                ..entry(17, 3, 20)
+            };
+            table.write(original);
+            table.write(Entry {
+                pv: true,
+                score: -500,
+                bound: Bound::Upper,
+                ..entry(17, 3, 2)
+            });
+            let marked = table.probe(17, 0, 0, 0).entry.unwrap();
+            assert!(marked.pv);
+            assert_eq!((marked.depth, marked.score), (20, 123));
+            table.write(Entry {
+                score: 456,
+                bound: Bound::Exact,
+                ..entry(17, 3, 21)
+            });
+            let updated = table.probe(17, 0, 0, 0).entry.unwrap();
+            assert!(updated.pv);
+            assert_eq!((updated.depth, updated.score), (21, 456));
+            assert!(table.probe(17, 1, 0, 0).entry.is_none());
+            assert!(table.probe(17, 0, 1, 0).entry.is_none());
+            assert!(table.probe(17, 0, 0, 1).entry.is_none());
+            let mut other = entry(17, 3, 21);
+            other.context = 1;
+            table.write(other);
+            assert!(!table.probe(17, 1, 0, 0).entry.unwrap().pv);
+        }
+        let words = pack(Entry {
+            pv: true,
+            ..entry(1, 0, 2)
+        })
+        .unwrap();
+        assert!(!unpack([words[0], words[1], words[2] | (1 << 60)]).valid);
+    }
+    #[test]
     fn packed_fields_roundtrip_and_invalid_ranges_are_rejected() {
         for promotion in [
             None,
@@ -389,6 +437,7 @@ mod tests {
                 depth: 122,
                 generation: 255,
                 bound: Bound::Upper,
+                pv: true,
                 extensions_left: 2,
                 best: Some(Move {
                     from: 48,
@@ -407,6 +456,7 @@ mod tests {
             assert_eq!(decoded.bound as u8, e.bound as u8);
             assert_eq!(decoded.extensions_left, e.extensions_left);
             assert_eq!(decoded.best, e.best);
+            assert_eq!(decoded.pv, e.pv);
         }
         let mut e = entry(0, 0, 1);
         e.halfmove = 128;
@@ -430,6 +480,7 @@ mod tests {
                         halfmove: (key % 100) as u16,
                         score: key as i32 * 97 - 3000,
                         extensions_left: (key % 3) as u8,
+                        pv: key.is_multiple_of(2),
                         ..entry(key, key as u8, (key % 120 + 1) as i16)
                     };
                     shared.write(e);
@@ -440,6 +491,7 @@ mod tests {
                         assert_eq!(actual.score, e.score);
                         assert_eq!(actual.depth, e.depth);
                         assert_eq!(actual.generation, e.generation);
+                        assert_eq!(actual.pv, e.pv);
                     }
                 }
             }));

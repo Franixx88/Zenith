@@ -96,6 +96,13 @@ pub fn run(
             result.stats.probcut_cutoffs
         );
         println!(
+            "singular probes={} extensions={} doubles={} verification_nodes={}",
+            result.stats.singular_probes,
+            result.stats.singular_extensions,
+            result.stats.singular_double_extensions,
+            result.stats.singular_verification_nodes
+        );
+        println!(
             "modern lmp={} futility={} history={} quiet_see={} iir={} corrections={}",
             result.stats.lmp_pruned,
             result.stats.futility_pruned,

@@ -27,6 +27,7 @@ def main():
     ap.add_argument("--seconds", type=float, default=5400)
     ap.add_argument("--pairs", type=int, default=64)
     ap.add_argument("--wdl-weight", type=float, default=0.25)
+    ap.add_argument("--lr", type=float, default=1e-3, help="initial learning rate; use a smaller value for warm starts")
     ap.add_argument("--init-model", type=Path, help="warm start v3 weights on a new training schedule")
     ap.add_argument("--recipe", type=Path, default=ROOT / "tools/nnue/corpora/first-50gb-wdl.json")
     ap.add_argument("--integrity", type=Path, default=ROOT / "runs/first-50gb-control-20261026/post-outage-integrity.json")
@@ -35,6 +36,8 @@ def main():
     args = ap.parse_args()
     if not math.isfinite(args.wdl_weight) or not 0 <= args.wdl_weight <= 1:
         ap.error("wdl-weight must be in [0,1]")
+    if not math.isfinite(args.lr) or args.lr < 1e-5:
+        ap.error("lr must be finite and at least the final learning rate 1e-5")
     if args.init_model and args.resume_run:
         ap.error("choose init-model for a new schedule or resume-run for an existing schedule")
     if not args.init_model and not args.resume_run:
@@ -65,7 +68,7 @@ def main():
         contract = provenance["contract"]
         if (contract.get("architecture") != "v3" or contract["epochs"] != args.epochs
                 or contract["epoch_rows"] != args.epoch_rows or latest["epoch"] >= args.epochs
-                or contract.get("wdl_weight",0.0) != args.wdl_weight):
+                or contract.get("wdl_weight",0.0) != args.wdl_weight or contract.get("lr") != args.lr):
             ap.error("resume requires an unfinished v3 schedule with identical epochs/epoch-rows")
         for name in ["v3_model.py", "records.py", "binpack_data.py"]:
             if digest(previous / "scripts" / name) != digest(ROOT / "tools/nnue" / name):
@@ -138,7 +141,7 @@ def main():
             "--binpack-config", recipe_path, "--binpack-reader", reader, "--out", netdir,
             "--epochs", args.epochs, "--epoch-rows", args.epoch_rows, "--batch-size", 8192,
             "--block-rows", 65536, "--val-rows", 131072, "--val-chunk", 4096, "--threads", 2,
-            "--device", "cuda", "--seed", 3, "--sigmoid-scale", 200, "--lr", 1e-3,
+            "--device", "cuda", "--seed", 3, "--sigmoid-scale", 200, "--lr", args.lr,
             "--wdl-weight", args.wdl_weight, *initial_options,
             "--lr-final", 1e-5, "--warmup-steps", 128, "--log-every", 128,
             "--max-train-seconds", args.seconds, *resume_options], args.seconds + 1200)
